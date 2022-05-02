@@ -1,4 +1,4 @@
-name: CI & Deploy
+name: CI
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  ci:
     name: CI
     runs-on: ubuntu-latest
     permissions:
