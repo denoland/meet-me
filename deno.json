@@ -2,8 +2,7 @@
   "tasks": {
     "dev": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts dev",
     "start": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts start",
-    "build": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts build",
-    "test": "deno test --import-map=import_map.json"
+    "build": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts build"
   },
   "fmt": {
     "files": {
