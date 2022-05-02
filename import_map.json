@@ -1,0 +1,20 @@
+{
+  "imports": {
+    "components/": "./components/",
+    "base/": "./components/base/",
+    "layout/": "./components/layout/",
+    "shared/": "./components/shared/",
+    "icons": "./components/icons/mod.ts",
+    "icons/": "./components/icons/",
+    "utils/": "./utils/",
+    "std/": "https://deno.land/std@0.136.0/",
+    "@unocss/": "https://deno.land/x/aleph@1.0.0-alpha.30/lib/@unocss/",
+    "aleph/": "https://deno.land/x/aleph@1.0.0-alpha.30/",
+    "aleph/server": "https://deno.land/x/aleph@1.0.0-alpha.30/server/mod.ts",
+    "aleph/react": "https://deno.land/x/aleph@1.0.0-alpha.30/framework/react/mod.ts",
+    "react": "https://esm.sh/react@18.1.0",
+    "react-dom": "https://esm.sh/react-dom@18.1.0",
+    "react-dom/": "https://esm.sh/react-dom@18.1.0/"
+  },
+  "scopes": {}
+}
