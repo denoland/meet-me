@@ -1,5 +1,6 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
+import "std/dotenv/load.ts";
 import presetUno from "@unocss/preset-uno.ts";
 import { renderToReadableStream } from "react-dom/server";
 import { Router } from "aleph/react";
