@@ -10,15 +10,17 @@ export default function LandingPage() {
       client_id: clientId,
       callback: (res) => {
         const jwt = res.credential;
-        const base64 = jwt.split(".")[1].replace(/-/g, '+').replace(/_/g, '/');
-        const json = decodeURIComponent(atob(base64).split("").map(
-          (c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-        ).join(''));
+        const base64 = jwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+        const json = decodeURIComponent(
+          atob(base64).split("").map(
+            (c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2),
+          ).join(""),
+        );
         const payload = JSON.parse(json);
         alert(`Successfully signed in as ${payload.email} (${payload.name})!`);
-      }
+      },
     });
-    google.accounts.id.renderButton(ref.current!, {})
+    google.accounts.id.renderButton(ref.current!, {});
   }, []);
 
   return (

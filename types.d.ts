@@ -10,6 +10,6 @@ interface GoogleApi {
     id: {
       initialize(conf: IdConfiguration): void;
       renderButton(el: Element, opts: unknown): void;
-    }
-  }
+    };
+  };
 }

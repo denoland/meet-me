@@ -24,6 +24,9 @@ jobs:
         with:
           deno-version: v1.x
 
+      - name: fmt check
+        run: deno fmt --check
+
       #- name: Test
       #  run: deno test
 
