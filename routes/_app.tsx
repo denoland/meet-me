@@ -3,9 +3,11 @@ import type { ReactNode } from "react";
 import { forwardProps, useData } from "aleph/react";
 import { Header } from "layout/Header.tsx";
 import { Footer } from "layout/Footer.tsx";
+import { envReady } from "utils/dotenv.ts";
 
 export const data = {
-  get(_: Request, ctx: Context) {
+  async get(_: Request, ctx: Context) {
+    await envReady;
     return ctx.json({
       clientId: Deno.env.get("CLIENT_ID"),
     });
