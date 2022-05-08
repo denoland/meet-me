@@ -16,7 +16,9 @@ export const data = {
 };
 
 export default function App({ children }: { children?: ReactNode }) {
-  const { data: { clientId, redirectUri } } = useData<{ clientId: string, redirectUri: string }>();
+  const { data: { clientId, redirectUri } } = useData<
+    { clientId: string; redirectUri: string }
+  >();
   return (
     <>
       <Header />

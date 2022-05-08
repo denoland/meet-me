@@ -2,7 +2,9 @@
 import { useForwardProps } from "aleph/react";
 
 export default function LandingPage() {
-  const { clientId, redirectUri } = useForwardProps<{ clientId: string, redirectUri: string }>();
+  const { clientId, redirectUri } = useForwardProps<
+    { clientId: string; redirectUri: string }
+  >();
 
   const signin = () => {
     google.accounts.oauth2.initCodeClient({
