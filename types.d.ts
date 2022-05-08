@@ -11,5 +11,6 @@ interface GoogleApi {
       initialize(conf: IdConfiguration): void;
       renderButton(el: Element, opts: unknown): void;
     };
+    oauth2: any;
   };
 }

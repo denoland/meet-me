@@ -1,25 +1,24 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-import { useEffect, useRef } from "react";
 import { useForwardProps } from "aleph/react";
-import { parsePayload } from "utils/jwt.ts";
 
 export default function LandingPage() {
   const { clientId } = useForwardProps<{ clientId: string }>();
-  const ref = useRef(null);
-  useEffect(() => {
-    google.accounts.id.initialize({
+
+  const signin = () => {
+    google.accounts.oauth2.initCodeClient({
       client_id: clientId,
-      callback: (res) => {
-        const payload = parsePayload(res.credential);
-        alert(`Successfully signed in as ${payload.email} (${payload.name})!`);
-      },
-    });
-    google.accounts.id.renderButton(ref.current!, {});
-  }, []);
+      scope: "https://www.googleapis.com/auth/calendar",
+      redirect_uri: "http://localhost:3000/api/authorize",
+      ux_mode: "redirect",
+      state: Math.random().toString(36).slice(2),
+    }).requestCode();
+  };
 
   return (
     <div className="flex items-center justify-center py-36">
-      <div ref={ref} id="google-sign-in"></div>
+      <button onClick={signin} className="border border-1 px-2 rounded">
+        Sign in with Google
+      </button>
     </div>
   );
 }
