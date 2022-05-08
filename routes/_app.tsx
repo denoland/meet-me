@@ -10,16 +10,17 @@ export const data = {
     await envReady;
     return ctx.json({
       clientId: Deno.env.get("CLIENT_ID"),
+      redirectUri: Deno.env.get("REDIRECT_URI"),
     });
   },
 };
 
 export default function App({ children }: { children?: ReactNode }) {
-  const { data: { clientId } } = useData<{ clientId: string }>();
+  const { data: { clientId, redirectUri } } = useData<{ clientId: string, redirectUri: string }>();
   return (
     <>
       <Header />
-      {forwardProps(children, { clientId })}
+      {forwardProps(children, { clientId, redirectUri })}
       <Footer />
     </>
   );

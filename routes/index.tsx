@@ -2,13 +2,13 @@
 import { useForwardProps } from "aleph/react";
 
 export default function LandingPage() {
-  const { clientId } = useForwardProps<{ clientId: string }>();
+  const { clientId, redirectUri } = useForwardProps<{ clientId: string, redirectUri: string }>();
 
   const signin = () => {
     google.accounts.oauth2.initCodeClient({
       client_id: clientId,
       scope: "https://www.googleapis.com/auth/calendar",
-      redirect_uri: "http://localhost:3000/api/authorize",
+      redirect_uri: redirectUri,
       ux_mode: "redirect",
       state: Math.random().toString(36).slice(2),
     }).requestCode();

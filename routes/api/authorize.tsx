@@ -8,7 +8,7 @@ export const data = {
     form.append("client_id", Deno.env.get("CLIENT_ID")!);
     form.append("client_secret", Deno.env.get("CLIENT_SECRET")!);
     form.append("grant_type", "authorization_code");
-    form.append("redirect_uri", "http://localhost:3000/api/authorize");
+    form.append("redirect_uri", Deno.env.get("REDIRECT_URI")!);
     const res = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       body: form,
