@@ -20,10 +20,10 @@ export default function App({ children }: { children?: ReactNode }) {
     { clientId: string; redirectUri: string }
   >();
   return (
-    <>
+    <div className="min-h-screen">
       <Header />
       {forwardProps(children, { clientId, redirectUri })}
       <Footer />
-    </>
+    </div>
   );
 }

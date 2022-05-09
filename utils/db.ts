@@ -3,15 +3,19 @@
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
-type User = {
+export type User = {
   id: string;
   email: string;
   slug?: string;
-  googleApiRefreshToken?: string;
+  googleRefreshToken?: string;
+  googleAccessToken?: string;
+  googleAccessTokenExpres?: Date;
   timezone?: string;
   availabilities?: Range[];
   events?: CalendarEvent[];
 };
+
+export type UserForClient = Omit<User, `google${string}`>;
 
 type WeekDay =
   | "SUN"
@@ -53,32 +57,44 @@ export async function getUserById(id: string) {
 }
 
 // deno-lint-ignore require-await
-export async function getUserByEmail(email: string) {
+export async function getUserByEmail(email: string): Promise<User | undefined> {
   return Object.values(Users).find((u) => u.email === email);
 }
 
-export function isUserReady(user: Omit<User, "googleApiRefreshToken">) {
-  return user.slug !== undefined && user.availabilities !== undefined &&
-    user.timezone !== undefined && user.events !== undefined;
-}
-
-export function isUserAuthorized(user: Pick<User, "googleApiRefreshToken">) {
-  return user.googleApiRefreshToken !== undefined;
-}
-
-// deno-lint-ignore require-await
-export async function getTokenByHash(hash: string) {
-  return Object.values(Tokens).find((t) => t.hash === hash);
-}
-
-// deno-lint-ignore require-await
 export async function createUserByEmail(email: string): Promise<User> {
   const user = {
     id: crypto.randomUUID(),
     email,
   };
-  Users[user.id] = user;
+  await saveUser(user);
   return user;
+}
+
+export async function getOrCreateUserByEmail(email: string): Promise<User> {
+  const user = await getUserByEmail(email);
+  if (user) {
+    return user;
+  }
+  return createUserByEmail(email);
+}
+
+// deno-lint-ignore require-await
+export async function saveUser(user: User): Promise<void> {
+  Users[user.id] = user;
+}
+
+export function isUserReady(user: Omit<User, "googleRefreshToken">) {
+  return user.slug !== undefined && user.availabilities !== undefined &&
+    user.timezone !== undefined && user.events !== undefined;
+}
+
+export function isUserAuthorized(user: Pick<User, "googleRefreshToken">) {
+  return user.googleRefreshToken !== undefined;
+}
+
+// deno-lint-ignore require-await
+export async function getTokenByHash(hash: string) {
+  return Object.values(Tokens).find((t) => t.hash === hash);
 }
 
 export async function getUserByToken(token: string) {

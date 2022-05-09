@@ -4,7 +4,8 @@
 
 # Development
 
-First copy `.env.example` to `.env` and replace `CLIENT_ID` and `CLIENT_SECRET` to appropriate values.
+First copy `.env.example` to `.env` and replace `CLIENT_ID` and `CLIENT_SECRET`
+to appropriate values.
 
 Then run the deployment locally:
 
