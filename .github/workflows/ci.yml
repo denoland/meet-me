@@ -27,6 +27,9 @@ jobs:
       - name: fmt check
         run: deno fmt --check
 
+      - name: lint
+        run: deno lint
+
       #- name: Test
       #  run: deno test
 

@@ -11,6 +11,14 @@
       ]
     }
   },
+  "lint": {
+    "files": {
+      "exclude": [
+        "dist",
+        "vendor"
+      ]
+    }
+  },
   "compilerOptions": {
     "lib": [
       "dom",

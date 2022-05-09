@@ -11,6 +11,7 @@ interface GoogleApi {
       initialize(conf: IdConfiguration): void;
       renderButton(el: Element, opts: unknown): void;
     };
+    // deno-lint-ignore no-explicit-any
     oauth2: any;
   };
 }
