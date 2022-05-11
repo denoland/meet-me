@@ -4,7 +4,7 @@ Date: 2022-05-02
 
 ## Status
 
-Accepted
+Superceded by [4. Use firestore as the persistance layer.](0004-use-firestore-as-the-persistance-layer.md)
 
 ## Context
 
