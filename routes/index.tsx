@@ -9,7 +9,7 @@ export default function LandingPage() {
   const signin = () => {
     google.accounts.oauth2.initCodeClient({
       client_id: clientId,
-      scope: "https://www.googleapis.com/auth/calendar",
+      scope: "openid https://www.googleapis.com/auth/calendar",
       redirect_uri: redirectUri,
       ux_mode: "redirect",
       state: Math.random().toString(36).slice(2),
