@@ -23,7 +23,7 @@ export default function App({ children }: { children?: ReactNode }) {
   const signin = () => {
     google.accounts.oauth2.initCodeClient({
       client_id: clientId,
-      scope: "openid https://www.googleapis.com/auth/calendar",
+      scope: "email profile openid https://www.googleapis.com/auth/calendar",
       redirect_uri: redirectUri,
       ux_mode: "redirect",
       state: Math.random().toString(36).slice(2),

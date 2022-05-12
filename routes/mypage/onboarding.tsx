@@ -11,7 +11,11 @@ export default function MyPage() {
         Welcome to <span className="font-semibold">Meet Me</span>!
       </h1>
       <p className="mt-4">
-        You're signed in as <span className="font-semibold">{user.email}</span>
+        You're signed in as {user.name}{" "}
+        (<span className="font-semibold">{user.email}</span>)
+      </p>
+      <p className="mt-4">
+        <img src={user.picture} />
       </p>
       <p className="mt-4">
         You're setting the following elements:

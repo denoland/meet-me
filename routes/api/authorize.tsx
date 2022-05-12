@@ -22,6 +22,7 @@ export const data = {
     const accessTokenExpiresIn = resp.expires_in;
     const idToken = resp.id_token;
     const idTokenPayload = parsePayload(idToken);
+    console.log("idTokenPayload", idTokenPayload);
     const email = idTokenPayload.email;
 
     console.log("accessToken", accessToken);
@@ -35,6 +36,8 @@ export const data = {
     user.googleAccessTokenExpres = new Date(
       Date.now() + accessTokenExpiresIn * 1000,
     );
+    user.picture = idTokenPayload.picture;
+    user.name = idTokenPayload.name;
 
     const token = await createNewTokenForUser(user);
 
