@@ -1,26 +1,33 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 import { useForwardProps } from "aleph/react";
+import icons from "icons";
 
 export default function LandingPage() {
-  const { clientId, redirectUri } = useForwardProps<
-    { clientId: string; redirectUri: string }
+  const { signin } = useForwardProps<
+    { signin: () => void }
   >();
-
-  const signin = () => {
-    google.accounts.oauth2.initCodeClient({
-      client_id: clientId,
-      scope: "openid https://www.googleapis.com/auth/calendar",
-      redirect_uri: redirectUri,
-      ux_mode: "redirect",
-      state: Math.random().toString(36).slice(2),
-    }).requestCode();
-  };
-
   return (
-    <div className="flex items-center justify-center py-36">
-      <button onClick={signin} className="border border-1 px-2 rounded">
-        Sign in with Google
-      </button>
+    <div className="max-w-screen-xl mx-auto flex items-center px-4 pt-36">
+      <div className="max-w-130">
+        <p className="flex gap-1.5">
+          <span className="text-yellow-500">●</span>
+          <span className="text-red-500">●</span>
+          <span className="text-blue-500">●</span>
+        </p>
+        <h1 className="mt-3 font-bold text-5xl">The Calendar by Deno</h1>
+        <p className="mt-4 text-zinc-300 text-lg font-light leading-6">
+          We re-engineered the service we built for secure, high-quality
+          business meetings, Google Meet, to make it available for all, on any
+          device.
+        </p>
+        <button
+          onClick={signin}
+          className="rounded-full mt-10 px-4 py-2 bg-zinc-200 flex items-center gap-2 text-black"
+        >
+          <icons.Google />
+          <span className="font-medium">Continue with Google</span>
+        </button>
+      </div>
     </div>
   );
 }

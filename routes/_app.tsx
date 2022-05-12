@@ -19,10 +19,21 @@ export default function App({ children }: { children?: ReactNode }) {
   const { data: { clientId, redirectUri } } = useData<
     { clientId: string; redirectUri: string }
   >();
+
+  const signin = () => {
+    google.accounts.oauth2.initCodeClient({
+      client_id: clientId,
+      scope: "openid https://www.googleapis.com/auth/calendar",
+      redirect_uri: redirectUri,
+      ux_mode: "redirect",
+      state: Math.random().toString(36).slice(2),
+    }).requestCode();
+  };
+
   return (
-    <div className="min-h-screen">
-      <Header />
-      {forwardProps(children, { clientId, redirectUri })}
+    <div className="min-h-screen bg-dark-400 text-white">
+      <Header signin={signin} />
+      {forwardProps(children, { clientId, redirectUri, signin })}
       <Footer />
     </div>
   );
