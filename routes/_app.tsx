@@ -31,7 +31,7 @@ export default function App({ children }: { children?: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-dark-400 text-white">
+    <div className="min-h-screen bg-dark-400 text-white overflow-x-hidden">
       <Header signin={signin} />
       {forwardProps(children, { clientId, redirectUri, signin })}
       <Footer />

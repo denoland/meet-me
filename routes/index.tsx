@@ -7,8 +7,8 @@ export default function LandingPage() {
     { signin: () => void }
   >();
   return (
-    <div className="max-w-screen-xl mx-auto flex items-center px-4 pt-36">
-      <div className="max-w-130">
+    <div className="max-w-screen-xl mx-auto flex items-center gap-16 px-4 pt-36">
+      <div className="max-w-130 flex-shrink-0">
         <p className="flex gap-1.5">
           <span className="text-yellow-500">●</span>
           <span className="text-red-500">●</span>
@@ -28,6 +28,37 @@ export default function LandingPage() {
           <span className="font-medium">Continue with Google</span>
         </button>
       </div>
+      <RightArea />
+    </div>
+  );
+}
+
+function RightArea() {
+  return (
+    <div className="opacity-60">
+      {[...Array(9)].map((_, i) => (
+        <div className="flex items-center gap-2">
+          {[...Array(100)].map((_, j) => {
+            const r = Math.random();
+            const thr = 0.02;
+            const className = r < thr
+              ? "text-red-500"
+              : r < thr * 2
+              ? "text-blue-500"
+              : r < thr * 3
+              ? "text-yellow-500"
+              : "";
+            if (i < 5) {
+              return <span className={className}>●</span>;
+            }
+            if (i === 5 && j < 10) {
+              return <span className={className}>●</span>;
+            }
+
+            return <span>○</span>;
+          })}
+        </div>
+      ))}
     </div>
   );
 }
