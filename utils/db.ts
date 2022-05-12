@@ -6,8 +6,8 @@ const dec = new TextDecoder();
 export type User = {
   id: string;
   email: string;
-  name: string;
-  picture: string;
+  name?: string;
+  picture?: string;
   slug?: string;
   googleRefreshToken?: string;
   googleAccessToken?: string;

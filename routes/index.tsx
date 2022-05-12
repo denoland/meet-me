@@ -7,8 +7,8 @@ export default function LandingPage() {
     { signin: () => void }
   >();
   return (
-    <div className="max-w-screen-xl mx-auto flex items-center gap-16 px-4 pt-36">
-      <div className="max-w-130 flex-shrink-0">
+    <div className="max-w-screen-xl mx-auto flex items-center gap-16 px-4 pt-20 sm:!pt-36">
+      <div className="max-w-130 sm:flex-shrink-0">
         <p className="flex gap-1.5">
           <span className="text-yellow-500">●</span>
           <span className="text-red-500">●</span>
@@ -35,7 +35,7 @@ export default function LandingPage() {
 
 function RightArea() {
   return (
-    <div className="opacity-60">
+    <div className="lt-sm:!hidden opacity-60">
       {[...Array(9)].map((_, i) => (
         <div className="flex items-center gap-2">
           {[...Array(100)].map((_, j) => {
