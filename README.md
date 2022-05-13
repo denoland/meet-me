@@ -12,3 +12,7 @@ Then run the deployment locally:
 ```sh
 deno task dev
 ```
+
+# Design
+
+https://www.figma.com/file/P0XsTDIeiwNhm8jFS03gwz/Deno-Cal
