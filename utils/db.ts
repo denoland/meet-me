@@ -54,7 +54,7 @@ export const Users: Record<string, User> = {};
 export const Tokens: Record<string, Token> = {};
 
 // deno-lint-ignore require-await
-export async function getUserById(id: string) {
+export async function getUserById(id: string): Promise<User | undefined> {
   return Users[id];
 }
 
