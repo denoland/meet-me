@@ -1,10 +1,22 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-import { useForwardProps } from "aleph/react";
+import { useEffect } from "react";
+import { useForwardProps, useRouter } from "aleph/react";
 import { UserForClient } from "utils/db.ts";
 
 export default function MyPage() {
   const { user } = useForwardProps<{ user: UserForClient }>();
+  const { redirect } = useRouter();
+  useEffect(() => {
+    if (!user) {
+      redirect("/");
+    }
+  });
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="px-8 py-4">
       <h1>

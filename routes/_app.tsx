@@ -4,7 +4,7 @@ import { forwardProps, useData } from "aleph/react";
 import { Header } from "layout/Header.tsx";
 import { Footer } from "layout/Footer.tsx";
 import { envReady } from "utils/dotenv.ts";
-import { User, getUserByToken } from "utils/db.ts";
+import { getUserByToken, User } from "utils/db.ts";
 
 export const data = {
   async get(_: Request, ctx: Context) {
@@ -21,7 +21,7 @@ export const data = {
 
 export default function App({ children }: { children?: ReactNode }) {
   const { data: { clientId, redirectUri, user } } = useData<
-    { clientId: string; redirectUri: string, user: User | undefined }
+    { clientId: string; redirectUri: string; user: User | undefined }
   >();
 
   const signin = () => {

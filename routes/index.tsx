@@ -1,11 +1,22 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-import { useForwardProps } from "aleph/react";
+import { useEffect } from "react";
+import { useForwardProps, useRouter } from "aleph/react";
 import icons from "icons";
+import { User } from "utils/db.ts";
 
 export default function LandingPage() {
-  const { signin } = useForwardProps<
-    { signin: () => void }
+  const { signin, user } = useForwardProps<
+    { signin: () => void; user: User }
   >();
+  const { redirect } = useRouter();
+  useEffect(() => {
+    if (user) {
+      redirect("/mypage/onboarding");
+    }
+  }, []);
+  if (user) {
+    return null;
+  }
   return (
     <div className="max-w-screen-xl mx-auto flex items-center gap-16 px-4 pt-20 sm:!pt-36">
       <div className="max-w-130 sm:flex-shrink-0">
