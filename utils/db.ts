@@ -7,6 +7,8 @@ export type User = {
   id: string;
   email: string;
   name?: string;
+  givenName?: string;
+  familyName?: string;
   picture?: string;
   slug?: string;
   googleRefreshToken?: string;

@@ -38,6 +38,8 @@ export const data = {
     );
     user.picture = idTokenPayload.picture;
     user.name = idTokenPayload.name;
+    user.givenName = idTokenPayload.given_name;
+    user.familyName = idTokenPayload.family_name;
 
     const token = await createNewTokenForUser(user);
 
