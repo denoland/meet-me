@@ -1,10 +1,9 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
-
 import { parsePayload } from "utils/jwt.ts";
 import { createNewTokenForUser, getOrCreateUserByEmail } from "utils/db.ts";
 
 export const data = {
-  async get(req: Request, ctx: Context) {
+  async get(req: Request, _ctx: Context) {
     const params = new URLSearchParams(new URL(req.url).search);
     const form = new URLSearchParams();
     form.append("code", params.get("code")!);

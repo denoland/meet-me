@@ -9,8 +9,8 @@ import { serve } from "aleph/server";
 serve({
   port: 3000,
   hmrWebSocketUrl: "ws://localhost:3000/-/hmr",
-  config: {
-    routes: "./routes/**/*.{ts,tsx}",
+  routes: "./routes/**/*.{ts,tsx}",
+  build: {
     unocss: {
       presets: [presetUno()],
       theme: {

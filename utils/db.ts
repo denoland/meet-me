@@ -48,6 +48,15 @@ type Token = {
   expires: Date;
 };
 
+// These words are not usable as url slugs.
+export const unavailableUserSlugs = [
+  "mypage",
+  "api",
+  "index",
+  "terms",
+  "privacy",
+];
+
 // TODO(kt3k): These are temporary DB tables in memory.
 // Replace these with actual DB calls later.
 /** id -> User */
@@ -83,13 +92,18 @@ export async function getOrCreateUserByEmail(email: string): Promise<User> {
 }
 
 // deno-lint-ignore require-await
+export async function getUserBySlug(slug: string): Promise<User | undefined> {
+  return Object.values(Users).find((user) => user.slug === slug);
+}
+
+// deno-lint-ignore require-await
 export async function saveUser(user: User): Promise<void> {
   Users[user.id] = user;
 }
 
 export function isUserReady(user: Omit<User, "googleRefreshToken">) {
   return user.slug !== undefined && user.availabilities !== undefined &&
-    user.timezone !== undefined && user.events !== undefined;
+    user.timezone !== undefined;
 }
 
 export function isUserAuthorized(user: Pick<User, "googleRefreshToken">) {
