@@ -1,14 +1,13 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-import "utils/dotenv.ts";
 import presetUno from "@unocss/preset-uno.ts";
 import { renderToReadableStream } from "react-dom/server";
 import { Router } from "aleph/react";
 import { serve } from "aleph/server";
+import "utils/dotenv.ts";
 
 serve({
   port: 3000,
-  hmrWebSocketUrl: "ws://localhost:3000/-/hmr",
   routes: "./routes/**/*.{ts,tsx}",
   build: {
     unocss: {
@@ -29,7 +28,7 @@ serve({
   },
   middlewares: [],
   ssr: {
-    suspense: false,
+    dataDefer: false,
     render: (ctx) => renderToReadableStream(<Router ssrContext={ctx} />, ctx),
   },
 });
