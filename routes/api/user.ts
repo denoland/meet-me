@@ -56,7 +56,7 @@ export const data = {
         return badRequest("The given slug ${slug} is not available");
       }
       const someoneThatHasSlug = await getUserBySlug(slug);
-      if (someoneThatHasSlug) {
+      if (someoneThatHasSlug && someoneThatHasSlug.id !== user.id) {
         return badRequest(`The given slug ${slug} is not available`);
       }
       user.slug = slug;
