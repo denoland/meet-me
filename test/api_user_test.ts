@@ -91,5 +91,3 @@ Deno.test("/api/user", async (t) => {
   child.kill("SIGINT");
   await child.status;
 });
-
-
