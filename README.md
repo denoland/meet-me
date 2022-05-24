@@ -4,7 +4,7 @@
 
 > [calendly](https://calendly.com/) clone in Deno
 
-# Development
+## Development
 
 First copy `.env.example` to `.env` and replace `CLIENT_ID` and `CLIENT_SECRET`
 to appropriate values.
@@ -14,17 +14,17 @@ Then run the deployment locally:
 ```sh
 deno task dev
 ```
-# Visual Design
+## Visual Design
 
 https://www.figma.com/file/P0XsTDIeiwNhm8jFS03gwz/Deno-Cal
 
-# LICENSE
+## LICENSE
 
 MIT
 
-# Notes
+## Notes
 
-## How to create `CLIENT_ID` and `CLEINT_SECRET` values in Google Cloud Platform
+### How to create `CLIENT_ID` and `CLEINT_SECRET` values in Google Cloud Platform
 
 You need [Google Cloud Platform](https://console.cloud.google.com/) Project to develop this app.
 
