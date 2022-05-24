@@ -9,7 +9,7 @@ Deno.test("/api/user", async (t) => {
     args: [
       "run",
       "-A",
-      "https://raw.githubusercontent.com/kt3k/aleph.js/send-signal-on-exit/cli.ts",
+      "https://deno.land/x/aleph@1.0.0-alpha.49/cli.ts",
       "start",
     ],
     stdout: "inherit",
