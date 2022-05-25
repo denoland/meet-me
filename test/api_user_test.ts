@@ -57,7 +57,10 @@ Deno.test("/api/user", async (t) => {
   await t.step("PATCH /api/user with invalid char in slug", async () => {
     const [code, { message }] = await patchUser({ slug: "%%%" });
     assertEquals(code, 400);
-    assertStringIncludes(message, `The given slug "%%%" includes invalid characters`);
+    assertStringIncludes(
+      message,
+      `The given slug "%%%" includes invalid characters`,
+    );
     const user =
       await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
         .json();
