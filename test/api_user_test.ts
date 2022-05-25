@@ -1,5 +1,5 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
-import { assertEquals } from "std/testing/asserts.ts";
+import { assertEquals, assertStringIncludes } from "std/testing/asserts.ts";
 
 const EMAIL = "foo@deno.com";
 const EMAIL_ALT = "bar@deno.com";
@@ -12,7 +12,7 @@ Deno.test("/api/user", async (t) => {
     args: [
       "run",
       "-A",
-      "https://deno.land/x/aleph@1.0.0-alpha.49/cli.ts",
+      "https://deno.land/x/aleph@1.0.0-alpha.52/cli.ts",
       "start",
     ],
     stdout: "inherit",
@@ -41,7 +41,7 @@ Deno.test("/api/user", async (t) => {
       },
       body: JSON.stringify(obj),
     });
-    const x = [resp.status, await resp.text()];
+    const x = [resp.status, await resp.json()];
     return x;
   };
 
@@ -55,9 +55,9 @@ Deno.test("/api/user", async (t) => {
   });
 
   await t.step("PATCH /api/user with invalid char in slug", async () => {
-    const [code, _] = await patchUser({ slug: "%%%" });
+    const [code, { message }] = await patchUser({ slug: "%%%" });
     assertEquals(code, 400);
-    // TODO(kt3k): should check about the response body
+    assertStringIncludes(message, `The given slug "%%%" includes invalid characters`);
     const user =
       await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
         .json();
@@ -65,9 +65,9 @@ Deno.test("/api/user", async (t) => {
   });
 
   await t.step("PATCH /api/user with invalid name", async () => {
-    const [code, _] = await patchUser({ slug: "mypage" });
+    const [code, { message }] = await patchUser({ slug: "mypage" });
     assertEquals(code, 400);
-    // TODO(kt3k): should check about the response body
+    assertStringIncludes(message, `The given slug "mypage" is not available`);
     const user =
       await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
         .json();
@@ -79,9 +79,9 @@ Deno.test("/api/user", async (t) => {
     await patchUser({ slug: "bar" }, await createUser(EMAIL_ALT));
 
     // `bar` is not available anymore because it's taken in the above
-    const [code, _] = await patchUser({ slug: "bar" });
+    const [code, { message }] = await patchUser({ slug: "bar" });
     assertEquals(code, 400);
-    // TODO(kt3k): should check about the response body
+    assertStringIncludes(message, `The given slug "bar" is not available`);
     const user =
       await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
         .json();

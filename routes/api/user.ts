@@ -49,15 +49,15 @@ export const data = {
     if (slug) {
       if (!/^[0-9A-Za-z-_]+$/.test(slug)) {
         return badRequest(
-          "The given slug ${slug} includes invalid characters. The slug can contain only alphabets, numbers, -, and _.",
+          `The given slug "${slug}" includes invalid characters. The slug can contain only alphabets, numbers, -, and _.`,
         );
       }
       if (unavailableUserSlugs.includes(slug)) {
-        return badRequest("The given slug ${slug} is not available");
+        return badRequest(`The given slug "${slug}" is not available`);
       }
       const someoneThatHasSlug = await getUserBySlug(slug);
       if (someoneThatHasSlug && someoneThatHasSlug.id !== user.id) {
-        return badRequest(`The given slug ${slug} is not available`);
+        return badRequest(`The given slug "${slug}" is not available`);
       }
       user.slug = slug;
     }
