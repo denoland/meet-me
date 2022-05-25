@@ -1,5 +1,40 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-export const timezones = [
+export const SEC = 1000;
+export const MIN = 60 * SEC;
+export const HOUR = 60 * MIN;
+export function isValidTimeZone(
+  timeZone: string,
+): timeZone is (typeof timeZones)[number] {
+  // deno-lint-ignore no-explicit-any
+  return timeZones.includes(timeZone as any);
+}
+const RE_HOUR_MINUTE = /([01][0-9]|2[0-3]):([0-5][0-9])/;
+export function isValidHourMinute(hourMinute: string) {
+  return RE_HOUR_MINUTE.test(hourMinute);
+}
+export function hourMinuteToSec(hourMinute: string): number | undefined {
+  const match = hourMinute.match(RE_HOUR_MINUTE);
+  if (!match) {
+    return;
+  }
+  const [, h, m] = match;
+  return +h * HOUR + +m * MIN;
+}
+const weekDays = [
+  "SUN",
+  "MON",
+  "TUE",
+  "WED",
+  "THU",
+  "FRI",
+  "SAT",
+] as const;
+export type WeekDay = (typeof weekDays)[number];
+export function isValidWeekDay(day: unknown): day is WeekDay {
+  // deno-lint-ignore no-explicit-any
+  return weekDays.includes(day as any);
+}
+export const timeZones = [
   "Africa/Abidjan",
   "Africa/Accra",
   "Africa/Addis_Ababa",
@@ -316,4 +351,4 @@ export const timezones = [
   "Pacific/Tongatapu",
   "Pacific/Wake",
   "Pacific/Wallis",
-];
+] as const;

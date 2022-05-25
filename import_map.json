@@ -7,7 +7,7 @@
     "icons": "./components/icons/mod.ts",
     "icons/": "./components/icons/",
     "utils/": "./utils/",
-    "std/": "https://deno.land/std@0.136.0/",
+    "std/": "https://deno.land/std@0.140.0/",
     "@unocss/": "https://deno.land/x/aleph@1.0.0-alpha.52/lib/@unocss/",
     "aleph/": "https://deno.land/x/aleph@1.0.0-alpha.52/",
     "aleph/server": "https://deno.land/x/aleph@1.0.0-alpha.52/server/mod.ts",

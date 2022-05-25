@@ -1,6 +1,6 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 import { assertEquals, assertStringIncludes } from "std/testing/asserts.ts";
-
+import { MIN } from "utils/datetime.ts";
 const EMAIL = "foo@deno.com";
 const EMAIL_ALT = "bar@deno.com";
 
@@ -45,7 +45,7 @@ Deno.test("/api/user", async (t) => {
     return x;
   };
 
-  await t.step("PATCH /api/user", async () => {
+  await t.step("PATCH /api/user with slug", async () => {
     const [code, _] = await patchUser({ slug: "foo" });
     assertEquals(code, 200);
     const user =
@@ -89,6 +89,118 @@ Deno.test("/api/user", async (t) => {
       await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
         .json();
     assertEquals(user?.slug, "foo"); // Not changed
+  });
+
+  await t.step("PATCH /api/user with time zone", async () => {
+    const [code, _] = await patchUser({ timeZone: "Europe/London" });
+    assertEquals(code, 200);
+    const user =
+      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
+        .json();
+    assertEquals(user?.timeZone, "Europe/London");
+  });
+
+  await t.step("PATCH /api/user with invalid time zone", async () => {
+    const [code, { message }] = await patchUser({ timeZone: "Foo/Bar" });
+    assertEquals(code, 400);
+    assertStringIncludes(message, `The given "timeZone" is invalid`);
+  });
+
+  await t.step("PATCH /api/user with event types", async () => {
+    const [code, _] = await patchUser({
+      eventTypes: [{ title: "45 Minute Meeting", duration: 45 * MIN }],
+    });
+    assertEquals(code, 200);
+    const user =
+      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
+        .json();
+    assertEquals(user?.eventTypes, [{
+      title: "45 Minute Meeting",
+      duration: 45 * MIN,
+    }]);
+  });
+
+  await t.step("PATCH /api/user with non-array event types", async () => {
+    const [code, { message }] = await patchUser({
+      eventTypes: { title: "45 Minute Meeting", duration: 45 * MIN },
+    });
+    assertEquals(code, 400);
+    assertStringIncludes(message, `"eventTypes" need to be an array.`);
+  });
+
+  await t.step("PATCH /api/user with invalid event types", async () => {
+    const [code, { message }] = await patchUser({
+      eventTypes: [{}],
+    });
+    assertEquals(code, 400);
+    assertStringIncludes(message, `The given eventType is invalid`);
+  });
+
+  await t.step("PATCH /api/user with availabilities", async () => {
+    const [code, _] = await patchUser({
+      availabilities: [
+        { weekDay: "MON", startTime: "09:00", endTime: "17:00" },
+        { weekDay: "TUE", startTime: "09:00", endTime: "17:00" },
+        { weekDay: "WED", startTime: "12:00", endTime: "17:00" },
+        { weekDay: "THU", startTime: "09:00", endTime: "17:00" },
+        { weekDay: "FRI", startTime: "09:00", endTime: "12:00" },
+      ],
+    });
+    assertEquals(code, 200);
+    const user =
+      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
+        .json();
+    assertEquals(user?.availabilities, [
+      { weekDay: "MON", startTime: "09:00", endTime: "17:00" },
+      { weekDay: "TUE", startTime: "09:00", endTime: "17:00" },
+      { weekDay: "WED", startTime: "12:00", endTime: "17:00" },
+      { weekDay: "THU", startTime: "09:00", endTime: "17:00" },
+      { weekDay: "FRI", startTime: "09:00", endTime: "12:00" },
+    ]);
+  });
+
+  await t.step("PATCH /api/user with non-array availabilities", async () => {
+    const [code, { message }] = await patchUser({
+      availabilities: { weekDay: "MON", startTime: "09:00", endTime: "17:00" },
+    });
+    assertEquals(code, 400);
+    assertStringIncludes(message, `"availabilities" need to be an array.`);
+  });
+
+  await t.step("PATCH /api/user with invalid availabilities", async () => {
+    {
+      const [code, { message }] = await patchUser({
+        availabilities: [{
+          weekDay: "MON",
+          startTime: "09:00",
+          endTime: "FOO",
+        }],
+      });
+      assertEquals(code, 400);
+      assertStringIncludes(message, `The given "range" is invalid`);
+    }
+    {
+      const [code, { message }] = await patchUser({
+        availabilities: [{
+          weekDay: "MON",
+          startTime: "BAR",
+          endTime: "17:00",
+        }],
+      });
+      assertEquals(code, 400);
+      assertStringIncludes(message, `The given "range" is invalid`);
+    }
+    {
+      const [code, { message }] = await patchUser({
+        availabilities: [{
+          weekDay: "BON",
+          startTime: "09:00",
+          endTime: "17:00",
+        }],
+      });
+      assertEquals(code, 400);
+      assertStringIncludes(message, `The given "range" is invalid`);
+    }
   });
 
   child.kill("SIGINT");
