@@ -9,10 +9,13 @@ import cx from "utils/cx.ts";
 type Step = "slug" | "availability";
 
 export default function OnboardingPage() {
-  const { user } = useForwardProps<{ user: UserForClient }>();
+  const { user, reloadUser } = useForwardProps<
+    { user: UserForClient; reloadUser: () => Promise<void> }
+  >();
   console.log("user", user);
   const { redirect } = useRouter();
   const [step, setStep] = useState<Step>("slug");
+  const [goingForward, setGoingForward] = useState(true);
   useEffect(() => {
     if (!user) {
       redirect("/");
@@ -25,16 +28,48 @@ export default function OnboardingPage() {
 
   return (
     <div className="px-8 py-4">
-      {step === "slug" && <ChooseURL onFinish={() => setStep("availability")} />}
-      {step === "availability" && <ChooseAvailabilities />}
+      {step === "slug" && (
+        <ChooseURL
+          key={1}
+          slug={user.slug || ""}
+          goingForward={goingForward}
+          onFinish={() => {
+            reloadUser();
+            setStep("availability");
+            setGoingForward(true);
+          }}
+        />
+      )}
+      {step === "availability" && (
+        <ChooseAvailabilities
+          key={2}
+          goingForward={goingForward}
+          onCancel={() => {
+            setStep("slug");
+            setGoingForward(false);
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function ChooseURL({ onFinish }: {onFinish: () => void}) {
-  const [slug, setSlug] = useState("");
-  const [fadingOut, setFadingOut] = useState(false);
+function ChooseURL(
+  { goingForward, slug: slugDefault, onFinish }: {
+    goingForward: boolean;
+    slug: string;
+    onFinish: () => void;
+  },
+) {
+  const [slug, setSlug] = useState(slugDefault);
+  const [fadingOut, setFadingOut] = useState(!goingForward);
   const [updating, setUpdating] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setFadingOut(false);
+    });
+  }, []);
 
   const updateSlug = async () => {
     setUpdating(true);
@@ -42,11 +77,11 @@ function ChooseURL({ onFinish }: {onFinish: () => void}) {
       // TODO(kt3k): Use some API updating utility
       const res = await fetch("/api/user", {
         method: "PATCH",
-        body: JSON.stringify({ slug })
+        body: JSON.stringify({ slug }),
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message)
+        throw new Error(data.message);
       }
       setFadingOut(true);
       await new Promise((resolve) => {
@@ -58,20 +93,22 @@ function ChooseURL({ onFinish }: {onFinish: () => void}) {
     } finally {
       setUpdating(false);
     }
-  }
+  };
 
   return (
     <div
-      className={cx("absolute w-screen transition-500", {
+      className={cx("absolute w-screen !transition-500", {
         "opacity-0": fadingOut,
         "!-translate-x-5": fadingOut,
       })}
     >
-      <div className="max-w-md mx-auto">
-        <h1 className="text-lg">
-          Welcome to <span className="font-semibold">Meet Me</span>!
-        </h1>
-      </div>
+      {goingForward && (
+        <div className="max-w-md mx-auto">
+          <h1 className="text-lg">
+            Welcome to <span className="font-semibold">Meet Me</span>!
+          </h1>
+        </div>
+      )}
       <div className="mt-8 flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-lg mx-auto">
         <h2 className="font-medium text-lg">Create your Meet Me URL</h2>
         <p className="text-gray-500">
@@ -104,45 +141,71 @@ function ChooseURL({ onFinish }: {onFinish: () => void}) {
   );
 }
 
-
-function ChooseAvailabilities() {
+function ChooseAvailabilities(
+  { onCancel, goingForward }: { goingForward: boolean; onCancel: () => void },
+) {
   const [updating, setUpdating] = useState(false);
   const updateAvailabilities = () => {};
-  const [fadingOut, setFadingOut] = useState(false);
-  const [fadingIn, setFadingIn] = useState(true);
+  const [fadingOut, setFadingOut] = useState(!goingForward);
+  const [fadingIn, setFadingIn] = useState(goingForward);
   const [timeZone, setTimeZone] = useState("");
   useEffect(() => {
     setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    setFadingIn(false);
+    setTimeout(() => {
+      setFadingIn(false);
+      setFadingOut(false);
+    });
   }, []);
+  const onBack = async () => {
+    setFadingIn(true);
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+    onCancel();
+  };
   return (
     <div
-    className={cx("absolute w-screen transition-500", {
-      "opacity-0": fadingOut || fadingIn,
-      "!-translate-x-5": fadingOut,
-      "!translate-x-5": fadingIn,
-    })}
-  >
-    <div className="mt-8 flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-lg mx-auto">
-      <h2 className="font-medium text-lg">Set your availability</h2>
-      <p className="text-gray-500">
-        Timezone: {timeZone}
-      </p>
-      <ul>
-        <li>TODO(kt3k): List Availability Ranges</li>
-      </ul>
-      <div className="self-end mt-4">
-        <Button
-          disabled={updating || true}
-          style="primary"
-          onClick={updateAvailabilities}
-        >
-          Continue
-          <icons.CaretRight />
-        </Button>
+      className={cx("absolute w-screen !transition-500", {
+        "opacity-0": fadingOut || fadingIn,
+        "!-translate-x-5": fadingOut,
+        "!translate-x-5": fadingIn,
+      })}
+    >
+      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-xl mx-auto">
+        <h2 className="font-medium text-lg">Set your availability</h2>
+        <p className="text-gray-500">
+          Timezone: {timeZone}
+        </p>
+        <ul>
+          <li>SUN: unavailable +</li>
+          <li>MON: 09:00 - 17:00 🗑 +</li>
+          <li>TUE: 09:00 - 17:00 🗑 +</li>
+          <li>WED: 09:00 - 17:00 🗑 +</li>
+          <li>THU: 09:00 - 17:00 🗑 +</li>
+          <li>FRI: 09:00 - 17:00 🗑 +</li>
+          <li>SAT: unavailable +</li>
+        </ul>
+        <p className="text-gray-500">
+          TODO(kt3k): Enable Availability Ranges set up
+        </p>
+        <div className="self-end flex items-center gap-2 mt-4">
+          <Button
+            disabled={updating}
+            style="alternate"
+            onClick={onBack}
+          >
+            Back
+          </Button>
+          <Button
+            disabled={updating || true}
+            style="primary"
+            onClick={updateAvailabilities}
+          >
+            Continue
+            <icons.CaretRight />
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-
-  )
+  );
 }

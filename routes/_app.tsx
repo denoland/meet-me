@@ -21,7 +21,7 @@ export const data = {
 };
 
 export default function App({ children }: { children?: ReactNode }) {
-  const { data: { clientId, redirectUri, user } } = useData<
+  const { data: { clientId, redirectUri, user }, reload: reloadUser } = useData<
     { clientId: string; redirectUri: string; user: User | undefined }
   >();
 
@@ -38,7 +38,13 @@ export default function App({ children }: { children?: ReactNode }) {
   return (
     <div className="min-h-screen bg-dark-400 text-white overflow-x-hidden">
       <Header signin={signin} user={user} />
-      {forwardProps(children, { clientId, redirectUri, signin, user })}
+      {forwardProps(children, {
+        clientId,
+        redirectUri,
+        signin,
+        user,
+        reloadUser,
+      })}
       <Footer />
     </div>
   );
