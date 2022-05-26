@@ -15,10 +15,8 @@ serve({
       theme: {
         colors: {
           "default": "#222222",
-          "primary": "#026BEB",
-          "fresh": "#2FA850",
+          "primary": "#00AC47",
           "danger": "#E90807",
-          "ultralight": "#F8F7F6",
         },
         fontSize: {
           "xs": ".75rem",

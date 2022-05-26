@@ -29,7 +29,7 @@ function UserAccountButton({ user }: { user: User }) {
       {user.picture &&
         <img className="h-5 w-5 rounded-full" src={user.picture} />}
       <span className="font-medium">{displayName}</span>
-      <icons.CarretDown className="h-4 h-4 text-black" />
+      <icons.CaretDown className="h-4 h-4 text-black" />
     </button>
   );
 }
