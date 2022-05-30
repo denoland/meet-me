@@ -1,40 +1,46 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
+import {
+  hourMinuteToSec,
+  isValidHourMinute,
+  isValidWeekDay,
+  MIN,
+  WeekDay,
+} from "./datetime.ts";
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
+/** User represents the signed-in user. */
 export type User = {
   id: string;
   email: string;
+  name?: string;
+  givenName?: string;
+  familyName?: string;
+  picture?: string;
   slug?: string;
   googleRefreshToken?: string;
   googleAccessToken?: string;
   googleAccessTokenExpres?: Date;
-  timezone?: string;
+  timeZone?: string;
   availabilities?: Range[];
-  events?: CalendarEvent[];
+  eventTypes?: EventType[];
 };
 
 export type UserForClient = Omit<User, `google${string}`>;
 
-type WeekDay =
-  | "SUN"
-  | "MON"
-  | "TUE"
-  | "WED"
-  | "THU"
-  | "FRI"
-  | "SAT";
-
-type CalendarEvent = {
-  summary: string;
+/** EventType is a template of the events, which the users can set up.
+ * The visiters can book actual events based on this EventType settings. */
+export type EventType = {
+  title: string;
+  description?: string;
   duration: number;
 };
 
 type Range = {
   weekDay: WeekDay;
-  startTime: string;
-  endTime: string;
+  startTime: string; // "HH:mm" format
+  endTime: string; // "HH:mm" format
 };
 
 type Token = {
@@ -44,6 +50,15 @@ type Token = {
   expires: Date;
 };
 
+// These words are not usable as url slugs.
+export const unavailableUserSlugs = [
+  "mypage",
+  "api",
+  "index",
+  "terms",
+  "privacy",
+];
+
 // TODO(kt3k): These are temporary DB tables in memory.
 // Replace these with actual DB calls later.
 /** id -> User */
@@ -52,7 +67,7 @@ export const Users: Record<string, User> = {};
 export const Tokens: Record<string, Token> = {};
 
 // deno-lint-ignore require-await
-export async function getUserById(id: string) {
+export async function getUserById(id: string): Promise<User | undefined> {
   return Users[id];
 }
 
@@ -61,10 +76,31 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
   return Object.values(Users).find((u) => u.email === email);
 }
 
+function createDefaultCalendarEvent(): EventType {
+  return {
+    title: "30 Minute Meeting",
+    duration: 30 * MIN,
+  };
+}
+
+export function isValidEventType(event: EventType): event is EventType {
+  return typeof event.title === "string" && typeof event.duration === "number";
+}
+
+// deno-lint-ignore no-explicit-any
+export function isValidRange(range: any = {}): range is Range {
+  const { weekDay, startTime, endTime } = range;
+  return isValidWeekDay(weekDay) &&
+    isValidHourMinute(startTime) &&
+    isValidHourMinute(endTime) &&
+    hourMinuteToSec(endTime)! - hourMinuteToSec(startTime)! > 0;
+}
+
 export async function createUserByEmail(email: string): Promise<User> {
   const user = {
     id: crypto.randomUUID(),
     email,
+    eventTypes: [createDefaultCalendarEvent()],
   };
   await saveUser(user);
   return user;
@@ -79,13 +115,18 @@ export async function getOrCreateUserByEmail(email: string): Promise<User> {
 }
 
 // deno-lint-ignore require-await
+export async function getUserBySlug(slug: string): Promise<User | undefined> {
+  return Object.values(Users).find((user) => user.slug === slug);
+}
+
+// deno-lint-ignore require-await
 export async function saveUser(user: User): Promise<void> {
   Users[user.id] = user;
 }
 
 export function isUserReady(user: Omit<User, "googleRefreshToken">) {
   return user.slug !== undefined && user.availabilities !== undefined &&
-    user.timezone !== undefined && user.events !== undefined;
+    user.timeZone !== undefined;
 }
 
 export function isUserAuthorized(user: Pick<User, "googleRefreshToken">) {

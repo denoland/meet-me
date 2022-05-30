@@ -1,10 +1,9 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
-
 import { parsePayload } from "utils/jwt.ts";
 import { createNewTokenForUser, getOrCreateUserByEmail } from "utils/db.ts";
 
 export const data = {
-  async get(req: Request, ctx: Context) {
+  async get(req: Request, _ctx: Context) {
     const params = new URLSearchParams(new URL(req.url).search);
     const form = new URLSearchParams();
     form.append("code", params.get("code")!);
@@ -22,6 +21,7 @@ export const data = {
     const accessTokenExpiresIn = resp.expires_in;
     const idToken = resp.id_token;
     const idTokenPayload = parsePayload(idToken);
+    console.log("idTokenPayload", idTokenPayload);
     const email = idTokenPayload.email;
 
     console.log("accessToken", accessToken);
@@ -35,6 +35,10 @@ export const data = {
     user.googleAccessTokenExpres = new Date(
       Date.now() + accessTokenExpiresIn * 1000,
     );
+    user.picture = idTokenPayload.picture;
+    user.name = idTokenPayload.name;
+    user.givenName = idTokenPayload.given_name;
+    user.familyName = idTokenPayload.family_name;
 
     const token = await createNewTokenForUser(user);
 

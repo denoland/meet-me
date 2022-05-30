@@ -1,36 +1,211 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
-
-import { useForwardProps } from "aleph/react";
+import { useEffect, useState } from "react";
+import { useForwardProps, useRouter } from "aleph/react";
 import { UserForClient } from "utils/db.ts";
+import Button from "base/Button.tsx";
+import icons from "icons";
+import cx from "utils/cx.ts";
 
-export default function MyPage() {
-  const { user } = useForwardProps<{ user: UserForClient }>();
+type Step = "slug" | "availability";
+
+export default function OnboardingPage() {
+  const { user, reloadUser } = useForwardProps<
+    { user: UserForClient; reloadUser: () => Promise<void> }
+  >();
+  console.log("user", user);
+  const { redirect } = useRouter();
+  const [step, setStep] = useState<Step>("slug");
+  const [goingForward, setGoingForward] = useState(true);
+  useEffect(() => {
+    if (!user) {
+      redirect("/");
+    }
+  });
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="px-8 py-4">
-      <h1>
-        Welcome to <span className="font-semibold">Meet Me</span>!
-      </h1>
-      <p className="mt-4">
-        You're signed in as <span className="font-semibold">{user.email}</span>
-      </p>
-      <p className="mt-4">
-        You're setting the following elements:
-      </p>
-      <ul className="mt-4 list-disc px-4">
-        <li>
-          Your URL{" "}
-          <span className="text-gray-400">ex. meet-me.deno.dev/foobar</span>
-        </li>
-        <li>
-          Availabilities{" "}
-          <span className="text-gray-400">ex. Mon 9:00 - 17:00 etc</span>
-        </li>
-        <li>
-          Event Types{" "}
-          <span className="text-gray-400">ex. 30 minutes meeting</span>
-        </li>
-      </ul>
-      <p className="mt-4">TODO: implement the above</p>
+      {step === "slug" && (
+        <ChooseURL
+          key={1}
+          slug={user.slug || ""}
+          goingForward={goingForward}
+          onFinish={() => {
+            reloadUser();
+            setStep("availability");
+            setGoingForward(true);
+          }}
+        />
+      )}
+      {step === "availability" && (
+        <ChooseAvailabilities
+          key={2}
+          goingForward={goingForward}
+          onCancel={() => {
+            setStep("slug");
+            setGoingForward(false);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ChooseURL(
+  { goingForward, slug: slugDefault, onFinish }: {
+    goingForward: boolean;
+    slug: string;
+    onFinish: () => void;
+  },
+) {
+  const [slug, setSlug] = useState(slugDefault);
+  const [fadingOut, setFadingOut] = useState(!goingForward);
+  const [updating, setUpdating] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setFadingOut(false);
+    });
+  }, []);
+
+  const updateSlug = async () => {
+    setUpdating(true);
+    try {
+      // TODO(kt3k): Use some API updating utility
+      const res = await fetch("/api/user", {
+        method: "PATCH",
+        body: JSON.stringify({ slug }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message);
+      }
+      setFadingOut(true);
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+      onFinish();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  return (
+    <div
+      className={cx("absolute w-screen !transition-500", {
+        "opacity-0": fadingOut,
+        "!-translate-x-5": fadingOut,
+      })}
+    >
+      {goingForward && (
+        <div className="max-w-md mx-auto">
+          <h1 className="text-lg">
+            Welcome to <span className="font-semibold">Meet Me</span>!
+          </h1>
+        </div>
+      )}
+      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-lg mx-auto">
+        <h2 className="font-medium text-lg">Create your Meet Me URL</h2>
+        <p className="text-gray-500">
+          Choose a URL that describes you or your business in a concise way.
+          Make it short and easy to remember so you can share links with ease.
+        </p>
+        <div className="flex items-center gap-2">
+          <span>https://meet-me.deno.dev/</span>
+          <input
+            className="rounded-lg py-2 px-4 text-black"
+            placeholder="url"
+            onChange={(e) => {
+              setSlug(e.target.value);
+            }}
+            value={slug}
+          />
+        </div>
+        <div className="self-end mt-4">
+          <Button
+            disabled={slug === "" || updating}
+            style="primary"
+            onClick={updateSlug}
+          >
+            Continue
+            <icons.CaretRight />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChooseAvailabilities(
+  { onCancel, goingForward }: { goingForward: boolean; onCancel: () => void },
+) {
+  const [updating, setUpdating] = useState(false);
+  const updateAvailabilities = () => {};
+  const [fadingOut, setFadingOut] = useState(!goingForward);
+  const [fadingIn, setFadingIn] = useState(goingForward);
+  const [timeZone, setTimeZone] = useState("");
+  useEffect(() => {
+    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    setTimeout(() => {
+      setFadingIn(false);
+      setFadingOut(false);
+    });
+  }, []);
+  const onBack = async () => {
+    setFadingIn(true);
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+    onCancel();
+  };
+  return (
+    <div
+      className={cx("absolute w-screen !transition-500", {
+        "opacity-0": fadingOut || fadingIn,
+        "!-translate-x-5": fadingOut,
+        "!translate-x-5": fadingIn,
+      })}
+    >
+      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-xl mx-auto">
+        <h2 className="font-medium text-lg">Set your availability</h2>
+        <p className="text-gray-500">
+          Timezone: {timeZone}
+        </p>
+        <ul>
+          <li>SUN: unavailable +</li>
+          <li>MON: 09:00 - 17:00 🗑 +</li>
+          <li>TUE: 09:00 - 17:00 🗑 +</li>
+          <li>WED: 09:00 - 17:00 🗑 +</li>
+          <li>THU: 09:00 - 17:00 🗑 +</li>
+          <li>FRI: 09:00 - 17:00 🗑 +</li>
+          <li>SAT: unavailable +</li>
+        </ul>
+        <p className="text-gray-500">
+          TODO(kt3k): Enable Availability Ranges set up
+        </p>
+        <div className="self-end flex items-center gap-2 mt-4">
+          <Button
+            disabled={updating}
+            style="alternate"
+            onClick={onBack}
+          >
+            Back
+          </Button>
+          <Button
+            disabled={updating || true}
+            style="primary"
+            onClick={updateAvailabilities}
+          >
+            Continue
+            <icons.CaretRight />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

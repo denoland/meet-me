@@ -3,7 +3,8 @@
     "dev": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts dev",
     "start": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts start",
     "build": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts build",
-    "store:example": "deno run --allow-env --allow-read=. --allow-net store/mod.ts"
+    "store:example": "deno run --allow-env --allow-read=. --allow-net store/mod.ts",
+    "test": "deno test -A --unstable"
   },
   "fmt": {
     "files": {
@@ -13,6 +14,11 @@
     }
   },
   "lint": {
+    "rules": {
+      "exclude": [
+        "import-prefix-missing"
+      ]
+    },
     "files": {
       "exclude": [
         "dist",
@@ -25,10 +31,11 @@
       "dom",
       "dom.iterable",
       "dom.asynciterable",
-      "deno.ns"
+      "deno.ns",
+      "deno.unstable"
     ],
     "types": [
-      "https://deno.land/x/aleph@1.0.0-alpha.30/types.d.ts",
+      "https://deno.land/x/aleph@1.0.0-alpha.52/types.d.ts",
       "./types.d.ts"
     ],
     "jsx": "react-jsx",
