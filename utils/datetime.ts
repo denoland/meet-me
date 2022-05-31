@@ -20,6 +20,16 @@ export function hourMinuteToSec(hourMinute: string): number | undefined {
   const [, h, m] = match;
   return +h * HOUR + +m * MIN;
 }
+export function secToHourMinute(sec: number): string {
+  if (sec >= 24 * HOUR || sec < 0) {
+    throw new RangeError(
+      `The given sec is out of the range between 0 <= sec < 24`,
+    );
+  }
+  const h = Math.floor(sec / HOUR);
+  const m = Math.floor((sec % HOUR) / MIN);
+  return h.toString().padStart(2, "0") + ":" + m.toString().padStart(2, "0");
+}
 const weekDays = [
   "SUN",
   "MON",
