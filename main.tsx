@@ -4,5 +4,5 @@ import { createPortal } from "react-dom";
 import { hydrateRoot } from "react-dom/client";
 import { Router } from "aleph/react";
 
-const mountPoint = document.querySelector("#root")!
+const mountPoint = document.querySelector("#root")!;
 hydrateRoot(mountPoint, <Router createPortal={createPortal} />);
