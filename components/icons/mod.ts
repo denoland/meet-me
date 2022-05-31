@@ -5,6 +5,7 @@ import CaretRight from "./CaretRight.tsx";
 import Deno from "./Deno.tsx";
 import Google from "./Google.tsx";
 import Logo from "./Logo.tsx";
+import Plus from "./Plus.tsx";
 import TrashBin from "./TrashBin.tsx";
 
 export default {
@@ -13,5 +14,6 @@ export default {
   Deno,
   Google,
   Logo,
+  Plus,
   TrashBin,
 };
