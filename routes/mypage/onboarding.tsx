@@ -137,9 +137,12 @@ function ChooseURL(
           </h1>
         </div>
       )}
-      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-lg mx-auto">
-        <h2 className="font-medium text-lg">Create your Meet Me URL</h2>
-        <p className="text-gray-500">
+      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-lg mx-auto">
+        <h2 className="font-medium text-lg">
+          Create your Meet Me URL{" "}
+          <span className="ml-2 text-sm text-stone-600">(step 1 of 3)</span>
+        </h2>
+        <p className="text-stone-500">
           Choose a URL that describes you or your business in a concise way.
           Make it short and easy to remember so you can share links with ease.
         </p>
@@ -249,10 +252,13 @@ function ChooseAvailabilities(
         "!translate-x-5": fadingIn,
       })}
     >
-      <div className="flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-xl mx-auto">
-        <h2 className="font-medium text-lg">Set your availability</h2>
-        <p className="text-gray-500">
-          Timezone: {timeZone}
+      <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-xl mx-auto">
+        <h2 className="font-medium text-lg">
+          Set your availability{" "}
+          <span className="ml-2 text-sm text-stone-600">(step 2 of 3)</span>
+        </h2>
+        <p className="text-stone-600">
+          Timezone: <span className="text-white">{timeZone}</span>
         </p>
         <ul>
           {Object.entries(ranges).map(([weekDay, ranges]) => (
@@ -335,14 +341,14 @@ function WeekRow(
   return (
     <div
       className={cx(
-        "flex justify-between px-4 py-2 border-b border-gray-700",
+        "flex justify-between px-4 py-2 border-b border-stone-700",
       )}
     >
       {noRanges && (
         <>
           <div className="flex items-center gap-4">
             <span className="w-10">{weekDay}</span>
-            <span className="text-gray-500">Unavailable</span>
+            <span className="text-stone-600">Unavailable</span>
           </div>
           <div>
             <Button style="outline" size="xs" onClick={onPlus}>
@@ -403,6 +409,11 @@ function SetUpEventType({ goingForward, onCancel, onFinish }: {
       setFadingOut(false);
     });
   }, []);
+
+  const updateEventTypes = () => {
+    alert("TODO(kt3k): finish onboarding!");
+  };
+
   const onBack = async () => {
     setFadingIn(true);
     await delay(1000);
@@ -416,15 +427,45 @@ function SetUpEventType({ goingForward, onCancel, onFinish }: {
         "!translate-x-5": fadingIn,
       })}
     >
-      <div className="flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-xl mx-auto">
-        <h2 className="font-medium text-lg">Set event types</h2>
-        <Button
-          disabled={updating}
-          style="alternate"
-          onClick={onBack}
-        >
-          Back
-        </Button>
+      <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-4xl mx-auto">
+        <h2 className="font-medium text-lg">
+          Set up event types{" "}
+          <span className="ml-2 text-sm text-stone-600">(step 3 of 3)</span>
+        </h2>
+        <div className="grid grid-cols-3 gap-3">
+          {[...Array(4)].map(() => (
+            <div className="flex flex-col gap-1 rounded-lg border-stone-700 border px-4 py-7">
+              <div className="flex justify-between">
+                <div>
+                  <span className="text-xs font-semibold bg-stone-600 rounded-full px-3 py-0.5 text-xs">
+                    30 min
+                  </span>
+                </div>
+                <div>
+                  ✏️ 🗑
+                </div>
+              </div>
+              <h2 className="font-semibold">30 Minute Meeting</h2>
+              <p className="text-stone-600 text-sm">30 Minute Meeting.</p>
+            </div>
+          ))}
+        </div>
+        <div className="self-end flex items-center gap-2 mt-4">
+          <Button
+            disabled={updating}
+            style="alternate"
+            onClick={onBack}
+          >
+            Back
+          </Button>
+          <Button
+            disabled={updating}
+            style="primary"
+            onClick={updateEventTypes}
+          >
+            Finish
+          </Button>
+        </div>
       </div>
     </div>
   );
