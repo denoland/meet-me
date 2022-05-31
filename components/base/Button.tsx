@@ -10,10 +10,10 @@ export default function Button(
   { children, style, disabled, ...rest }: ButtonProps,
 ) {
   const btnClassName = useMemo(() => {
-    const base =
-      "px-5 py-2 rounded-full bg-primary text-black inline-flex items-center gap-2 transition";
+    const base = "px-5 py-2 inline-flex items-center gap-2 transition";
     return [
       base,
+      style === "primary" && "rounded-full bg-primary text-black",
       disabled && "opacity-60 cursor-not-allowed",
       !disabled && "hover:opacity-80",
     ].filter(Boolean).join(" ");

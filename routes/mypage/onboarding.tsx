@@ -1,7 +1,8 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 import { useEffect, useState } from "react";
 import { useForwardProps, useRouter } from "aleph/react";
-import { UserForClient } from "utils/db.ts";
+import { Range, UserForClient } from "utils/db.ts";
+import { WeekDay } from "utils/datetime.ts";
 import Button from "base/Button.tsx";
 import icons from "icons";
 import cx from "utils/cx.ts";
@@ -141,6 +142,8 @@ function ChooseURL(
   );
 }
 
+const WEEK_DEFAULTS = [];
+
 function ChooseAvailabilities(
   { onCancel, goingForward }: { goingForward: boolean; onCancel: () => void },
 ) {
@@ -177,13 +180,28 @@ function ChooseAvailabilities(
           Timezone: {timeZone}
         </p>
         <ul>
-          <li>SUN: unavailable +</li>
-          <li>MON: 09:00 - 17:00 🗑 +</li>
-          <li>TUE: 09:00 - 17:00 🗑 +</li>
-          <li>WED: 09:00 - 17:00 🗑 +</li>
-          <li>THU: 09:00 - 17:00 🗑 +</li>
-          <li>FRI: 09:00 - 17:00 🗑 +</li>
-          <li>SAT: unavailable +</li>
+          <WeekRow weekDay="SUN" />
+          <WeekRow
+            weekDay="MON"
+            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
+          />
+          <WeekRow
+            weekDay="TUE"
+            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
+          />
+          <WeekRow
+            weekDay="WED"
+            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
+          />
+          <WeekRow
+            weekDay="THU"
+            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
+          />
+          <WeekRow
+            weekDay="FRI"
+            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
+          />
+          <WeekRow weekDay="SAT" />
         </ul>
         <p className="text-gray-500">
           TODO(kt3k): Enable Availability Ranges set up
@@ -205,6 +223,52 @@ function ChooseAvailabilities(
             <icons.CaretRight />
           </Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Input(props: { value: string }) {
+  const { value, ...rest } = props;
+  return (
+    <input
+      className="text-black rounded-lg px-4 py-2 w-24 text-center"
+      value={value}
+      {...rest}
+    />
+  );
+}
+
+function WeekRow(
+  { weekDay, defaultRanges }: {
+    weekDay: WeekDay;
+    defaultRanges?: Omit<Range, "weekDay">[] | undefined;
+  },
+) {
+  const [ranges, setRanges] = useState(defaultRanges || []);
+  const noRanges = ranges.length === 0;
+  return (
+    <div
+      className={cx(
+        "flex items-center justify-between px-4 py-2 border-b border-gray-700",
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <span className="w-10">{weekDay}</span>
+        {noRanges && <span className="text-gray-500">Unavailable</span>}
+        {!noRanges && ranges.map(({ startTime, endTime }, i) => (
+          <>
+            <Input value={startTime} onChange={() => {}} />
+            ~
+            <Input value={endTime} />
+            <span>
+              <icons.TrashBin />
+            </span>
+          </>
+        ))}
+      </div>
+      <div>
+        <Button style="alternate">+</Button>
       </div>
     </div>
   );

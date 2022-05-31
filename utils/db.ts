@@ -37,7 +37,7 @@ export type EventType = {
   duration: number;
 };
 
-type Range = {
+export type Range = {
   weekDay: WeekDay;
   startTime: string; // "HH:mm" format
   endTime: string; // "HH:mm" format

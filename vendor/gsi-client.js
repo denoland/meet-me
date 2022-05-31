@@ -1123,11 +1123,22 @@
       var qb = function (a, b) {
         _.nb.call(this, a ? a.type : "");
         this.relatedTarget = this.g = this.target = null;
-        this.button = this.screenY = this.screenX = this.clientY = this
-          .clientX = this.j = this.i = 0;
+        this.button =
+          this.screenY =
+          this.screenX =
+          this.clientY =
+          this
+            .clientX =
+          this.j =
+          this.i =
+            0;
         this.key = "";
         this.charCode = this.keyCode = 0;
-        this.metaKey = this.shiftKey = this.altKey = this.ctrlKey = !1;
+        this.metaKey =
+          this.shiftKey =
+          this.altKey =
+          this.ctrlKey =
+            !1;
         this.state = null;
         this.pointerId = 0;
         this.pointerType = "";
@@ -2333,7 +2344,11 @@
         this.ka = !1;
         this.hb = this.u = null;
         this.yb = "";
-        this.qa = this.wb = this.Za = this.ub = !1;
+        this.qa =
+          this.wb =
+          this.Za =
+          this.ub =
+            !1;
         this.fb = 0;
         this.eb = null;
         this.cc = "";
