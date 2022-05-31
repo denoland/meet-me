@@ -1,4 +1,5 @@
 // Copyright Deno Land Inc. All Rights Reserved. Proprietary and confidential.
+
 type IconProps = {
   size?: number;
   className?: string;

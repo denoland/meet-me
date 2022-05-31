@@ -1,4 +1,5 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
+
 export default function CaretRight(
   { className, size = 17 }: { className?: string; size?: number },
 ) {

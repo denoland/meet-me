@@ -1,17 +1,21 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+
 export const SEC = 1000;
 export const MIN = 60 * SEC;
 export const HOUR = 60 * MIN;
+
 export function isValidTimeZone(
   timeZone: string,
 ): timeZone is (typeof timeZones)[number] {
   // deno-lint-ignore no-explicit-any
   return timeZones.includes(timeZone as any);
 }
+
 const RE_HOUR_MINUTE = /([01][0-9]|2[0-3]):([0-5][0-9])/;
 export function isValidHourMinute(hourMinute: string) {
   return RE_HOUR_MINUTE.test(hourMinute);
 }
+
 export function hourMinuteToSec(hourMinute: string): number | undefined {
   const match = hourMinute.match(RE_HOUR_MINUTE);
   if (!match) {
@@ -20,6 +24,7 @@ export function hourMinuteToSec(hourMinute: string): number | undefined {
   const [, h, m] = match;
   return +h * HOUR + +m * MIN;
 }
+
 export function secToHourMinute(sec: number): string {
   if (sec >= 24 * HOUR || sec < 0) {
     throw new RangeError(
@@ -30,20 +35,15 @@ export function secToHourMinute(sec: number): string {
   const m = Math.floor((sec % HOUR) / MIN);
   return h.toString().padStart(2, "0") + ":" + m.toString().padStart(2, "0");
 }
-const weekDays = [
-  "SUN",
-  "MON",
-  "TUE",
-  "WED",
-  "THU",
-  "FRI",
-  "SAT",
-] as const;
+
+const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
 export type WeekDay = (typeof weekDays)[number];
+
 export function isValidWeekDay(day: unknown): day is WeekDay {
   // deno-lint-ignore no-explicit-any
   return weekDays.includes(day as any);
 }
+
 export const timeZones = [
   "Africa/Abidjan",
   "Africa/Accra",

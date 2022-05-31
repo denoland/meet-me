@@ -1,4 +1,5 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
+
 import { badRequest, ok } from "utils/api.ts";
 import {
   createNewTokenForUser,

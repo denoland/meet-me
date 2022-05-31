@@ -1,11 +1,13 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
+
 import { useEffect, useState } from "react";
 import { useForwardProps, useRouter } from "aleph/react";
-import { Range, UserForClient } from "utils/db.ts";
-import { WeekDay } from "utils/datetime.ts";
 import Button from "base/Button.tsx";
+import Input from "base/Input.tsx";
 import icons from "icons";
 import cx from "utils/cx.ts";
+import { Range, UserForClient } from "utils/db.ts";
+import { WeekDay } from "utils/datetime.ts";
 
 type Step = "slug" | "availability";
 
@@ -225,17 +227,6 @@ function ChooseAvailabilities(
         </div>
       </div>
     </div>
-  );
-}
-
-function Input(props: { value: string }) {
-  const { value, ...rest } = props;
-  return (
-    <input
-      className="text-black rounded-lg px-4 py-2 w-24 text-center"
-      value={value}
-      {...rest}
-    />
   );
 }
 
