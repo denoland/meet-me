@@ -14,8 +14,9 @@ import Input from "base/Input.tsx";
 import icons from "icons";
 import cx from "utils/cx.ts";
 import { Range, UserForClient } from "utils/db.ts";
+import { delay } from "std/async/delay.ts";
 
-type Step = "slug" | "availability";
+type Step = "slug" | "availability" | "eventType";
 
 export default function OnboardingPage() {
   const { user, reloadUser } = useForwardProps<
@@ -35,7 +36,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="px-8">
+    <div>
       {step === "slug" && (
         <ChooseURL
           key={1}
@@ -51,10 +52,31 @@ export default function OnboardingPage() {
       {step === "availability" && (
         <ChooseAvailabilities
           key={2}
+          availabilities={user.availabilities}
           goingForward={goingForward}
           onCancel={() => {
             setStep("slug");
             setGoingForward(false);
+          }}
+          onFinish={() => {
+            reloadUser();
+            setStep("eventType");
+            setGoingForward(true);
+          }}
+        />
+      )}
+      {step === "eventType" && (
+        <SetUpEventType
+          key={3}
+          goingForward={goingForward}
+          onCancel={() => {
+            setStep("availability");
+            setGoingForward(false);
+          }}
+          onFinish={() => {
+            reloadUser();
+            setStep("eventType");
+            setGoingForward(true);
           }}
         />
       )}
@@ -92,9 +114,7 @@ function ChooseURL(
         throw new Error(data.message);
       }
       setFadingOut(true);
-      await new Promise((resolve) => {
-        setTimeout(resolve, 1000);
-      });
+      await delay(1000);
       onFinish();
     } catch (e) {
       alert(e.message);
@@ -105,7 +125,7 @@ function ChooseURL(
 
   return (
     <div
-      className={cx("absolute w-screen !transition-500", {
+      className={cx("w-screen !transition-500", {
         "opacity-0": fadingOut,
         "!-translate-x-5": fadingOut,
       })}
@@ -149,26 +169,42 @@ function ChooseURL(
   );
 }
 
-const WEEK_DEFAULTS = [];
+const DEFAULT_AVAILABILITIES: Range[] = [
+  { weekDay: "MON" as const, startTime: "09:00", endTime: "17:00" },
+  { weekDay: "TUE" as const, startTime: "09:00", endTime: "17:00" },
+  { weekDay: "WED" as const, startTime: "09:00", endTime: "17:00" },
+  { weekDay: "THU" as const, startTime: "09:00", endTime: "17:00" },
+  { weekDay: "FRI" as const, startTime: "09:00", endTime: "17:00" },
+];
+
+function rangesToRangeMap(ranges: Range[]): Record<WeekDay, Range[]> {
+  return {
+    SUN: ranges.filter((range) => range.weekDay === "SUN"),
+    MON: ranges.filter((range) => range.weekDay === "MON"),
+    TUE: ranges.filter((range) => range.weekDay === "TUE"),
+    WED: ranges.filter((range) => range.weekDay === "WED"),
+    THU: ranges.filter((range) => range.weekDay === "THU"),
+    FRI: ranges.filter((range) => range.weekDay === "FRI"),
+    SAT: ranges.filter((range) => range.weekDay === "SAT"),
+  };
+}
 
 function ChooseAvailabilities(
-  { onCancel, goingForward }: { goingForward: boolean; onCancel: () => void },
+  { availabilities, onCancel, goingForward, onFinish }: {
+    availabilities: Range[] | undefined;
+    goingForward: boolean;
+    onCancel: () => void;
+    onFinish: () => void;
+  },
 ) {
   const [updating, setUpdating] = useState(false);
-  const updateAvailabilities = async () => {
-    setUpdating(true);
-    try {
-      // TODO(kt3k): call patch /api/user
-      await Promise.resolve();
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setUpdating(false);
-    }
-  };
   const [fadingOut, setFadingOut] = useState(!goingForward);
   const [fadingIn, setFadingIn] = useState(goingForward);
   const [timeZone, setTimeZone] = useState("");
+
+  const [ranges, setRanges] = useState(
+    rangesToRangeMap(availabilities ?? DEFAULT_AVAILABILITIES),
+  );
   useEffect(() => {
     setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
     setTimeout(() => {
@@ -176,16 +212,38 @@ function ChooseAvailabilities(
       setFadingOut(false);
     });
   }, []);
+
+  const updateAvailabilities = async () => {
+    setUpdating(true);
+    try {
+      const resp = await fetch("/api/user", {
+        method: "PATCH",
+        body: JSON.stringify({ availabilities: Object.values(ranges).flat() }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.message);
+      }
+      setFadingOut(true);
+      await delay(1000);
+      onFinish();
+    } catch (e) {
+      // TODO(kt3k): handle error correctly
+      console.error(e);
+      alert(e.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const onBack = async () => {
     setFadingIn(true);
-    await new Promise((resolve) => {
-      setTimeout(resolve, 1000);
-    });
+    await delay(1000);
     onCancel();
   };
   return (
     <div
-      className={cx("absolute w-screen !transition-500", {
+      className={cx("w-screen !transition-500", {
         "opacity-0": fadingOut || fadingIn,
         "!-translate-x-5": fadingOut,
         "!translate-x-5": fadingIn,
@@ -197,28 +255,15 @@ function ChooseAvailabilities(
           Timezone: {timeZone}
         </p>
         <ul>
-          <WeekRow weekDay="SUN" />
-          <WeekRow
-            weekDay="MON"
-            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
-          />
-          <WeekRow
-            weekDay="TUE"
-            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
-          />
-          <WeekRow
-            weekDay="WED"
-            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
-          />
-          <WeekRow
-            weekDay="THU"
-            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
-          />
-          <WeekRow
-            weekDay="FRI"
-            defaultRanges={[{ startTime: "09:00", endTime: "17:00" }]}
-          />
-          <WeekRow weekDay="SAT" />
+          {Object.entries(ranges).map(([weekDay, ranges]) => (
+            <WeekRow
+              key={weekDay}
+              weekDay={weekDay as WeekDay}
+              defaultRanges={ranges}
+              onRangeUpdate={(ranges) =>
+                setRanges((r) => ({ ...r, [weekDay]: ranges }))}
+            />
+          ))}
         </ul>
         <div className="self-end flex items-center gap-2 mt-4">
           <Button
@@ -229,7 +274,7 @@ function ChooseAvailabilities(
             Back
           </Button>
           <Button
-            disabled={updating || true}
+            disabled={updating}
             style="primary"
             onClick={updateAvailabilities}
           >
@@ -243,19 +288,20 @@ function ChooseAvailabilities(
 }
 
 function WeekRow(
-  { weekDay, defaultRanges }: {
+  { weekDay, defaultRanges, onRangeUpdate }: {
     weekDay: WeekDay;
     defaultRanges?: Omit<Range, "weekDay">[] | undefined;
+    onRangeUpdate: (ranges: Omit<Range, "weekDay">[]) => void;
   },
 ) {
   const [ranges, setRanges] = useState(defaultRanges || []);
   const noRanges = ranges.length === 0;
 
-  // deno-lint-ignore no-explicit-any
-  const onChange = (e: any, type: "startTime" | "endTime", i: number) =>
+  const onChange = (v: string, type: "startTime" | "endTime", i: number) =>
     setRanges((ranges) => {
       const result = [...ranges];
-      result[i] = { ...ranges[i], [type]: e.target.value };
+      result[i] = { ...ranges[i], [type]: v };
+      onRangeUpdate(result);
       return result;
     });
 
@@ -263,6 +309,7 @@ function WeekRow(
     setRanges((ranges) => {
       const result = [...ranges];
       result.splice(i, 1);
+      onRangeUpdate(result);
       return result;
     });
 
@@ -270,16 +317,19 @@ function WeekRow(
     setRanges((ranges) => {
       const lastRange = ranges.at(-1);
       if (!lastRange) {
-        return [{ startTime: "09:00", endTime: "17:00" }];
+        return [{ weekDay, startTime: "09:00", endTime: "17:00" }];
       }
       const lastEndTime = hourMinuteToSec(lastRange.endTime)!;
-      const newStartTime = Math.min(lastEndTime + HOUR, 24 * HOUR - MIN);
-      const newEndTime = Math.min(newStartTime + HOUR, 24 * HOUR - MIN);
+      const newStartTime = Math.min(lastEndTime + HOUR, 24 * HOUR - 15 * MIN);
+      const newEndTime = Math.min(newStartTime + HOUR, 24 * HOUR - 15 * MIN);
       const newRange = {
+        weekDay,
         startTime: secToHourMinute(newStartTime),
         endTime: secToHourMinute(newEndTime),
       };
-      return [...ranges, newRange];
+      const result = [...ranges, newRange];
+      onRangeUpdate(result);
+      return result;
     });
 
   return (
@@ -310,29 +360,72 @@ function WeekRow(
                 <Input
                   className="w-24 text-center"
                   value={startTime}
-                  onChange={(e) =>
-                    onChange(e, "startTime", i)}
+                  onChange={(v) =>
+                    onChange(v, "startTime", i)}
                 />
                 ~
                 <Input
                   className="w-24"
                   value={endTime}
-                  onChange={(e) =>
-                    onChange(e, "endTime", i)}
+                  onChange={(v) =>
+                    onChange(v, "endTime", i)}
                 />
                 <Button size="xs" style="none" onClick={() => onRemove(i)}>
                   <icons.TrashBin />
                 </Button>
               </div>
               <div>
-                <Button style="outline" size="xs" onClick={onPlus}>
-                  <icons.Plus size={11} />
-                </Button>
+                {i === 0 && (
+                  <Button style="outline" size="xs" onClick={onPlus}>
+                    <icons.Plus size={11} />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function SetUpEventType({ goingForward, onCancel, onFinish }: {
+  goingForward: boolean;
+  onCancel: () => void;
+  onFinish: () => void;
+}) {
+  const [fadingOut, setFadingOut] = useState(!goingForward);
+  const [fadingIn, setFadingIn] = useState(goingForward);
+  const [updating, setUpdating] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      setFadingIn(false);
+      setFadingOut(false);
+    });
+  }, []);
+  const onBack = async () => {
+    setFadingIn(true);
+    await delay(1000);
+    onCancel();
+  };
+  return (
+    <div
+      className={cx("w-screen !transition-500", {
+        "opacity-0": fadingOut || fadingIn,
+        "!-translate-x-5": fadingOut,
+        "!translate-x-5": fadingIn,
+      })}
+    >
+      <div className="flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-xl mx-auto">
+        <h2 className="font-medium text-lg">Set event types</h2>
+        <Button
+          disabled={updating}
+          style="alternate"
+          onClick={onBack}
+        >
+          Back
+        </Button>
+      </div>
     </div>
   );
 }
