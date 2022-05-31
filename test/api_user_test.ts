@@ -1,6 +1,7 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 import { assertEquals, assertStringIncludes } from "std/testing/asserts.ts";
 import { MIN } from "utils/datetime.ts";
+
 const EMAIL = "foo@deno.com";
 const EMAIL_ALT = "bar@deno.com";
 
@@ -12,14 +13,28 @@ Deno.test("/api/user", async (t) => {
     args: [
       "run",
       "-A",
-      "https://deno.land/x/aleph@1.0.0-alpha.52/cli.ts",
-      "start",
+      "https://deno.land/x/aleph@1.0.0-alpha.60/cli.ts",
+      "dev",
     ],
     stdout: "inherit",
     stderr: "inherit",
   });
-  // TODO(kt3k): Race condition. Wait until the server is available
-  await new Promise<void>((resolve) => setTimeout(resolve, 10000));
+
+  await new Promise<void>((resolve) => {
+    (async () => {
+      for (let i = 0; i < 100; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        try {
+          const res = await fetch(USER_API);
+          await res.body?.cancel();
+          resolve();
+          break;
+        } catch (_e) {
+          // retry
+        }
+      }
+    })();
+  });
 
   // Creates user and token for testing
   const createUser = async (email: string) => {
