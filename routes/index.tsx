@@ -9,14 +9,17 @@ export default function LandingPage() {
     { signin: () => void; user: User }
   >();
   const { redirect } = useRouter();
+
   useEffect(() => {
     if (user) {
       redirect("/mypage/onboarding");
     }
   }, []);
+
   if (user) {
     return null;
   }
+
   return (
     <div className="max-w-screen-xl mx-auto flex items-center gap-16 px-4 pt-20 sm:!pt-36">
       <div className="max-w-130 sm:flex-shrink-0">

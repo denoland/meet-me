@@ -1,11 +1,13 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 import { ButtonHTMLAttributes, PropsWithChildren, useMemo } from "react";
+
 type ButtonProps = PropsWithChildren<
   {
     style?: "primary" | "secondary" | "danger" | "alternate" | "outline";
     disabled?: boolean;
   } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "style" | "disabled">
 >;
+
 export default function Button(
   { children, style, disabled, ...rest }: ButtonProps,
 ) {
@@ -18,6 +20,7 @@ export default function Button(
       !disabled && "hover:opacity-80",
     ].filter(Boolean).join(" ");
   }, [disabled, style]);
+
   return (
     <button className={btnClassName} disabled={disabled} {...rest}>
       {children}
