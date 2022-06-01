@@ -15,14 +15,14 @@ import Input from "base/Input.tsx";
 import icons from "icons";
 import Dropdown from "base/Dropdown.tsx";
 import cx from "utils/cx.ts";
-import { Range, UserForClient } from "utils/db.ts";
+import { EventType, Range, UserForClient as User } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
 
 type Step = "slug" | "availability" | "eventType";
 
 export default function OnboardingPage() {
   const { user, reloadUser } = useForwardProps<
-    { user: UserForClient; reloadUser: () => Promise<void> }
+    { user: User; reloadUser: () => Promise<void> }
   >();
   const { redirect } = useRouter();
   const [step, setStep] = useState<Step>("slug");
@@ -70,6 +70,7 @@ export default function OnboardingPage() {
       {step === "eventType" && (
         <SetUpEventType
           key={3}
+          user={user}
           goingForward={goingForward}
           onCancel={() => {
             setStep("availability");
@@ -198,7 +199,7 @@ function rangesToRangeMap(ranges: Range[]): Record<WeekDay, Range[]> {
 
 function ChooseAvailabilities(
   { user, onCancel, goingForward, onFinish }: {
-    user: UserForClient;
+    user: User;
     goingForward: boolean;
     onCancel: () => void;
     onFinish: () => void;
@@ -278,6 +279,7 @@ function ChooseAvailabilities(
                 <ul>
                   {timeZones.map((timeZone) => (
                     <li
+                      key={timeZone}
                       className="cursor-pointer hover:bg-neutral-100 px-2 py-1"
                       onClick={() => {
                         setTimeZone(timeZone);
@@ -430,11 +432,13 @@ function WeekRow(
   );
 }
 
-function SetUpEventType({ goingForward, onCancel, onFinish }: {
+function SetUpEventType({ user, goingForward, onCancel, onFinish }: {
+  user: User,
   goingForward: boolean;
   onCancel: () => void;
   onFinish: () => void;
 }) {
+  const [eventTypes, setEventTypes] = useState(user.eventTypes || []);
   const [fadingOut, setFadingOut] = useState(!goingForward);
   const [fadingIn, setFadingIn] = useState(goingForward);
   const [updating, setUpdating] = useState(false);
@@ -470,22 +474,28 @@ function SetUpEventType({ goingForward, onCancel, onFinish }: {
           </span>
         </h2>
         <div className="grid grid-cols-3 gap-3">
-          {[...Array(4)].map(() => (
+          {eventTypes.map((eventType) => (
             <div className="flex flex-col gap-1 rounded-lg border-stone-700 border px-4 py-7">
               <div className="flex justify-between">
                 <div>
                   <span className="text-xs font-semibold bg-stone-600 rounded-full px-3 py-0.5 text-xs">
-                    30 min
+                    {Math.floor(eventType.duration / MIN)} min
                   </span>
                 </div>
                 <div>
-                  ✏️ 🗑
+                  <Button size="xs">
+                    <icons.Edit />
+                  </Button>
+                  <Button size="xs">
+                    <icons.TrashBin />
+                  </Button>
                 </div>
               </div>
-              <h2 className="font-semibold">30 Minute Meeting</h2>
-              <p className="text-stone-600 text-sm">30 Minute Meeting.</p>
+              <h2 className="font-semibold">{eventType.title}</h2>
+              <p className="text-stone-600 text-sm">{eventType.description}</p>
             </div>
           ))}
+          <div></div>
         </div>
         <div className="self-end flex items-center gap-2 mt-4">
           <Button

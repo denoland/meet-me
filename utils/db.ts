@@ -80,6 +80,7 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 function createDefaultCalendarEvent(): EventType {
   return {
     title: "30 Minute Meeting",
+    description: "30 minute meeting.",
     duration: 30 * MIN,
   };
 }
