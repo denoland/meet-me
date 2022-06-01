@@ -7,11 +7,13 @@ import {
   hourMinuteToSec,
   MIN,
   secToHourMinute,
+  timeZones,
   WeekDay,
 } from "utils/datetime.ts";
 import Button from "base/Button.tsx";
 import Input from "base/Input.tsx";
 import icons from "icons";
+import Dropdown from "base/Dropdown.tsx";
 import cx from "utils/cx.ts";
 import { Range, UserForClient } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
@@ -52,7 +54,7 @@ export default function OnboardingPage() {
       {step === "availability" && (
         <ChooseAvailabilities
           key={2}
-          availabilities={user.availabilities}
+          user={user}
           goingForward={goingForward}
           onCancel={() => {
             setStep("slug");
@@ -140,7 +142,9 @@ function ChooseURL(
       <div className="mt-8 flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-lg mx-auto">
         <h2 className="font-medium text-lg">
           Create your Meet Me URL{" "}
-          <span className="ml-2 text-sm text-stone-600">(step 1 of 3)</span>
+          <span className="ml-2 text-sm font-normal text-stone-600">
+            (step 1 of 3)
+          </span>
         </h2>
         <p className="text-stone-500">
           Choose a URL that describes you or your business in a concise way.
@@ -193,8 +197,8 @@ function rangesToRangeMap(ranges: Range[]): Record<WeekDay, Range[]> {
 }
 
 function ChooseAvailabilities(
-  { availabilities, onCancel, goingForward, onFinish }: {
-    availabilities: Range[] | undefined;
+  { user, onCancel, goingForward, onFinish }: {
+    user: UserForClient;
     goingForward: boolean;
     onCancel: () => void;
     onFinish: () => void;
@@ -206,10 +210,12 @@ function ChooseAvailabilities(
   const [timeZone, setTimeZone] = useState("");
 
   const [ranges, setRanges] = useState(
-    rangesToRangeMap(availabilities ?? DEFAULT_AVAILABILITIES),
+    rangesToRangeMap(user.availabilities ?? DEFAULT_AVAILABILITIES),
   );
   useEffect(() => {
-    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    setTimeZone(
+      user.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+    );
     setTimeout(() => {
       setFadingIn(false);
       setFadingOut(false);
@@ -221,7 +227,10 @@ function ChooseAvailabilities(
     try {
       const resp = await fetch("/api/user", {
         method: "PATCH",
-        body: JSON.stringify({ availabilities: Object.values(ranges).flat() }),
+        body: JSON.stringify({
+          timeZone,
+          availabilities: Object.values(ranges).flat(),
+        }),
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -255,10 +264,36 @@ function ChooseAvailabilities(
       <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-xl mx-auto">
         <h2 className="font-medium text-lg">
           Set your availability{" "}
-          <span className="ml-2 text-sm text-stone-600">(step 2 of 3)</span>
+          <span className="ml-2 text-sm font-normal text-stone-600">
+            (step 2 of 3)
+          </span>
         </h2>
-        <p className="text-stone-600">
-          Timezone: <span className="text-white">{timeZone}</span>
+        <p className="text-stone-400">
+          Timezone:{" "}
+          <Dropdown
+            trigger="click"
+            offset={4}
+            render={() => (
+              <div className="bg-white shadow-lg rounded-lg py-2 h-48 overflow-scroll">
+                <ul>
+                  {timeZones.map((timeZone) => (
+                    <li
+                      className="cursor-pointer hover:bg-neutral-100 px-2 py-1"
+                      onClick={() => {
+                        setTimeZone(timeZone);
+                      }}
+                    >
+                      {timeZone}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          >
+            <span className="text-white underline cursor-pointer">
+              {timeZone}
+            </span>
+          </Dropdown>
         </p>
         <ul>
           {Object.entries(ranges).map(([weekDay, ranges]) => (
@@ -430,7 +465,9 @@ function SetUpEventType({ goingForward, onCancel, onFinish }: {
       <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-4xl mx-auto">
         <h2 className="font-medium text-lg">
           Set up event types{" "}
-          <span className="ml-2 text-sm text-stone-600">(step 3 of 3)</span>
+          <span className="ml-2 text-sm font-normal text-stone-600">
+            (step 3 of 3)
+          </span>
         </h2>
         <div className="grid grid-cols-3 gap-3">
           {[...Array(4)].map(() => (
