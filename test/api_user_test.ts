@@ -1,24 +1,15 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
 import { assertEquals, assertStringIncludes } from "std/testing/asserts.ts";
+import { MockServer } from "aleph/server/mock.ts";
 import { MIN } from "utils/datetime.ts";
 
 const EMAIL = "foo@deno.com";
 const EMAIL_ALT = "bar@deno.com";
 
 Deno.test("/api/user", async (t) => {
-  const USER_API = "http://localhost:3000/api/user";
-
-  // Starts the server
-  const child = Deno.spawnChild(Deno.execPath(), {
-    args: [
-      "run",
-      "-A",
-      "https://deno.land/x/aleph@1.0.0-alpha.63/cli.ts",
-      "dev",
-    ],
-    stdout: "inherit",
-    stderr: "inherit",
+  const api = new MockServer({
+    routes: "./routes/**/*.{ts,tsx}",
   });
 
   await new Promise<void>((resolve) => {
@@ -26,7 +17,7 @@ Deno.test("/api/user", async (t) => {
       for (let i = 0; i < 100; i++) {
         await new Promise((resolve) => setTimeout(resolve, 100));
         try {
-          const res = await fetch(USER_API);
+          const res = await api.fetch("/api/user");
           await res.body?.cancel();
           resolve();
           break;
@@ -39,7 +30,7 @@ Deno.test("/api/user", async (t) => {
 
   // Creates user and token for testing
   const createUser = async (email: string) => {
-    const resp = await fetch(USER_API, {
+    const resp = await api.fetch("/api/user", {
       method: "POST",
       body: `{"email":"${email}"}`,
     });
@@ -50,7 +41,7 @@ Deno.test("/api/user", async (t) => {
 
   // Util for calling PATCH /api/user
   const patchUser = async (obj: Record<string, unknown>, t = token) => {
-    const resp = await fetch(USER_API, {
+    const resp = await api.fetch("/api/user", {
       method: "PATCH",
       headers: {
         "Cookie": `token=${t}`,
@@ -64,9 +55,10 @@ Deno.test("/api/user", async (t) => {
   await t.step("PATCH /api/user with slug", async () => {
     const [code, _] = await patchUser({ slug: "foo" });
     assertEquals(code, 200);
-    const user =
-      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
-        .json();
+    const user = await (await api.fetch("/api/user", {
+      headers: { Cookie: `token=${token}` },
+    }))
+      .json();
     assertEquals(user?.slug, "foo");
   });
 
@@ -77,9 +69,10 @@ Deno.test("/api/user", async (t) => {
       message,
       `The given slug "%%%" includes invalid characters`,
     );
-    const user =
-      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
-        .json();
+    const user = await (await api.fetch("/api/user", {
+      headers: { Cookie: `token=${token}` },
+    }))
+      .json();
     assertEquals(user?.slug, "foo"); // Not changed
   });
 
@@ -88,7 +81,9 @@ Deno.test("/api/user", async (t) => {
     assertEquals(code, 400);
     assertStringIncludes(message, `The given slug "mypage" is not available`);
     const user =
-      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
+      await (await api.fetch("/api/user", {
+        headers: { Cookie: `token=${token}` },
+      }))
         .json();
     assertEquals(user?.slug, "foo"); // Not changed
   });
@@ -102,7 +97,9 @@ Deno.test("/api/user", async (t) => {
     assertEquals(code, 400);
     assertStringIncludes(message, `The given slug "bar" is not available`);
     const user =
-      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
+      await (await api.fetch("/api/user", {
+        headers: { Cookie: `token=${token}` },
+      }))
         .json();
     assertEquals(user?.slug, "foo"); // Not changed
   });
@@ -111,7 +108,9 @@ Deno.test("/api/user", async (t) => {
     const [code, _] = await patchUser({ timeZone: "Europe/London" });
     assertEquals(code, 200);
     const user =
-      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
+      await (await api.fetch("/api/user", {
+        headers: { Cookie: `token=${token}` },
+      }))
         .json();
     assertEquals(user?.timeZone, "Europe/London");
   });
@@ -128,7 +127,9 @@ Deno.test("/api/user", async (t) => {
     });
     assertEquals(code, 200);
     const user =
-      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
+      await (await api.fetch("/api/user", {
+        headers: { Cookie: `token=${token}` },
+      }))
         .json();
     assertEquals(user?.eventTypes, [{
       title: "45 Minute Meeting",
@@ -164,7 +165,9 @@ Deno.test("/api/user", async (t) => {
     });
     assertEquals(code, 200);
     const user =
-      await (await fetch(USER_API, { headers: { Cookie: `token=${token}` } }))
+      await (await api.fetch("/api/user", {
+        headers: { Cookie: `token=${token}` },
+      }))
         .json();
     assertEquals(user?.availabilities, [
       { weekDay: "MON", startTime: "09:00", endTime: "17:00" },
@@ -218,7 +221,4 @@ Deno.test("/api/user", async (t) => {
       assertStringIncludes(message, `The given "range" is invalid`);
     }
   });
-
-  child.kill("SIGINT");
-  await child.status;
 });
