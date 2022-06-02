@@ -1,6 +1,6 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-import { useEffect, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { useForwardProps, useRouter } from "aleph/react";
 import {
   HOUR,
@@ -18,7 +18,9 @@ import cx from "utils/cx.ts";
 import { EventType, Range, UserForClient as User } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
 
-type Step = "slug" | "availability" | "eventType";
+const STEPS = ["slug", "availability", "eventType"] as const;
+type Step = (typeof STEPS)[number];
+type PanelState = "left" | "center" | "right";
 
 export default function OnboardingPage() {
   const { user, reloadUser } = useForwardProps<
@@ -26,12 +28,33 @@ export default function OnboardingPage() {
   >();
   const { redirect } = useRouter();
   const [step, setStep] = useState<Step>("slug");
-  const [goingForward, setGoingForward] = useState(true);
+  const [panelState, setPanelState] = useState<PanelState>("center");
+
   useEffect(() => {
     if (!user) {
       redirect("/");
     }
   });
+
+  const goForward = async () => {
+    setPanelState("right");
+    await delay(1000);
+    await reloadUser();
+    setPanelState("left");
+    setStep(STEPS[STEPS.indexOf(step) + 1]);
+    await delay(0);
+    setPanelState("center");
+  };
+
+  const goBack = async () => {
+    setPanelState("left");
+    await delay(1000);
+    await reloadUser();
+    setPanelState("right");
+    setStep(STEPS[STEPS.indexOf(step) - 1]);
+    await delay(0);
+    setPanelState("center");
+  };
 
   if (!user) {
     return null;
@@ -40,70 +63,60 @@ export default function OnboardingPage() {
   return (
     <div>
       {step === "slug" && (
-        <ChooseURL
-          key={1}
-          slug={user.slug || ""}
-          goingForward={goingForward}
-          onFinish={() => {
-            reloadUser();
-            setStep("availability");
-            setGoingForward(true);
-          }}
-        />
+        <SlidingPanel state={panelState}>
+          <ChooseURL
+            slug={user.slug || ""}
+            onFinish={goForward}
+          />
+        </SlidingPanel>
       )}
       {step === "availability" && (
-        <ChooseAvailabilities
-          key={2}
-          user={user}
-          goingForward={goingForward}
-          onCancel={() => {
-            setStep("slug");
-            setGoingForward(false);
-          }}
-          onFinish={() => {
-            reloadUser();
-            setStep("eventType");
-            setGoingForward(true);
-          }}
-        />
+        <SlidingPanel state={panelState}>
+          <ChooseAvailabilities
+            user={user}
+            onCancel={goBack}
+            onFinish={goForward}
+          />
+        </SlidingPanel>
       )}
       {step === "eventType" && (
-        <SetUpEventType
-          key={3}
-          user={user}
-          goingForward={goingForward}
-          onCancel={() => {
-            setStep("availability");
-            setGoingForward(false);
-          }}
-          onFinish={() => {
-            reloadUser();
-            setStep("eventType");
-            setGoingForward(true);
-          }}
-          reloadUser={reloadUser}
-        />
+        <SlidingPanel state={panelState}>
+          <SetUpEventType
+            user={user}
+            onCancel={goBack}
+            onFinish={goForward}
+            reloadUser={reloadUser}
+          />
+        </SlidingPanel>
       )}
     </div>
   );
 }
 
+function SlidingPanel(
+  { state, children }: PropsWithChildren<{ state: PanelState }>,
+) {
+  return (
+    <div
+      className={cx("w-screen !transition-500", {
+        "opacity-0": state !== "center",
+        "!-translate-x-5": state === "right",
+        "!translate-x-5": state === "left",
+      })}
+    >
+      {children}
+    </div>
+  );
+}
+
 function ChooseURL(
-  { goingForward, slug: slugDefault, onFinish }: {
-    goingForward: boolean;
+  { slug: slugDefault, onFinish }: {
     slug: string;
     onFinish: () => void;
   },
 ) {
   const [slug, setSlug] = useState(slugDefault);
-  const [fadingOut, setFadingOut] = useState(!goingForward);
   const [updating, setUpdating] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setFadingOut(false);
-    });
-  }, []);
 
   const updateSlug = async () => {
     setUpdating(true);
@@ -117,8 +130,6 @@ function ChooseURL(
       if (!res.ok) {
         throw new Error(data.message);
       }
-      setFadingOut(true);
-      await delay(1000);
       onFinish();
     } catch (e) {
       alert(e.message);
@@ -128,19 +139,13 @@ function ChooseURL(
   };
 
   return (
-    <div
-      className={cx("w-screen !transition-500", {
-        "opacity-0": fadingOut,
-        "!-translate-x-5": fadingOut,
-      })}
-    >
-      {goingForward && (
-        <div className="max-w-md mx-auto">
-          <h1 className="text-lg">
-            Welcome to <span className="font-semibold">Meet Me</span>!
-          </h1>
-        </div>
-      )}
+    <>
+      <div className="max-w-md mx-auto">
+        <h1 className="text-lg">
+          Welcome to <span className="font-semibold">Meet Me</span>!
+        </h1>
+      </div>
+
       <div className="mt-8 flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-lg mx-auto">
         <h2 className="font-medium text-lg">
           Create your Meet Me URL{" "}
@@ -174,7 +179,7 @@ function ChooseURL(
           </Button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -199,16 +204,13 @@ function rangesToRangeMap(ranges: Range[]): Record<WeekDay, Range[]> {
 }
 
 function ChooseAvailabilities(
-  { user, onCancel, goingForward, onFinish }: {
+  { user, onCancel, onFinish }: {
     user: User;
-    goingForward: boolean;
     onCancel: () => void;
     onFinish: () => void;
   },
 ) {
   const [updating, setUpdating] = useState(false);
-  const [fadingOut, setFadingOut] = useState(!goingForward);
-  const [fadingIn, setFadingIn] = useState(goingForward);
   const [timeZone, setTimeZone] = useState("");
 
   const [ranges, setRanges] = useState(
@@ -218,10 +220,6 @@ function ChooseAvailabilities(
     setTimeZone(
       user.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
     );
-    setTimeout(() => {
-      setFadingIn(false);
-      setFadingOut(false);
-    });
   }, []);
 
   const updateAvailabilities = async () => {
@@ -238,8 +236,6 @@ function ChooseAvailabilities(
       if (!resp.ok) {
         throw new Error(data.message);
       }
-      setFadingOut(true);
-      await delay(1000);
       onFinish();
     } catch (e) {
       // TODO(kt3k): handle error correctly
@@ -250,82 +246,69 @@ function ChooseAvailabilities(
     }
   };
 
-  const onBack = async () => {
-    setFadingIn(true);
-    await delay(1000);
-    onCancel();
-  };
   return (
-    <div
-      className={cx("w-screen !transition-500", {
-        "opacity-0": fadingOut || fadingIn,
-        "!-translate-x-5": fadingOut,
-        "!translate-x-5": fadingIn,
-      })}
-    >
-      <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-xl mx-auto">
-        <h2 className="font-medium text-lg">
-          Set your availability{" "}
-          <span className="ml-2 text-sm font-normal text-stone-600">
-            (step 2 of 3)
+    <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-xl mx-auto">
+      <h2 className="font-medium text-lg">
+        Set your availability{" "}
+        <span className="ml-2 text-sm font-normal text-stone-600">
+          (step 2 of 3)
+        </span>
+      </h2>
+      <p className="text-stone-400">
+        Timezone:{" "}
+        <Dropdown
+          trigger="click"
+          offset={4}
+          render={() => (
+            <div className="bg-white shadow-lg rounded-lg py-2 h-48 overflow-scroll">
+              <ul>
+                {timeZones.map((timeZone) => (
+                  <li
+                    key={timeZone}
+                    className="cursor-pointer hover:bg-neutral-100 px-2 py-1"
+                    onClick={() => {
+                      setTimeZone(timeZone);
+                    }}
+                  >
+                    {timeZone}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        >
+          <span className="text-white underline cursor-pointer">
+            {timeZone}
           </span>
-        </h2>
-        <p className="text-stone-400">
-          Timezone:{" "}
-          <Dropdown
-            trigger="click"
-            offset={4}
-            render={() => (
-              <div className="bg-white shadow-lg rounded-lg py-2 h-48 overflow-scroll">
-                <ul>
-                  {timeZones.map((timeZone) => (
-                    <li
-                      key={timeZone}
-                      className="cursor-pointer hover:bg-neutral-100 px-2 py-1"
-                      onClick={() => {
-                        setTimeZone(timeZone);
-                      }}
-                    >
-                      {timeZone}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          >
-            <span className="text-white underline cursor-pointer">
-              {timeZone}
-            </span>
-          </Dropdown>
-        </p>
-        <ul>
-          {Object.entries(ranges).map(([weekDay, ranges]) => (
-            <WeekRow
-              key={weekDay}
-              weekDay={weekDay as WeekDay}
-              defaultRanges={ranges}
-              onRangeUpdate={(ranges) =>
-                setRanges((r) => ({ ...r, [weekDay]: ranges }))}
-            />
-          ))}
-        </ul>
-        <div className="self-end flex items-center gap-2 mt-4">
-          <Button
-            disabled={updating}
-            style="alternate"
-            onClick={onBack}
-          >
-            Back
-          </Button>
-          <Button
-            disabled={updating}
-            style="primary"
-            onClick={updateAvailabilities}
-          >
-            Continue
-            <icons.CaretRight />
-          </Button>
-        </div>
+        </Dropdown>
+      </p>
+      <ul>
+        {Object.entries(ranges).map(([weekDay, ranges]) => (
+          <WeekRow
+            key={weekDay}
+            weekDay={weekDay as WeekDay}
+            defaultRanges={ranges}
+            onRangeUpdate={(ranges) =>
+              setRanges((r) => ({ ...r, [weekDay]: ranges }))}
+          />
+        ))}
+      </ul>
+      <div className="self-end flex items-center gap-2 mt-4">
+        <Button
+          disabled={updating}
+          style="alternate"
+          onClick={onCancel}
+        >
+          Back
+        </Button>
+        <Button
+          disabled={updating}
+          style="primary"
+          onClick={updateAvailabilities}
+        >
+          Continue
+          <icons.CaretRight />
+        </Button>
       </div>
     </div>
   );
@@ -433,109 +416,87 @@ function WeekRow(
   );
 }
 
-function SetUpEventType({ user, goingForward, onCancel, onFinish, reloadUser }: {
+function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
   user: User;
-  goingForward: boolean;
   onCancel: () => void;
   onFinish: () => void;
   reloadUser: () => Promise<void>;
 }) {
   const eventTypes = user.eventTypes!;
-  const [fadingOut, setFadingOut] = useState(!goingForward);
-  const [fadingIn, setFadingIn] = useState(goingForward);
   const [updating, setUpdating] = useState(false);
-  useEffect(() => {
-    setTimeout(() => {
-      setFadingIn(false);
-      setFadingOut(false);
-    });
-  }, []);
 
   const updateEventTypes = () => {
     alert("TODO(kt3k): finish onboarding!");
   };
 
-  const onBack = async () => {
-    setFadingIn(true);
-    await delay(1000);
-    onCancel();
-  };
   return (
-    <div
-      className={cx("w-screen !transition-500", {
-        "opacity-0": fadingOut || fadingIn,
-        "!-translate-x-5": fadingOut,
-        "!translate-x-5": fadingIn,
-      })}
-    >
-      <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-4xl mx-auto">
-        <h2 className="font-medium text-lg">
-          Set up event types{" "}
-          <span className="ml-2 text-sm font-normal text-stone-600">
-            (step 3 of 3)
-          </span>
-        </h2>
-        <div className="grid grid-cols-3 gap-3">
-          {eventTypes.map((eventType) => (
-            <div className="flex flex-col gap-1 rounded-lg border-stone-700 border px-4 py-7">
-              <div className="flex justify-between">
-                <div>
-                  <span className="text-xs font-semibold bg-stone-600 rounded-full px-3 py-0.5 text-xs">
-                    {Math.floor(eventType.duration / MIN)} min
-                  </span>
-                </div>
-                <div>
-                  <Button
-                    size="xs"
-                    onClick={() => alert("TODO: Edit Event Type")}
-                  >
-                    <icons.Edit />
-                  </Button>
-                  <Button
-                    size="xs"
-                    onClick={() => alert("TODO: Remove Event Type")}
-                  >
-                    <icons.TrashBin />
-                  </Button>
-                </div>
+    <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-4xl mx-auto">
+      <h2 className="font-medium text-lg">
+        Set up event types{" "}
+        <span className="ml-2 text-sm font-normal text-stone-600">
+          (step 3 of 3)
+        </span>
+      </h2>
+      <div className="grid grid-cols-3 gap-3">
+        {eventTypes.map((eventType) => (
+          <div className="flex flex-col gap-1 rounded-lg border-stone-700 border px-4 py-7">
+            <div className="flex justify-between">
+              <div>
+                <span className="text-xs font-semibold bg-stone-600 rounded-full px-3 py-0.5 text-xs">
+                  {Math.floor(eventType.duration / MIN)} min
+                </span>
               </div>
-              <h2 className="font-bold">{eventType.title}</h2>
-              <p className="text-neutral-600 text-sm">
-                {eventType.description}
-              </p>
+              <div>
+                <Button
+                  size="xs"
+                  onClick={() => alert("TODO: Edit Event Type")}
+                >
+                  <icons.Edit />
+                </Button>
+                <Button
+                  size="xs"
+                  onClick={() => alert("TODO: Remove Event Type")}
+                >
+                  <icons.TrashBin />
+                </Button>
+              </div>
             </div>
-          ))}
-          <div
-            className="flex items-center rounded-lg border-stone-700 gap-3 border px-6"
-            role="button"
-            tabIndex={0}
-            onClick={() => alert("TODO: Open dialog and create event type")}
-          >
-            <icons.Calendar size={28} />
-            <div className="flex flex-col">
-              <h3 className="font-bold">+ New Meetings</h3>
-              <p className="text-neutral-600 text-sm">
-                Create a new event type
-              </p>
-            </div>
+            <h2 className="font-bold">{eventType.title}</h2>
+            <p className="text-neutral-600 text-sm">
+              {eventType.description}
+            </p>
+          </div>
+        ))}
+        <div
+          className="flex items-center rounded-lg border-stone-700 gap-3 border px-6"
+          role="button"
+          tabIndex={0}
+          onClick={() => alert("TODO: Open dialog and create event type")}
+        >
+          <icons.Calendar size={28} />
+          <div className="flex flex-col">
+            <h3 className="font-bold">+ New Meetings</h3>
+            <p className="text-neutral-600 text-sm">
+              Create a new event type
+            </p>
           </div>
         </div>
-        <div className="self-end flex items-center gap-2 mt-4">
-          <Button
-            disabled={updating}
-            style="alternate"
-            onClick={onBack}
-          >
-            Back
-          </Button>
-          <Button
-            disabled={updating}
-            style="primary"
-            onClick={updateEventTypes}
-          >
-            Finish
-          </Button>
-        </div>
+      </div>
+      <div className="self-end flex items-center gap-2 mt-4">
+        <Button
+          disabled={updating}
+          style="alternate"
+          onClick={onCancel}
+        >
+          Back
+        </Button>
+        <Button
+          disabled={updating}
+          style="primary"
+          onClick={updateEventTypes}
+        >
+          Finish
+        </Button>
       </div>
     </div>
   );
