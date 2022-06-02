@@ -14,7 +14,7 @@ Deno.test("/api/user", async (t) => {
     args: [
       "run",
       "-A",
-      "https://deno.land/x/aleph@1.0.0-alpha.60/cli.ts",
+      "https://deno.land/x/aleph@1.0.0-alpha.63/cli.ts",
       "dev",
     ],
     stdout: "inherit",

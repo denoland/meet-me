@@ -1,8 +1,8 @@
 {
   "tasks": {
-    "dev": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.60/cli.ts dev",
-    "start": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.60/cli.ts start",
-    "build": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.60/cli.ts build",
+    "dev": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.63/cli.ts dev",
+    "start": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.63/cli.ts start",
+    "build": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.63/cli.ts build",
     "test": "deno test -A --unstable"
   },
   "fmt": {
