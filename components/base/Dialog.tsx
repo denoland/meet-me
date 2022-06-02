@@ -24,6 +24,7 @@ type DialogProps = PropsWithChildren<{
   okDisabled?: boolean;
   onCancel?: () => void;
   onOk?: () => Promise<void> | void;
+  showCloseButton?: boolean;
 }>;
 
 export function dialog(props: Omit<DialogProps, "children" | "okDisabled">) {
@@ -95,6 +96,7 @@ export function DialogModal({
   onCancel,
   onOk,
   onESC,
+  showCloseButton,
 }: DialogProps & { onESC?: () => void }) {
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -120,6 +122,7 @@ export function DialogModal({
     <Modal
       onESC={() => !isWaiting && onESC?.()}
       className="p-6 w-full md:!w-auto md:min-w-140"
+      showCloseButton={showCloseButton}
     >
       {title && (
         <header>
@@ -129,7 +132,7 @@ export function DialogModal({
         </header>
       )}
       {message && (
-        <div className="mt-3 text-gray-700">
+        <div className="mt-3 text-neutral-100">
           {message}
         </div>
       )}

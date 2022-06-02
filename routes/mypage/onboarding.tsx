@@ -14,8 +14,9 @@ import Button from "base/Button.tsx";
 import Input from "base/Input.tsx";
 import icons from "icons";
 import Dropdown from "base/Dropdown.tsx";
+import Dialog from "base/Dialog.tsx";
 import cx from "utils/cx.ts";
-import { EventType, Range, UserForClient as User } from "utils/db.ts";
+import { Range, UserForClient as User } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
 
 const STEPS = ["slug", "availability", "eventType"] as const;
@@ -146,7 +147,7 @@ function ChooseURL(
         </h1>
       </div>
 
-      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-lg mx-auto">
+      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-lg mx-auto">
         <h2 className="font-medium text-lg">
           Create your Meet Me URL{" "}
           <span className="ml-2 text-sm font-normal text-stone-600">
@@ -247,7 +248,7 @@ function ChooseAvailabilities(
   };
 
   return (
-    <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-xl mx-auto">
+    <div className="flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-xl mx-auto">
       <h2 className="font-medium text-lg">
         Set your availability{" "}
         <span className="ml-2 text-sm font-normal text-stone-600">
@@ -362,7 +363,7 @@ function WeekRow(
   return (
     <div
       className={cx(
-        "flex justify-between px-4 py-2 border-b border-stone-700",
+        "flex justify-between px-4 py-2 border-b border-neutral-700",
       )}
     >
       {noRanges && (
@@ -430,7 +431,7 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
   };
 
   return (
-    <div className="flex flex-col gap-4 border rounded-lg border-stone-700 py-8 px-8 max-w-4xl mx-auto">
+    <div className="flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-4xl mx-auto">
       <h2 className="font-medium text-lg">
         Set up event types{" "}
         <span className="ml-2 text-sm font-normal text-stone-600">
@@ -439,7 +440,7 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
       </h2>
       <div className="grid grid-cols-3 gap-3">
         {eventTypes.map((eventType) => (
-          <div className="flex flex-col gap-1 rounded-lg border-stone-700 border px-4 py-7">
+          <div className="flex flex-col gap-1 rounded-lg border-neutral-700 border px-4 py-7">
             <div className="flex justify-between">
               <div>
                 <span className="text-xs font-semibold bg-stone-600 rounded-full px-3 py-0.5 text-xs">
@@ -467,20 +468,22 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
             </p>
           </div>
         ))}
-        <div
-          className="flex items-center rounded-lg border-stone-700 gap-3 border px-6"
-          role="button"
-          tabIndex={0}
-          onClick={() => alert("TODO: Open dialog and create event type")}
-        >
-          <icons.Calendar size={28} />
-          <div className="flex flex-col">
-            <h3 className="font-bold">+ New Meetings</h3>
-            <p className="text-neutral-600 text-sm">
-              Create a new event type
-            </p>
+        <NewEventTypeDialog user={user} reloadUser={reloadUser}>
+          <div
+            className="flex items-center rounded-lg border-neutral-700 gap-3 border px-6"
+            role="button"
+            tabIndex={0}
+            onClick={() => alert("TODO: Open dialog and create event type")}
+          >
+            <icons.Calendar size={28} />
+            <div className="flex flex-col">
+              <h3 className="font-bold">+ New Meetings</h3>
+              <p className="text-neutral-600 text-sm">
+                Create a new event type
+              </p>
+            </div>
           </div>
-        </div>
+        </NewEventTypeDialog>
       </div>
       <div className="self-end flex items-center gap-2 mt-4">
         <Button
@@ -499,5 +502,113 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
         </Button>
       </div>
     </div>
+  );
+}
+
+function NewEventTypeDialog(
+  { children, user, reloadUser }: PropsWithChildren<
+    { user: User; reloadUser: () => Promise<void> }
+  >,
+) {
+  const [updating, setUpdating] = useState(false);
+  const [title, setTitle] = useState("");
+  const [duration, setDuration] = useState(30);
+  const [description, setDescription] = useState("");
+  const [slug, setSlug] = useState("");
+  const disabled = updating;
+  const addEventType = async () => {
+    setUpdating(false);
+    try {
+      const resp = await fetch("/api/user", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          eventTypes: [...user.eventTypes!, {
+            title,
+            description,
+            duration: duration * MIN,
+            slug,
+          }],
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.message);
+      }
+      await reloadUser();
+    } catch (e) {
+      // TODO(kt3k): better handling
+      alert(e.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+  return (
+    <Dialog
+      title="Create a new Event Type"
+      okDisabled={disabled}
+      onOk={addEventType}
+      okText="Create"
+      message={
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-2">
+            <div>
+              <h3 className="font-semibold text-sm">TITLE</h3>
+              <Input
+                className="mt-2"
+                placeholder="event title"
+                onChange={(v) => setTitle(v)}
+                value={title}
+              />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm">DURATION</h3>
+              <Dropdown
+                trigger="click"
+                render={() => (
+                  <ul className="rounded-md py-2 bg-neutral-100">
+                    {[...Array(12)].map((_, i) => (
+                      <li
+                        className="px-2 py-1 hover:bg-neutral-3 cursor-pointer"
+                        onClick={() => setDuration((i + 1) * 15)}
+                      >
+                        {(i + 1) * 15} mins
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              >
+                <div className="mt-2 flex items-center justify-between bg-neutral-100 rounded-md h-9 px-3 w-30 text-black">
+                  {duration} mins
+                  <icons.CaretDown />
+                </div>
+              </Dropdown>
+            </div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm">DESCRIPTION</h3>
+            <textarea
+              className="mt-2 rounded-md bg-neutral-100 text-black px-3 py-2 w-full"
+              placeholder="description"
+              onChange={(e) => {
+                setDescription(e.target.value);
+              }}
+            >
+            </textarea>
+          </div>
+          <div className="mb-3">
+            <h3>URL</h3>
+            <p className="text-neutral-500">Choose your event's url</p>
+            <p className="flex items-center gap-2">
+              https://meet-me.deno.dev/{user.slug}/ <Input placeholder="url" />
+            </p>
+          </div>
+        </div>
+      }
+    >
+      {children}
+    </Dialog>
   );
 }

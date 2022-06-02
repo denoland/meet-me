@@ -43,7 +43,7 @@ export default forwardRef((props: InputProps, ref: Ref<HTMLInputElement>) => {
     <label
       className={[
         "inline-flex items-center justify-between gap-1 px-3 transition-colors duration-150 ease-in-out group",
-        "bg-gray-100 text-default border border-transparent focus-within:bg-white focus-within:border focus-within:border-gray-400",
+        "bg-neutral-100 text-default border border-transparent focus-within:bg-white focus-within:border focus-within:border-gray-400",
         rounded ? "rounded-full" : "rounded-md",
         !(className?.includes(" h-") || className?.startsWith("h-")) && "h-9",
         className,

@@ -16,7 +16,6 @@ export default function Modal(props: ModalProps) {
   const portal = usePortal({
     className: "modal-overlay",
     lockScroll: true,
-    isDialog: true,
   });
   const [tansitionTiggered, setTansitionTiggered] = useState(false);
 
@@ -36,7 +35,7 @@ export default function Modal(props: ModalProps) {
   }, []);
 
   return portal(
-    <div className="fixed top-0 left-0 z-50 w-screen h-screen flex items-center justify-center">
+    <div className="fixed top-0 left-0 z-50 w-screen h-screen flex items-center justify-center text-white">
       <div
         className={cx(
           "absolute top-0 left-0 w-full h-full bg-black/30 transition-opacity duration-100",
@@ -49,7 +48,7 @@ export default function Modal(props: ModalProps) {
       />
       <div
         className={cx(
-          "relative bg-white border border-gray-300/70 rounded-lg shadow-xl shadow-gray-500/10 overflow-auto",
+          "relative bg-dark-400 border border-neutral-700 rounded-lg shadow-xl shadow-gray-500/10 overflow-auto",
           "transition-top,opacity duration-300",
           {
             "-top-4 opacity-0": !tansitionTiggered,
