@@ -81,6 +81,7 @@ export default function OnboardingPage() {
             setStep("eventType");
             setGoingForward(true);
           }}
+          reloadUser={reloadUser}
         />
       )}
     </div>
@@ -432,13 +433,14 @@ function WeekRow(
   );
 }
 
-function SetUpEventType({ user, goingForward, onCancel, onFinish }: {
+function SetUpEventType({ user, goingForward, onCancel, onFinish, reloadUser }: {
   user: User;
   goingForward: boolean;
   onCancel: () => void;
   onFinish: () => void;
+  reloadUser: () => Promise<void>;
 }) {
-  const [eventTypes, setEventTypes] = useState(user.eventTypes || []);
+  const eventTypes = user.eventTypes!;
   const [fadingOut, setFadingOut] = useState(!goingForward);
   const [fadingIn, setFadingIn] = useState(goingForward);
   const [updating, setUpdating] = useState(false);
@@ -483,19 +485,40 @@ function SetUpEventType({ user, goingForward, onCancel, onFinish }: {
                   </span>
                 </div>
                 <div>
-                  <Button size="xs">
+                  <Button
+                    size="xs"
+                    onClick={() => alert("TODO: Edit Event Type")}
+                  >
                     <icons.Edit />
                   </Button>
-                  <Button size="xs">
+                  <Button
+                    size="xs"
+                    onClick={() => alert("TODO: Remove Event Type")}
+                  >
                     <icons.TrashBin />
                   </Button>
                 </div>
               </div>
-              <h2 className="font-semibold">{eventType.title}</h2>
-              <p className="text-stone-600 text-sm">{eventType.description}</p>
+              <h2 className="font-bold">{eventType.title}</h2>
+              <p className="text-neutral-600 text-sm">
+                {eventType.description}
+              </p>
             </div>
           ))}
-          <div></div>
+          <div
+            className="flex items-center rounded-lg border-stone-700 gap-3 border px-6"
+            role="button"
+            tabIndex={0}
+            onClick={() => alert("TODO: Open dialog and create event type")}
+          >
+            <icons.Calendar size={28} />
+            <div className="flex flex-col">
+              <h3 className="font-bold">+ New Meetings</h3>
+              <p className="text-neutral-600 text-sm">
+                Create a new event type
+              </p>
+            </div>
+          </div>
         </div>
         <div className="self-end flex items-center gap-2 mt-4">
           <Button

@@ -1,5 +1,6 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
+import Calendar from "./Calendar.tsx";
 import CaretDown from "./CaretDown.tsx";
 import CaretRight from "./CaretRight.tsx";
 import Deno from "./Deno.tsx";
@@ -10,6 +11,7 @@ import Plus from "./Plus.tsx";
 import TrashBin from "./TrashBin.tsx";
 
 export default {
+  Calendar,
   CaretDown,
   CaretRight,
   Deno,
