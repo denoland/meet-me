@@ -433,7 +433,7 @@ function WeekRow(
 }
 
 function SetUpEventType({ user, goingForward, onCancel, onFinish }: {
-  user: User,
+  user: User;
   goingForward: boolean;
   onCancel: () => void;
   onFinish: () => void;
