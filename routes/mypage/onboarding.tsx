@@ -425,6 +425,7 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
 }) {
   const eventTypes = user.eventTypes!;
   const [updating, setUpdating] = useState(false);
+  const { redirect } = useRouter();
 
   const updateEventTypes = () => {
     alert("TODO(kt3k): finish onboarding!");
@@ -468,9 +469,13 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
             </p>
           </div>
         ))}
-        <NewEventTypeDialog user={user} reloadUser={reloadUser}>
+        <NewEventTypeDialog
+          key={user.eventTypes!.length}
+          user={user}
+          reloadUser={reloadUser}
+        >
           <div
-            className="flex items-center rounded-lg border-neutral-700 gap-3 border px-6"
+            className="flex items-center rounded-lg border-neutral-700 gap-3 border px-6 py-7"
             role="button"
             tabIndex={0}
             onClick={() => alert("TODO: Open dialog and create event type")}
@@ -496,7 +501,11 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
         <Button
           disabled={updating}
           style="primary"
-          onClick={updateEventTypes}
+          onClick={async () => {
+            await onFinish();
+            alert("Settings are done!");
+            redirect("/mypage", true);
+          }}
         >
           Finish
         </Button>
@@ -602,7 +611,8 @@ function NewEventTypeDialog(
             <h3>URL</h3>
             <p className="text-neutral-500">Choose your event's url</p>
             <p className="flex items-center gap-2">
-              https://meet-me.deno.dev/{user.slug}/ <Input placeholder="url" />
+              https://meet-me.deno.dev/{user.slug}/{" "}
+              <Input placeholder="url" onChange={(v) => setSlug(v)} />
             </p>
           </div>
         </div>
