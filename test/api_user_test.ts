@@ -80,11 +80,10 @@ Deno.test("/api/user", async (t) => {
     const [code, { message }] = await patchUser({ slug: "mypage" });
     assertEquals(code, 400);
     assertStringIncludes(message, `The given slug "mypage" is not available`);
-    const user =
-      await (await api.fetch("/api/user", {
-        headers: { Cookie: `token=${token}` },
-      }))
-        .json();
+    const user = await (await api.fetch("/api/user", {
+      headers: { Cookie: `token=${token}` },
+    }))
+      .json();
     assertEquals(user?.slug, "foo"); // Not changed
   });
 
@@ -96,22 +95,20 @@ Deno.test("/api/user", async (t) => {
     const [code, { message }] = await patchUser({ slug: "bar" });
     assertEquals(code, 400);
     assertStringIncludes(message, `The given slug "bar" is not available`);
-    const user =
-      await (await api.fetch("/api/user", {
-        headers: { Cookie: `token=${token}` },
-      }))
-        .json();
+    const user = await (await api.fetch("/api/user", {
+      headers: { Cookie: `token=${token}` },
+    }))
+      .json();
     assertEquals(user?.slug, "foo"); // Not changed
   });
 
   await t.step("PATCH /api/user with time zone", async () => {
     const [code, _] = await patchUser({ timeZone: "Europe/London" });
     assertEquals(code, 200);
-    const user =
-      await (await api.fetch("/api/user", {
-        headers: { Cookie: `token=${token}` },
-      }))
-        .json();
+    const user = await (await api.fetch("/api/user", {
+      headers: { Cookie: `token=${token}` },
+    }))
+      .json();
     assertEquals(user?.timeZone, "Europe/London");
   });
 
@@ -126,11 +123,10 @@ Deno.test("/api/user", async (t) => {
       eventTypes: [{ title: "45 Minute Meeting", duration: 45 * MIN }],
     });
     assertEquals(code, 200);
-    const user =
-      await (await api.fetch("/api/user", {
-        headers: { Cookie: `token=${token}` },
-      }))
-        .json();
+    const user = await (await api.fetch("/api/user", {
+      headers: { Cookie: `token=${token}` },
+    }))
+      .json();
     assertEquals(user?.eventTypes, [{
       title: "45 Minute Meeting",
       duration: 45 * MIN,
@@ -164,11 +160,10 @@ Deno.test("/api/user", async (t) => {
       ],
     });
     assertEquals(code, 200);
-    const user =
-      await (await api.fetch("/api/user", {
-        headers: { Cookie: `token=${token}` },
-      }))
-        .json();
+    const user = await (await api.fetch("/api/user", {
+      headers: { Cookie: `token=${token}` },
+    }))
+      .json();
     assertEquals(user?.availabilities, [
       { weekDay: "MON", startTime: "09:00", endTime: "17:00" },
       { weekDay: "TUE", startTime: "09:00", endTime: "17:00" },
