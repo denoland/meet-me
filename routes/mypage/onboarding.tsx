@@ -16,7 +16,7 @@ import icons from "icons";
 import Dropdown from "base/Dropdown.tsx";
 import Dialog from "base/Dialog.tsx";
 import cx from "utils/cx.ts";
-import { Range, UserForClient as User } from "utils/db.ts";
+import { EventType, Range, UserForClient as User } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
 
 const STEPS = ["slug", "availability", "eventType"] as const;
@@ -449,12 +449,16 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
                 </span>
               </div>
               <div>
-                <Button
-                  size="xs"
-                  onClick={() => alert("TODO: Edit Event Type")}
+                <EditEventTypeDialog
+                  key={user.eventTypes!.length}
+                  user={user}
+                  reloadUser={reloadUser}
+                  eventTypeId={eventType.id}
                 >
-                  <icons.Edit />
-                </Button>
+                  <Button size="xs">
+                    <icons.Edit />
+                  </Button>
+                </EditEventTypeDialog>
                 <Button
                   size="xs"
                   onClick={() => alert("TODO: Remove Event Type")}
@@ -469,7 +473,7 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
             </p>
           </div>
         ))}
-        <NewEventTypeDialog
+        <EditEventTypeDialog
           key={user.eventTypes!.length}
           user={user}
           reloadUser={reloadUser}
@@ -488,7 +492,7 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
               </p>
             </div>
           </div>
-        </NewEventTypeDialog>
+        </EditEventTypeDialog>
       </div>
       <div className="self-end flex items-center gap-2 mt-4">
         <Button
@@ -514,34 +518,50 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
   );
 }
 
-function NewEventTypeDialog(
-  { children, user, reloadUser }: PropsWithChildren<
-    { user: User; reloadUser: () => Promise<void> }
+function EditEventTypeDialog(
+  { children, eventTypeId, user, reloadUser }: PropsWithChildren<
+    { eventTypeId?: string; user: User; reloadUser: () => Promise<void> }
   >,
 ) {
+  const editIndex = user.eventTypes!.findIndex((et) => et.id === eventTypeId);
+  const editEventType = user.eventTypes![editIndex];
   const [updating, setUpdating] = useState(false);
-  const [title, setTitle] = useState("");
-  const [duration, setDuration] = useState(30);
-  const [description, setDescription] = useState("");
-  const [slug, setSlug] = useState("");
+  const [title, setTitle] = useState(editEventType?.title ?? "");
+  const [duration, setDuration] = useState(
+    typeof editEventType?.duration === "number"
+      ? editEventType.duration / MIN
+      : 30,
+  );
+  const [description, setDescription] = useState(
+    editEventType?.description ?? "",
+  );
+  const [slug, setSlug] = useState(editEventType?.slug ?? "");
   const disabled = updating;
-  const addEventType = async () => {
+  const updateEventTypes = async () => {
     setUpdating(false);
     try {
+      // deno-lint-ignore no-explicit-any
+      const eventTypes: EventType[] = (globalThis as any).structuredClone(
+        user.eventTypes,
+      );
+      const newEventType = {
+        id: eventTypeId ?? crypto.randomUUID(),
+        title,
+        description,
+        duration: duration * MIN,
+        slug,
+      };
+      if (editIndex === -1) {
+        eventTypes.push(newEventType);
+      } else {
+        eventTypes[editIndex] = newEventType;
+      }
       const resp = await fetch("/api/user", {
         method: "PATCH",
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({
-          eventTypes: [...user.eventTypes!, {
-            id: crypto.randomUUID(),
-            title,
-            description,
-            duration: duration * MIN,
-            slug,
-          }],
-        }),
+        body: JSON.stringify({ eventTypes }),
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -557,10 +577,10 @@ function NewEventTypeDialog(
   };
   return (
     <Dialog
-      title="Create a new Event Type"
-      okDisabled={disabled}
-      onOk={addEventType}
-      okText="Create"
+      title={editIndex === -1 ? "Create a new Event Type" : "Edit event type"}
+      okDisabled={disabled || title === ""}
+      onOk={updateEventTypes}
+      okText={editIndex === -1 ? "Create" : "Update"}
       message={
         <div className="flex flex-col gap-5">
           <div className="grid grid-cols-2">
@@ -569,7 +589,7 @@ function NewEventTypeDialog(
               <Input
                 className="mt-2"
                 placeholder="event title"
-                onChange={(v) => setTitle(v)}
+                onChange={setTitle}
                 value={title}
               />
             </div>
@@ -606,6 +626,7 @@ function NewEventTypeDialog(
                 setDescription(e.target.value);
               }}
             >
+              {description}
             </textarea>
           </div>
           <div className="mb-3">
@@ -613,7 +634,7 @@ function NewEventTypeDialog(
             <p className="text-neutral-500">Choose your event's url</p>
             <p className="flex items-center gap-2">
               https://meet-me.deno.dev/{user.slug}/{" "}
-              <Input placeholder="url" onChange={(v) => setSlug(v)} />
+              <Input placeholder="url" onChange={setSlug} value={slug} />
             </p>
           </div>
         </div>
