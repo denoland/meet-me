@@ -119,8 +119,9 @@ Deno.test("/api/user", async (t) => {
   });
 
   await t.step("PATCH /api/user with event types", async () => {
+    const id = crypto.randomUUID();
     const [code, _] = await patchUser({
-      eventTypes: [{ title: "45 Minute Meeting", duration: 45 * MIN }],
+      eventTypes: [{ id, title: "45 Minute Meeting", duration: 45 * MIN }],
     });
     assertEquals(code, 200);
     const user = await (await api.fetch("/api/user", {
@@ -128,6 +129,7 @@ Deno.test("/api/user", async (t) => {
     }))
       .json();
     assertEquals(user?.eventTypes, [{
+      id,
       title: "45 Minute Meeting",
       duration: 45 * MIN,
     }]);
@@ -142,11 +144,55 @@ Deno.test("/api/user", async (t) => {
   });
 
   await t.step("PATCH /api/user with invalid event types", async () => {
-    const [code, { message }] = await patchUser({
+    let [code, { message }] = await patchUser({
       eventTypes: [{}],
     });
     assertEquals(code, 400);
     assertStringIncludes(message, `The given eventType is invalid`);
+
+    // the event type misses duration
+    [code, { message }] = await patchUser({
+      eventTypes: [{ id: crypto.randomUUID(), title: "foo" }],
+    });
+    assertEquals(code, 400);
+    assertStringIncludes(message, `The given eventType is invalid`);
+
+    // the event type misses title
+    [code, { message }] = await patchUser({
+      eventTypes: [{ id: crypto.randomUUID(), duration: 30 * MIN }],
+    });
+    assertEquals(code, 400);
+    assertStringIncludes(message, `The given eventType is invalid`);
+
+    // the event type misses id
+    [code, { message }] = await patchUser({
+      eventTypes: [{ title: "Foo", duration: 30 * MIN }],
+    });
+    assertEquals(code, 400);
+    assertStringIncludes(message, `The given eventType is invalid`);
+
+    // the event types have non unique slugs
+    [code, { message }] = await patchUser({
+      eventTypes: [
+        {
+          id: crypto.randomUUID(),
+          title: "Foo",
+          duration: 30 * MIN,
+          slug: "30min",
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Bar",
+          duration: 30 * MIN,
+          slug: "30min",
+        },
+      ],
+    });
+    assertEquals(code, 400);
+    assertStringIncludes(
+      message,
+      `More than 1 event type have the same url slug: 30min.`,
+    );
   });
 
   await t.step("PATCH /api/user with availabilities", async () => {

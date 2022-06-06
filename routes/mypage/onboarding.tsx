@@ -535,6 +535,7 @@ function NewEventTypeDialog(
         },
         body: JSON.stringify({
           eventTypes: [...user.eventTypes!, {
+            id: crypto.randomUUID(),
             title,
             description,
             duration: duration * MIN,

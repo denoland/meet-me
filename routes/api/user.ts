@@ -76,13 +76,25 @@ export const PATCH = async (req: Request, ctx: Context) => {
       );
     }
 
+    const slugs = new Set();
     for (const eventType of eventTypes) {
       if (!isValidEventType(eventType)) {
         return badRequest(
-          `The given eventType is invalid: ${JSON.stringify(eventType)}`,
+          `The given eventType is invalid: ${JSON.stringify(eventType)}.`,
         );
       }
+      const { slug } = eventType;
+      if (!slug) {
+        continue;
+      }
+      if (slugs.has(slug)) {
+        return badRequest(
+          `More than 1 event type have the same url slug: ${slug}.`,
+        );
+      }
+      slugs.add(slug);
     }
+    // eventType.slug has to be unique
     user.eventTypes = eventTypes;
   }
 

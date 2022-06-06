@@ -1,5 +1,6 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
+import { validate as uuidValidate } from "std/uuid/v4.ts";
 import {
   hourMinuteToSec,
   isValidHourMinute,
@@ -33,9 +34,14 @@ export type UserForClient = Omit<User, `google${string}`>;
 /** EventType is a template of the events, which the users can set up.
  * The visiters can book actual events based on this EventType settings. */
 export type EventType = {
+  id: string;
   title: string;
   description?: string;
   duration: number;
+  /** The slug is used as the last part of the booking page of this event type
+   * like `https://meet-me.deno.dev/[user-slug]/[event-type-slug]`.
+   */
+  slug?: string;
 };
 
 export type Range = {
@@ -79,14 +85,17 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 
 function createDefaultCalendarEvent(): EventType {
   return {
+    id: crypto.randomUUID(),
     title: "30 Minute Meeting",
     description: "30 minute meeting.",
     duration: 30 * MIN,
+    slug: "30min",
   };
 }
 
 export function isValidEventType(event: EventType): event is EventType {
-  return typeof event.title === "string" && typeof event.duration === "number";
+  return uuidValidate(event.id) && typeof event.title === "string" &&
+    typeof event.duration === "number";
 }
 
 // deno-lint-ignore no-explicit-any
