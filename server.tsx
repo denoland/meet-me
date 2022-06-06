@@ -4,7 +4,7 @@ import presetUno from "@unocss/preset-uno.ts";
 import { renderToReadableStream } from "react-dom/server";
 import { Router } from "aleph/react";
 import { serve } from "aleph/server";
-import "utils/dotenv.ts";
+import "std/dotenv/load.ts";
 
 serve({
   port: 3000,
