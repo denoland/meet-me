@@ -14,7 +14,7 @@ import Button from "base/Button.tsx";
 import Input from "base/Input.tsx";
 import icons from "icons";
 import Dropdown from "base/Dropdown.tsx";
-import EditEventTypeDialog from "shared/EditEventTypeDialog.tsx";
+import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
 import cx from "utils/cx.ts";
 import { EventType, Range, UserForClient as User } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
@@ -465,70 +465,13 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
       </h2>
       <div className="grid grid-cols-3 gap-3">
         {eventTypes.map((eventType) => (
-          <div
-            key={eventType.id}
-            className="flex flex-col gap-1 rounded-lg border-neutral-700 border px-4 py-7"
-          >
-            <div className="flex justify-between">
-              <div>
-                <span className="text-xs font-semibold bg-stone-600 rounded-full px-3 py-0.5 text-xs">
-                  {Math.floor(eventType.duration / MIN)} min
-                </span>
-              </div>
-              <div>
-                <EditEventTypeDialog
-                  key={user.eventTypes!.length}
-                  user={user}
-                  reloadUser={reloadUser}
-                  eventTypeId={eventType.id}
-                >
-                  <Button size="xs" disabled={updating}>
-                    <icons.Edit />
-                  </Button>
-                </EditEventTypeDialog>
-                <Button
-                  size="xs"
-                  onClick={() => {
-                    if (
-                      confirm(
-                        `Are you sure to delete the event type "${eventType.title}"`,
-                      )
-                    ) {
-                      removeEventTypes(eventType.id);
-                    }
-                  }}
-                  disabled={updating}
-                >
-                  <icons.TrashBin />
-                </Button>
-              </div>
-            </div>
-            <h2 className="font-bold">{eventType.title}</h2>
-            <p className="text-neutral-600 text-sm">
-              {eventType.description}
-            </p>
-          </div>
+          <EventTypeCard
+            user={user}
+            reloadUser={reloadUser}
+            eventType={eventType}
+          />
         ))}
-        <EditEventTypeDialog
-          key={user.eventTypes!.length}
-          user={user}
-          reloadUser={reloadUser}
-        >
-          <div
-            className="flex items-center rounded-lg border-neutral-700 gap-3 border px-6 py-7"
-            role="button"
-            tabIndex={0}
-            onClick={() => alert("TODO: Open dialog and create event type")}
-          >
-            <icons.Calendar size={28} />
-            <div className="flex flex-col">
-              <h3 className="font-bold">+ New Meetings</h3>
-              <p className="text-neutral-600 text-sm">
-                Create a new event type
-              </p>
-            </div>
-          </div>
-        </EditEventTypeDialog>
+        <NewEventTypeCard user={user} reloadUser={reloadUser} />
       </div>
       <div className="self-end flex items-center gap-2 mt-4">
         <Button
