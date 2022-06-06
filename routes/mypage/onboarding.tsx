@@ -427,8 +427,32 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
   const [updating, setUpdating] = useState(false);
   const { redirect } = useRouter();
 
-  const updateEventTypes = () => {
-    alert("TODO(kt3k): finish onboarding!");
+  const removeEventTypes = async (idToRemove: string) => {
+    setUpdating(true);
+    try {
+      // deno-lint-ignore no-explicit-any
+      let eventTypes: EventType[] = (globalThis as any).structuredClone(
+        user.eventTypes,
+      );
+      eventTypes = eventTypes.filter((et) => et.id !== idToRemove);
+      const resp = await fetch("/api/user", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ eventTypes }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        return new Error(data.message);
+      }
+      await reloadUser();
+    } catch (e) {
+      // TODO(kt3k): better error handling
+      alert(e.message);
+    } finally {
+      setUpdating(false);
+    }
   };
 
   return (
@@ -441,7 +465,10 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
       </h2>
       <div className="grid grid-cols-3 gap-3">
         {eventTypes.map((eventType) => (
-          <div className="flex flex-col gap-1 rounded-lg border-neutral-700 border px-4 py-7">
+          <div
+            key={eventType.id}
+            className="flex flex-col gap-1 rounded-lg border-neutral-700 border px-4 py-7"
+          >
             <div className="flex justify-between">
               <div>
                 <span className="text-xs font-semibold bg-stone-600 rounded-full px-3 py-0.5 text-xs">
@@ -455,13 +482,22 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
                   reloadUser={reloadUser}
                   eventTypeId={eventType.id}
                 >
-                  <Button size="xs">
+                  <Button size="xs" disabled={updating}>
                     <icons.Edit />
                   </Button>
                 </EditEventTypeDialog>
                 <Button
                   size="xs"
-                  onClick={() => alert("TODO: Remove Event Type")}
+                  onClick={() => {
+                    if (
+                      confirm(
+                        `Are you sure to delete the event type "${eventType.title}"`,
+                      )
+                    ) {
+                      removeEventTypes(eventType.id);
+                    }
+                  }}
+                  disabled={updating}
                 >
                   <icons.TrashBin />
                 </Button>
@@ -601,6 +637,7 @@ function EditEventTypeDialog(
                   <ul className="rounded-md py-2 bg-neutral-100">
                     {[...Array(12)].map((_, i) => (
                       <li
+                        key={i}
                         className="px-2 py-1 hover:bg-neutral-3 cursor-pointer"
                         onClick={() => setDuration((i + 1) * 15)}
                       >
