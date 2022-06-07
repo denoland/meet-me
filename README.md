@@ -25,7 +25,7 @@ MIT
 
 ## Notes
 
-### How to create `CLIENT_ID` and `CLEINT_SECRET` values in Google Cloud Platform
+### How to get create `CLIENT_ID` and `CLEINT_SECRET` values in Google Cloud Platform
 
 You need [Google Cloud Platform](https://console.cloud.google.com/) Project to
 develop this app.
@@ -38,3 +38,6 @@ develop this app.
 - TODO(kt3k): document the parameters to set.
 - Then you'll find client id and client secrent of the oauth client.
 - Copy those values and set them as `CLIENT_ID` and `CLIENT_SECRET`.
+
+For Deno Land employees:
+- You can find these values in the password manager.
