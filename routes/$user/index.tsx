@@ -5,7 +5,7 @@ import { getUserBySlug, UserForClient as User } from "utils/db.ts";
 import { ok } from "utils/api.ts";
 
 export const data = {
-  async get(req: Request, ctx: Context) {
+  async get(_req: Request, ctx: Context) {
     const slug = ctx.params.user;
     const user = await getUserBySlug(slug);
     // Passes only necessary info

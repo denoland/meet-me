@@ -2,10 +2,11 @@
 
 import { useForwardProps } from "aleph/react";
 import { UserForClient as User } from "utils/db.ts";
+import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
 
 export default function MyPage() {
-  const { user } = useForwardProps<
-    { user: User }
+  const { user, reloadUser } = useForwardProps<
+    { user: User; reloadUser: () => Promise<void> }
   >();
   return (
     <div className="max-w-screen-xl px-4 m-auto">
@@ -20,7 +21,17 @@ export default function MyPage() {
           </p>
         </div>
       </div>
-      <div className="mt-12 ml-7 text-6xl font-bold">TODO</div>
+      <div className="mt-6 grid grid-cols-3 gap-3">
+        {user.eventTypes!.map((et) => (
+          <EventTypeCard
+            key={et.id}
+            eventType={et}
+            user={user}
+            reloadUser={reloadUser}
+          />
+        ))}
+        <NewEventTypeCard user={user} reloadUser={reloadUser} />
+      </div>
     </div>
   );
 }
