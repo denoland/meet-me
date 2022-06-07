@@ -52,11 +52,26 @@ export function NotificationProvider() {
   );
 }
 
+function useTransitionFlag() {
+  const [state, setState] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      setState(true);
+    }, 20);
+  }, []);
+  return state;
+}
+
 function DangerMessage({ msg }: { msg: Message & { key: number } }) {
+  const flag = useTransitionFlag();
   return (
     <div
       className={cx(
-        "flex gap-3 px-6 py-5 border-1 border-red bg-red-300/5 shadow-md shadow-red-danger/100 rounded-lg",
+        "flex gap-3 px-6 py-5 border-1 border-red bg-red-300/5 shadow-md shadow-red-danger/100 rounded-lg !transition-500",
+        {
+          "!opacity-0": !flag,
+          "!translate-x-5": !flag,
+        },
       )}
       key={msg.key}
     >
@@ -74,9 +89,17 @@ function DangerMessage({ msg }: { msg: Message & { key: number } }) {
 }
 
 function SuccessMessage({ msg }: { msg: Message & { key: number } }) {
+  const flag = useTransitionFlag();
+
   return (
     <div
-      className="flex gap-3 px-6 py-5 border-1 border-blue bg-dark-400 shadow shadow-gray-100 rounded-lg"
+      className={cx(
+        "flex gap-3 px-6 py-5 border-1 border-blue bg-dark-400 shadow shadow-gray-100 rounded-lg transition-500",
+        {
+          "!opacity-0": !flag,
+          "!translate-x-5": !flag,
+        },
+      )}
       key={msg.key}
     >
       <Info />

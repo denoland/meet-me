@@ -23,7 +23,7 @@ type DialogProps = PropsWithChildren<{
   okText?: string;
   okDisabled?: boolean;
   onCancel?: () => void;
-  onOk?: () => Promise<void> | void;
+  onOk?: () => Promise<void | boolean> | void | boolean;
   showCloseButton?: boolean;
 }>;
 
@@ -106,13 +106,20 @@ export function DialogModal({
     }
     try {
       const ret = onOk?.();
+      if (ret === false) {
+        return;
+      }
       if (ret && ret instanceof Promise) {
         setIsWaiting(true);
-        await ret;
+        const result = await ret;
+        setIsWaiting(false);
+        if (result === false) {
+          return;
+        }
       }
-    } finally {
-      setIsWaiting(false);
       onESC?.();
+    } catch {
+      setIsWaiting(false);
     }
   }, [onOk, onESC, okDisabled, isWaiting]);
 

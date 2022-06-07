@@ -65,6 +65,7 @@ export default function EditEventTypeDialog(
         type: "danger",
         message: e.message,
       });
+      return false;
     } finally {
       setUpdating(false);
     }
