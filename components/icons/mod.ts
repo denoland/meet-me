@@ -3,9 +3,11 @@
 import Calendar from "./Calendar.tsx";
 import CaretDown from "./CaretDown.tsx";
 import CaretRight from "./CaretRight.tsx";
+import Check from "./Check.tsx";
 import Close from "./Close.tsx";
 import Deno from "./Deno.tsx";
 import Edit from "./Edit.tsx";
+import Exclamation from "./Exclamation.tsx";
 import Google from "./Google.tsx";
 import Logo from "./Logo.tsx";
 import Plus from "./Plus.tsx";
@@ -16,9 +18,11 @@ export default {
   Calendar,
   CaretDown,
   CaretRight,
+  Check,
   Close,
   Deno,
   Edit,
+  Exclamation,
   Google,
   Logo,
   Plus,

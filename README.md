@@ -40,4 +40,6 @@ develop this app.
 - Copy those values and set them as `CLIENT_ID` and `CLIENT_SECRET`.
 
 For Deno Land employees:
-- You can find these values in `Meet Me API Credentials` section in the password manager.
+
+- You can find these values in `Meet Me API Credentials` section in the password
+  manager.
