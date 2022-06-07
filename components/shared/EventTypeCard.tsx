@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MIN } from "utils/datetime.ts";
 import Button from "base/Button.tsx";
+import { notify } from "base/Notification.tsx";
 import icons from "icons";
 import EditEventTypeDialog from "shared/EditEventTypeDialog.tsx";
 import { EventType, UserForClient as User } from "utils/db.ts";
@@ -37,8 +38,11 @@ export default function EventTypeCard(
       }
       await reloadUser();
     } catch (e) {
-      // TODO(kt3k): better error handling
-      alert(e.message);
+      notify({
+        title: "Request failed",
+        type: "danger",
+        message: e.message,
+      });
     } finally {
       setUpdating(false);
     }

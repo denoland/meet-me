@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import events from "utils/events.ts";
 import { usePortal } from "utils/hooks.ts";
 import { Danger, Info } from "./Status.tsx";
+import cx from "utils/cx.ts";
 
 type Message = {
   type: "danger" | "success";
@@ -54,7 +55,9 @@ export function NotificationProvider() {
 function DangerMessage({ msg }: { msg: Message & { key: number } }) {
   return (
     <div
-      className="flex gap-3 px-6 py-5 border-1 border-red bg-red-50 shadow-md shadow-red-danger/100 rounded-lg"
+      className={cx(
+        "flex gap-3 px-6 py-5 border-1 border-red bg-red-300/5 shadow-md shadow-red-danger/100 rounded-lg",
+      )}
       key={msg.key}
     >
       <Danger />
@@ -73,15 +76,15 @@ function DangerMessage({ msg }: { msg: Message & { key: number } }) {
 function SuccessMessage({ msg }: { msg: Message & { key: number } }) {
   return (
     <div
-      className="flex gap-3 px-6 py-5 border-1 border-blue bg-white shadow shadow-gray-100 rounded-lg"
+      className="flex gap-3 px-6 py-5 border-1 border-blue bg-dark-400 shadow shadow-gray-100 rounded-lg"
       key={msg.key}
     >
       <Info />
       <div>
-        <h2 className="font-semibold text-md text-gray-900 !leading-5">
+        <h2 className="font-semibold text-md text-white !leading-5">
           {msg.title}
         </h2>
-        <p className="text-sm text-gray-500 mt-1 max-w-120">
+        <p className="text-sm text-gray-300 mt-1 max-w-120">
           {msg.message}
         </p>
       </div>

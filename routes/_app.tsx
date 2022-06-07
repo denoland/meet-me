@@ -5,6 +5,7 @@ import { forwardProps, useData } from "aleph/react";
 import { Header } from "layout/Header.tsx";
 import { Footer } from "layout/Footer.tsx";
 import { getUserByToken, User } from "utils/db.ts";
+import { NotificationProvider } from "base/Notification.tsx";
 import { ok } from "utils/api.ts";
 
 export const data = {
@@ -35,16 +36,19 @@ export default function App({ children }: { children?: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-dark-400 text-white overflow-x-hidden">
-      <Header signin={signin} user={user} />
-      {forwardProps(children, {
-        clientId,
-        redirectUri,
-        signin,
-        user,
-        reloadUser,
-      })}
-      <Footer />
-    </div>
+    <>
+      <NotificationProvider />
+      <div className="min-h-screen bg-dark-400 text-white overflow-x-hidden">
+        <Header signin={signin} user={user} />
+        {forwardProps(children, {
+          clientId,
+          redirectUri,
+          signin,
+          user,
+          reloadUser,
+        })}
+        <Footer />
+      </div>
+    </>
   );
 }

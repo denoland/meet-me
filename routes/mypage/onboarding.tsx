@@ -1,6 +1,6 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-import { PropsWithChildren, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForwardProps, useRouter } from "aleph/react";
 import {
   HOUR,
@@ -14,14 +14,15 @@ import Button from "base/Button.tsx";
 import Input from "base/Input.tsx";
 import icons from "icons";
 import Dropdown from "base/Dropdown.tsx";
+import SlidingPanel, { PanelState } from "base/SlidingPanel.tsx";
+import { notify } from "base/Notification.tsx";
 import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
 import cx from "utils/cx.ts";
-import { EventType, Range, UserForClient as User } from "utils/db.ts";
+import { Range, UserForClient as User } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
 
 const STEPS = ["slug", "availability", "eventType"] as const;
 type Step = (typeof STEPS)[number];
-type PanelState = "left" | "center" | "right";
 
 export default function OnboardingPage() {
   const { user, reloadUser } = useForwardProps<
@@ -94,22 +95,6 @@ export default function OnboardingPage() {
   );
 }
 
-function SlidingPanel(
-  { state, children }: PropsWithChildren<{ state: PanelState }>,
-) {
-  return (
-    <div
-      className={cx("w-screen !transition-500", {
-        "opacity-0": state !== "center",
-        "!-translate-x-5": state === "right",
-        "!translate-x-5": state === "left",
-      })}
-    >
-      {children}
-    </div>
-  );
-}
-
 function ChooseURL(
   { slug: slugDefault, onFinish }: {
     slug: string;
@@ -122,7 +107,6 @@ function ChooseURL(
   const updateSlug = async () => {
     setUpdating(true);
     try {
-      // TODO(kt3k): Use some API updating utility
       const res = await fetch("/api/user", {
         method: "PATCH",
         body: JSON.stringify({ slug }),
@@ -133,7 +117,11 @@ function ChooseURL(
       }
       onFinish();
     } catch (e) {
-      alert(e.message);
+      notify({
+        title: "Request failed",
+        type: "danger",
+        message: e.message,
+      });
     } finally {
       setUpdating(false);
     }
@@ -239,9 +227,11 @@ function ChooseAvailabilities(
       }
       onFinish();
     } catch (e) {
-      // TODO(kt3k): handle error correctly
-      console.error(e);
-      alert(e.message);
+      notify({
+        title: "Request failed",
+        type: "danger",
+        message: e.message,
+      });
     } finally {
       setUpdating(false);
     }
@@ -424,37 +414,7 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
   reloadUser: () => Promise<void>;
 }) {
   const eventTypes = user.eventTypes!;
-  const [updating, setUpdating] = useState(false);
   const { redirect } = useRouter();
-
-  const removeEventTypes = async (idToRemove: string) => {
-    setUpdating(true);
-    try {
-      // deno-lint-ignore no-explicit-any
-      let eventTypes: EventType[] = (globalThis as any).structuredClone(
-        user.eventTypes,
-      );
-      eventTypes = eventTypes.filter((et) => et.id !== idToRemove);
-      const resp = await fetch("/api/user", {
-        method: "PATCH",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ eventTypes }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) {
-        return new Error(data.message);
-      }
-      await reloadUser();
-    } catch (e) {
-      // TODO(kt3k): better error handling
-      alert(e.message);
-    } finally {
-      setUpdating(false);
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-4xl mx-auto">
       <h2 className="font-medium text-lg">
@@ -476,18 +436,20 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
       </div>
       <div className="self-end flex items-center gap-2 mt-4">
         <Button
-          disabled={updating}
           style="alternate"
           onClick={onCancel}
         >
           Back
         </Button>
         <Button
-          disabled={updating}
           style="primary"
           onClick={async () => {
             await onFinish();
-            alert("Settings are done!");
+            notify({
+              title: "Settings are completed",
+              type: "success",
+              message: "You successfully completed the initial settings!",
+            });
             redirect("/mypage", true);
           }}
         >

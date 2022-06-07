@@ -6,6 +6,7 @@ import Input from "base/Input.tsx";
 import icons from "icons";
 import Dropdown from "base/Dropdown.tsx";
 import Dialog from "base/Dialog.tsx";
+import { notify } from "base/Notification.tsx";
 import { EventType, UserForClient as User } from "utils/db.ts";
 
 export default function EditEventTypeDialog(
@@ -59,8 +60,11 @@ export default function EditEventTypeDialog(
       }
       await reloadUser();
     } catch (e) {
-      // TODO(kt3k): better handling
-      alert(e.message);
+      notify({
+        title: "Request failed",
+        type: "danger",
+        message: e.message,
+      });
     } finally {
       setUpdating(false);
     }

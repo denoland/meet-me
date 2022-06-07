@@ -14,15 +14,15 @@ const sharedClassName =
 export function Ok({ className, iconSize = 10 }: StatusProps) {
   return (
     <span className={cx(sharedClassName, "bg-primary/15", className)}>
-      <icons.Check className="text-fresh" size={iconSize} />
+      <icons.Check className="text-primary" size={iconSize} />
     </span>
   );
 }
 
 export function Info({ className, iconSize = 10 }: StatusProps) {
   return (
-    <span className={cx(sharedClassName, "bg-blue-500/15", className)}>
-      <icons.Exclamation className="text-primary rotate-180" size={iconSize} />
+    <span className={cx(sharedClassName, "bg-blue/15", className)}>
+      <icons.Exclamation className="text-blue rotate-180" size={iconSize} />
     </span>
   );
 }
