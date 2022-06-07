@@ -466,6 +466,7 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
       <div className="grid grid-cols-3 gap-3">
         {eventTypes.map((eventType) => (
           <EventTypeCard
+            key={eventType.id}
             user={user}
             reloadUser={reloadUser}
             eventType={eventType}
