@@ -3,7 +3,6 @@
 import type { PropsWithChildren } from "react";
 import { Link, useRouter } from "aleph/react";
 import Dropdown from "base/Dropdown.tsx";
-import Button from "base/Button.tsx";
 import { ShadowBox } from "base/Container.tsx";
 import icons from "icons";
 import { User } from "utils/db.ts";

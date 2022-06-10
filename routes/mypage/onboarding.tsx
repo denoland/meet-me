@@ -18,7 +18,7 @@ import SlidingPanel, { PanelState } from "base/SlidingPanel.tsx";
 import { notify } from "base/Notification.tsx";
 import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
 import cx from "utils/cx.ts";
-import { Range, UserForClient as User } from "utils/db.ts";
+import { isUserReady, Range, UserForClient as User } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
 
 const STEPS = ["slug", "availability", "eventType"] as const;
@@ -36,7 +36,10 @@ export default function OnboardingPage() {
     if (!user) {
       redirect("/");
     }
-  });
+    if (isUserReady(user)) {
+      redirect("/mypage");
+    }
+  }, []);
 
   const goForward = async () => {
     setPanelState("right");
@@ -58,7 +61,7 @@ export default function OnboardingPage() {
     setPanelState("center");
   };
 
-  if (!user) {
+  if (!user || isUserReady(user)) {
     return null;
   }
 

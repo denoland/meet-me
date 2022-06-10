@@ -1,5 +1,11 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-export default function Signout() {
-  return <div>TODO: Sign out</div>;
+import { useEffect } from "react";
+
+export default function Settings() {
+  useEffect(() => {
+    // This triggers Signout middleware
+    location.reload();
+  });
+  return <div></div>;
 }
