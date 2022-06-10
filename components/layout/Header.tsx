@@ -1,5 +1,6 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
+import type { PropsWithChildren } from "react";
 import { Link, useRouter } from "aleph/react";
 import Dropdown from "base/Dropdown.tsx";
 import Button from "base/Button.tsx";
@@ -37,33 +38,12 @@ export function Header(
 }
 
 function UserAccountButton({ user }: { user: User }) {
-  const { redirect } = useRouter();
   const displayName = user.givenName || user.name;
   return (
     <Dropdown
       trigger="click"
       position="right"
-      render={() => (
-        <ShadowBox className="min-w-50 text-white flex flex-col">
-          <div className="flex flex-col items-center gap-2 p-6 text-sm">
-            <img className="w-17 h-17 rounded-full mb-2" src={user.picture} />
-            <span>{user.name}</span>
-            <a className="text-blue-400" href={`/${user.slug}`} target="_blank">
-              meet-me.deno.dev/{user.slug}
-            </a>
-          </div>
-          <ul>
-            <li
-              onClick={() => {
-                redirect("/signout");
-              }}
-              className="cursor-pointer border-t border-neutral-700 px-6 py-2"
-            >
-              Sign out
-            </li>
-          </ul>
-        </ShadowBox>
-      )}
+      render={() => <UserDropdown user={user} />}
     >
       <button className="flex items-center gap-2 bg-zinc-200 px-4 py-2 rounded-full text-black">
         {user.picture &&
@@ -72,6 +52,56 @@ function UserAccountButton({ user }: { user: User }) {
         <icons.CaretDown className="h-4 h-4 text-black" />
       </button>
     </Dropdown>
+  );
+}
+
+function UserDropdown({ user }: { user: User }) {
+  return (
+    <ShadowBox className="min-w-50 text-white flex flex-col">
+      <div className="flex flex-col items-center gap-2 p-6 text-sm">
+        <img className="w-17 h-17 rounded-full mb-2" src={user.picture} />
+        <span>{user.name}</span>
+        <a className="text-blue-400" href={`/${user.slug}`} target="_blank">
+          meet-me.deno.dev/{user.slug}
+        </a>
+      </div>
+      <ul>
+        <UserDropdownMenuItem href="/mypage/settings">
+          Settings
+        </UserDropdownMenuItem>
+        <UserDropdownMenuItem
+          href="https://github.com/denoland/showcase_cal"
+          external
+        >
+          Source code
+        </UserDropdownMenuItem>
+        <UserDropdownMenuItem href="/signout">
+          Sign out
+        </UserDropdownMenuItem>
+      </ul>
+    </ShadowBox>
+  );
+}
+
+function UserDropdownMenuItem(
+  { href, external, children }: PropsWithChildren<
+    { href: string; external?: boolean }
+  >,
+) {
+  const { redirect } = useRouter();
+  return (
+    <li
+      className="cursor-pointer border-t border-neutral-700 px-6 py-2"
+      onClick={() => {
+        if (external) {
+          open(href);
+        } else {
+          redirect(href);
+        }
+      }}
+    >
+      {children}
+    </li>
   );
 }
 
