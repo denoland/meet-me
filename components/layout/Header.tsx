@@ -44,23 +44,24 @@ function UserAccountButton({ user }: { user: User }) {
       trigger="click"
       position="right"
       render={() => (
-        <ShadowBox className="text-white flex flex-col">
+        <ShadowBox className="min-w-50 text-white flex flex-col">
           <div className="flex flex-col items-center gap-2 p-6 text-sm">
-            <img className="rounded-full mb-2" src={user.picture} />
+            <img className="w-17 h-17 rounded-full mb-2" src={user.picture} />
             <span>{user.name}</span>
             <a className="text-blue-400" href={`/${user.slug}`} target="_blank">
               meet-me.deno.dev/{user.slug}
             </a>
           </div>
-          <div className="border-t border-neutral-700 px-6 py-2">
-            <Button
+          <ul>
+            <li
               onClick={() => {
                 redirect("/signout");
               }}
+              className="cursor-pointer border-t border-neutral-700 px-6 py-2"
             >
               Sign out
-            </Button>
-          </div>
+            </li>
+          </ul>
         </ShadowBox>
       )}
     >
