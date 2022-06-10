@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useForwardProps, useRouter } from "aleph/react";
 import icons from "icons";
-import { User } from "utils/db.ts";
+import { isUserReady, User } from "utils/db.ts";
 
 export default function LandingPage() {
   const { signin, user } = useForwardProps<
@@ -13,7 +13,11 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (user) {
-      redirect("/mypage/onboarding");
+      if (isUserReady(user)) {
+        redirect("/mypage");
+      } else {
+        redirect("/mypage/onboarding");
+      }
     }
   }, []);
 

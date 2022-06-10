@@ -64,6 +64,7 @@ export const unavailableUserSlugs = [
   "index",
   "terms",
   "privacy",
+  "signout",
 ];
 
 // TODO(kt3k): These are temporary DB tables in memory.
