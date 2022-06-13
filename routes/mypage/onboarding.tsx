@@ -2,21 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useForwardProps, useRouter } from "aleph/react";
-import {
-  HOUR,
-  hourMinuteToSec,
-  MIN,
-  secToHourMinute,
-  WeekDay,
-} from "utils/datetime.ts";
 import Button from "base/Button.tsx";
-import Input from "base/Input.tsx";
 import icons from "icons";
 import SlidingPanel, { PanelState } from "base/SlidingPanel.tsx";
 import { notify } from "base/Notification.tsx";
 import TimeZoneSelect from "shared/TimeZoneSelect.tsx";
+import AvailabilitySettings from "shared/AvailabilitySettings.tsx";
 import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
-import cx from "utils/cx.ts";
 import { Range, UserForClient as User } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
 
@@ -179,18 +171,6 @@ const DEFAULT_AVAILABILITIES: Range[] = [
   { weekDay: "FRI" as const, startTime: "09:00", endTime: "17:00" },
 ];
 
-function rangesToRangeMap(ranges: Range[]): Record<WeekDay, Range[]> {
-  return {
-    SUN: ranges.filter((range) => range.weekDay === "SUN"),
-    MON: ranges.filter((range) => range.weekDay === "MON"),
-    TUE: ranges.filter((range) => range.weekDay === "TUE"),
-    WED: ranges.filter((range) => range.weekDay === "WED"),
-    THU: ranges.filter((range) => range.weekDay === "THU"),
-    FRI: ranges.filter((range) => range.weekDay === "FRI"),
-    SAT: ranges.filter((range) => range.weekDay === "SAT"),
-  };
-}
-
 function ChooseAvailabilities(
   { user, onCancel, onFinish }: {
     user: User;
@@ -201,9 +181,8 @@ function ChooseAvailabilities(
   const [updating, setUpdating] = useState(false);
   const [timeZone, setTimeZone] = useState("");
 
-  const [ranges, setRanges] = useState(
-    rangesToRangeMap(user.availabilities ?? DEFAULT_AVAILABILITIES),
-  );
+  const [availabilities, setAvailabilities] = useState(user.availabilities ?? DEFAULT_AVAILABILITIES);
+
   useEffect(() => {
     setTimeZone(
       // Set the system's default time zone as default
@@ -218,7 +197,7 @@ function ChooseAvailabilities(
         method: "PATCH",
         body: JSON.stringify({
           timeZone,
-          availabilities: Object.values(ranges).flat(),
+          availabilities,
         }),
       });
       const data = await resp.json();
@@ -249,17 +228,7 @@ function ChooseAvailabilities(
         timeZone={timeZone}
         onTimeZoneSelect={(timeZone) => setTimeZone(timeZone)}
       />
-      <ul>
-        {Object.entries(ranges).map(([weekDay, ranges]) => (
-          <WeekRow
-            key={weekDay}
-            weekDay={weekDay as WeekDay}
-            defaultRanges={ranges}
-            onRangeUpdate={(ranges) =>
-              setRanges((r) => ({ ...r, [weekDay]: ranges }))}
-          />
-        ))}
-      </ul>
+      <AvailabilitySettings availabilities={availabilities} onChange={setAvailabilities} />
       <div className="self-end flex items-center gap-2 mt-4">
         <Button
           disabled={updating}
@@ -277,108 +246,6 @@ function ChooseAvailabilities(
           <icons.CaretRight />
         </Button>
       </div>
-    </div>
-  );
-}
-
-function WeekRow(
-  { weekDay, defaultRanges, onRangeUpdate }: {
-    weekDay: WeekDay;
-    defaultRanges?: Omit<Range, "weekDay">[] | undefined;
-    onRangeUpdate: (ranges: Omit<Range, "weekDay">[]) => void;
-  },
-) {
-  const [ranges, setRanges] = useState(defaultRanges || []);
-  const noRanges = ranges.length === 0;
-
-  const onChange = (v: string, type: "startTime" | "endTime", i: number) =>
-    setRanges((ranges) => {
-      const result = [...ranges];
-      result[i] = { ...ranges[i], [type]: v };
-      onRangeUpdate(result);
-      return result;
-    });
-
-  const onRemove = (i: number) =>
-    setRanges((ranges) => {
-      const result = [...ranges];
-      result.splice(i, 1);
-      onRangeUpdate(result);
-      return result;
-    });
-
-  const onPlus = () =>
-    setRanges((ranges) => {
-      const lastRange = ranges.at(-1);
-      if (!lastRange) {
-        return [{ weekDay, startTime: "09:00", endTime: "17:00" }];
-      }
-      const lastEndTime = hourMinuteToSec(lastRange.endTime)!;
-      const newStartTime = Math.min(lastEndTime + HOUR, 24 * HOUR - 15 * MIN);
-      const newEndTime = Math.min(newStartTime + HOUR, 24 * HOUR - 15 * MIN);
-      const newRange = {
-        weekDay,
-        startTime: secToHourMinute(newStartTime),
-        endTime: secToHourMinute(newEndTime),
-      };
-      const result = [...ranges, newRange];
-      onRangeUpdate(result);
-      return result;
-    });
-
-  return (
-    <div
-      className={cx(
-        "flex justify-between px-4 py-2 border-b border-neutral-700",
-      )}
-    >
-      {noRanges && (
-        <>
-          <div className="flex items-center gap-4">
-            <span className="w-10">{weekDay}</span>
-            <span className="text-neutral-600">Unavailable</span>
-          </div>
-          <div>
-            <Button style="outline" size="xs" onClick={onPlus}>
-              <icons.Plus size={11} />
-            </Button>
-          </div>
-        </>
-      )}
-      {!noRanges && (
-        <div className="flex flex-col w-full gap-3">
-          {ranges.map(({ startTime, endTime }, i) => (
-            <div className="flex items-center justify-between" key={i}>
-              <div className="flex items-center gap-2">
-                <span className="w-10">{i === 0 && weekDay}</span>
-                <Input
-                  className="w-24 text-center"
-                  value={startTime}
-                  onChange={(v) =>
-                    onChange(v, "startTime", i)}
-                />
-                ~
-                <Input
-                  className="w-24"
-                  value={endTime}
-                  onChange={(v) =>
-                    onChange(v, "endTime", i)}
-                />
-                <Button size="xs" style="none" onClick={() => onRemove(i)}>
-                  <icons.TrashBin />
-                </Button>
-              </div>
-              <div>
-                {i === 0 && (
-                  <Button style="outline" size="xs" onClick={onPlus}>
-                    <icons.Plus size={11} />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
