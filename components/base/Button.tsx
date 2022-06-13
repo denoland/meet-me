@@ -24,7 +24,7 @@ type ButtonProps = PropsWithChildren<
 >;
 
 export default function Button(
-  { children, style, disabled, size = "md", ...rest }: ButtonProps,
+  { className, children, style, disabled, size = "md", ...rest }: ButtonProps,
 ) {
   const btnClassName = useMemo(() => {
     const base = "inline-flex items-center gap-2 transition";
@@ -40,7 +40,11 @@ export default function Button(
   }, [disabled, style]);
 
   return (
-    <button className={btnClassName} disabled={disabled} {...rest}>
+    <button
+      className={cx(btnClassName, className)}
+      disabled={disabled}
+      {...rest}
+    >
       {children}
     </button>
   );
