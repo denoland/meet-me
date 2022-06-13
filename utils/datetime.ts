@@ -4,9 +4,11 @@ export const SEC = 1000;
 export const MIN = 60 * SEC;
 export const HOUR = 60 * MIN;
 
+export type TimeZone = (typeof timeZones)[number];
+
 export function isValidTimeZone(
   timeZone: string,
-): timeZone is (typeof timeZones)[number] {
+): timeZone is TimeZone {
   // deno-lint-ignore no-explicit-any
   return timeZones.includes(timeZone as any);
 }

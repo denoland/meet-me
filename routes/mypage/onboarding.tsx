@@ -16,6 +16,7 @@ import icons from "icons";
 import Dropdown from "base/Dropdown.tsx";
 import SlidingPanel, { PanelState } from "base/SlidingPanel.tsx";
 import { notify } from "base/Notification.tsx";
+import TimeZoneSelect from "shared/TimeZoneSelect.tsx";
 import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
 import cx from "utils/cx.ts";
 import { isUserReady, Range, UserForClient as User } from "utils/db.ts";
@@ -141,11 +142,11 @@ function ChooseURL(
       <div className="mt-8 flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-lg mx-auto">
         <h2 className="font-medium text-lg">
           Create your Meet Me URL{" "}
-          <span className="ml-2 text-sm font-normal text-stone-600">
+          <span className="ml-2 text-sm font-normal text-neutral-600">
             (step 1 of 3)
           </span>
         </h2>
-        <p className="text-stone-500">
+        <p className="text-neutral-500">
           Choose a URL that describes you or your business in a concise way.
           Make it short and easy to remember so you can share links with ease.
         </p>
@@ -244,38 +245,14 @@ function ChooseAvailabilities(
     <div className="flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-xl mx-auto">
       <h2 className="font-medium text-lg">
         Set your availability{" "}
-        <span className="ml-2 text-sm font-normal text-stone-600">
+        <span className="ml-2 text-sm font-normal text-neutral-600">
           (step 2 of 3)
         </span>
       </h2>
-      <p className="text-stone-400">
-        Timezone:{" "}
-        <Dropdown
-          trigger="click"
-          offset={4}
-          render={() => (
-            <div className="bg-white shadow-lg rounded-lg py-2 h-48 overflow-scroll">
-              <ul>
-                {timeZones.map((timeZone) => (
-                  <li
-                    key={timeZone}
-                    className="cursor-pointer hover:bg-neutral-100 px-2 py-1"
-                    onClick={() => {
-                      setTimeZone(timeZone);
-                    }}
-                  >
-                    {timeZone}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        >
-          <span className="text-white underline cursor-pointer">
-            {timeZone}
-          </span>
-        </Dropdown>
-      </p>
+      <TimeZoneSelect
+        timeZone={timeZone}
+        onTimeZoneSelect={(timeZone) => setTimeZone(timeZone)}
+      />
       <ul>
         {Object.entries(ranges).map(([weekDay, ranges]) => (
           <WeekRow
@@ -363,7 +340,7 @@ function WeekRow(
         <>
           <div className="flex items-center gap-4">
             <span className="w-10">{weekDay}</span>
-            <span className="text-stone-600">Unavailable</span>
+            <span className="text-neutral-600">Unavailable</span>
           </div>
           <div>
             <Button style="outline" size="xs" onClick={onPlus}>
@@ -422,7 +399,7 @@ function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
     <div className="flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-4xl mx-auto">
       <h2 className="font-medium text-lg">
         Set up event types{" "}
-        <span className="ml-2 text-sm font-normal text-stone-600">
+        <span className="ml-2 text-sm font-normal text-neutral-600">
           (step 3 of 3)
         </span>
       </h2>

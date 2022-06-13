@@ -5,7 +5,9 @@ import { useForwardProps, useRouter } from "aleph/react";
 import { UserForClient as User } from "utils/db.ts";
 import Button from "base/Button.tsx";
 import { notify } from "base/Notification.tsx";
+import TimeZoneSelect from "shared/TimeZoneSelect.tsx";
 import cx from "utils/cx.ts";
+import { isValidTimeZone, TimeZone } from "utils/datetime.ts";
 
 export default function Settings() {
   const { user, reloadUser } = useForwardProps<
@@ -111,8 +113,50 @@ export function SlugSettings({ user, reloadUser }: SettingsProps) {
   );
 }
 
-export function TimeZoneSettings({ user }: SettingsProps) {
-  return <SettingsBox title="Time Zone">Time Zone Settings</SettingsBox>;
+export function TimeZoneSettings({ user, reloadUser }: SettingsProps) {
+  const initialTimeZone = isValidTimeZone(user.timeZone!)
+    ? user.timeZone
+    : "Europe/London";
+  const [timeZone, setTimeZone] = useState<TimeZone>(initialTimeZone);
+
+  const updateTimeZone = async (timeZone: string) => {
+    try {
+      const resp = await fetch("/api/user", {
+        method: "PATCH",
+        body: JSON.stringify({
+          timeZone,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.message);
+      }
+      notify({
+        title: "Time zone updated!",
+        type: "success",
+        message: `Your time zone has been updated to ${timeZone}.`,
+      });
+      reloadUser();
+    } catch (e) {
+      notify({
+        title: "Request failed",
+        type: "danger",
+        message: e.message,
+      });
+    }
+  };
+
+  return (
+    <SettingsBox title="Time Zone" description="Set your time zone.">
+      <TimeZoneSelect
+        timeZone={timeZone}
+        onTimeZoneSelect={(timeZone) => {
+          setTimeZone(timeZone);
+          updateTimeZone(timeZone);
+        }}
+      />
+    </SettingsBox>
+  );
 }
 
 export function AvailabilitySettings({ user }: SettingsProps) {
