@@ -30,6 +30,7 @@ serve({
       colors: {
         "default": "#222222",
         "primary": "#00AC47",
+        "fresh": "#00AC47",
         "danger": "#E90807",
       },
       fontSize: {

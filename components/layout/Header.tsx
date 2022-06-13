@@ -3,6 +3,7 @@
 import type { PropsWithChildren } from "react";
 import { Link, useRouter } from "aleph/react";
 import Dropdown from "base/Dropdown.tsx";
+import Copyable from "base/Copyable.tsx";
 import { ShadowBox } from "base/Container.tsx";
 import icons from "icons";
 import { User } from "utils/db.ts";
@@ -60,9 +61,12 @@ function UserDropdown({ user }: { user: User }) {
       <div className="flex flex-col items-center gap-2 p-6 text-sm">
         <img className="w-17 h-17 rounded-full mb-2" src={user.picture} />
         <span>{user.name}</span>
-        <a className="text-blue-400" href={`/${user.slug}`} target="_blank">
-          meet-me.deno.dev/{user.slug}
-        </a>
+        <div className="flex items-center gap-1">
+          <a className="text-blue-400" href={`/${user.slug}`} target="_blank">
+            meet-me.deno.dev/{user.slug}
+          </a>
+          <Copyable value={`https://meet-me.deno.dev/${user.slug}`} />
+        </div>
       </div>
       <ul>
         <UserDropdownMenuItem href="/mypage/settings">

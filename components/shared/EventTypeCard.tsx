@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MIN } from "utils/datetime.ts";
 import Button from "base/Button.tsx";
+import Copyable from "base/Copyable.tsx";
 import { notify } from "base/Notification.tsx";
 import icons from "icons";
 import EditEventTypeDialog from "shared/EditEventTypeDialog.tsx";
@@ -48,6 +49,8 @@ export default function EventTypeCard(
     }
   };
 
+  const eventUrl = `https://meet-me.deno.dev/${user.slug}/${eventType.slug || eventType.id}`
+
   return (
     <div
       key={eventType.id}
@@ -59,7 +62,8 @@ export default function EventTypeCard(
             {Math.floor(eventType.duration / MIN)} min
           </span>
         </div>
-        <div>
+        <div className="flex items-center">
+          <Copyable value={eventUrl} />
           <EditEventTypeDialog
             key={eventType.title + eventType.description + eventType.duration +
               eventType.slug}

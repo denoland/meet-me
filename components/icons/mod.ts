@@ -5,6 +5,7 @@ import CaretDown from "./CaretDown.tsx";
 import CaretRight from "./CaretRight.tsx";
 import Check from "./Check.tsx";
 import Close from "./Close.tsx";
+import Copy from "./Copy.tsx";
 import Deno from "./Deno.tsx";
 import Edit from "./Edit.tsx";
 import Exclamation from "./Exclamation.tsx";
@@ -20,6 +21,7 @@ export default {
   CaretRight,
   Check,
   Close,
+  Copy,
   Deno,
   Edit,
   Exclamation,

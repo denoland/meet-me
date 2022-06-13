@@ -136,7 +136,9 @@ export async function saveUser(user: User): Promise<void> {
   Users[user.id] = user;
 }
 
-export function isUserReady(user: Omit<User, "googleRefreshToken"> | undefined) {
+export function isUserReady(
+  user: Omit<User, "googleRefreshToken"> | undefined,
+) {
   if (!user) {
     return false;
   }
