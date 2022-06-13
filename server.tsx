@@ -39,6 +39,7 @@ serve({
     },
   },
   middlewares: [
+    // deno-lint-ignore no-explicit-any
     Signout as any,
   ],
   ssr: {

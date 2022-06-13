@@ -77,6 +77,12 @@ function UserDropdown({ user }: { user: User }) {
           Settings
         </UserDropdownMenuItem>
         <UserDropdownMenuItem
+          href={`https://calendar.google.com/calendar?authuser=${user.email}`}
+          external
+        >
+          Go to Google Calendar
+        </UserDropdownMenuItem>
+        <UserDropdownMenuItem
           href="https://github.com/denoland/showcase_cal"
           external
         >
