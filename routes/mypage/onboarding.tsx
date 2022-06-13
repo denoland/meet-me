@@ -7,19 +7,17 @@ import {
   hourMinuteToSec,
   MIN,
   secToHourMinute,
-  timeZones,
   WeekDay,
 } from "utils/datetime.ts";
 import Button from "base/Button.tsx";
 import Input from "base/Input.tsx";
 import icons from "icons";
-import Dropdown from "base/Dropdown.tsx";
 import SlidingPanel, { PanelState } from "base/SlidingPanel.tsx";
 import { notify } from "base/Notification.tsx";
 import TimeZoneSelect from "shared/TimeZoneSelect.tsx";
 import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
 import cx from "utils/cx.ts";
-import { isUserReady, Range, UserForClient as User } from "utils/db.ts";
+import { Range, UserForClient as User } from "utils/db.ts";
 import { delay } from "std/async/delay.ts";
 
 const STEPS = ["slug", "availability", "eventType"] as const;
@@ -36,9 +34,6 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (!user) {
       redirect("/");
-    }
-    if (isUserReady(user)) {
-      redirect("/mypage");
     }
   }, []);
 
@@ -68,7 +63,7 @@ export default function OnboardingPage() {
 
   return (
     <div>
-      {step === "slug" && !isUserReady(user) && (
+      {step === "slug" && (
         <SlidingPanel state={panelState}>
           <ChooseURL
             slug={user.slug || ""}
@@ -211,6 +206,7 @@ function ChooseAvailabilities(
   );
   useEffect(() => {
     setTimeZone(
+      // Set the system's default time zone as default
       user.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
     );
   }, []);

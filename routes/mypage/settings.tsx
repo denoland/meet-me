@@ -6,8 +6,10 @@ import { UserForClient as User } from "utils/db.ts";
 import Button from "base/Button.tsx";
 import { notify } from "base/Notification.tsx";
 import TimeZoneSelect from "shared/TimeZoneSelect.tsx";
+import AvailabilitySettings from "shared/AvailabilitySettings.tsx";
 import cx from "utils/cx.ts";
 import { isValidTimeZone, TimeZone } from "utils/datetime.ts";
+import { equal } from "std/testing/asserts.ts";
 
 export default function Settings() {
   const { user, reloadUser } = useForwardProps<
@@ -31,7 +33,7 @@ export default function Settings() {
       <a className="text-blue-400" href="/mypage">Back</a>
       <SlugSettings user={user} reloadUser={reloadUser} />
       <TimeZoneSettings user={user} reloadUser={reloadUser} />
-      <AvailabilitySettings user={user} reloadUser={reloadUser} />
+      <AvailabilitySettingsArea user={user} reloadUser={reloadUser} />
     </div>
   );
 }
@@ -159,6 +161,52 @@ export function TimeZoneSettings({ user, reloadUser }: SettingsProps) {
   );
 }
 
-export function AvailabilitySettings({ user }: SettingsProps) {
-  return <SettingsBox title="Availability">Availability Settings</SettingsBox>;
+export function AvailabilitySettingsArea({ user, reloadUser }: SettingsProps) {
+  const [updating, setUpdating] = useState(false);
+  const [availabilities, setAvailabilities] = useState(user.availabilities!);
+
+  const updateAvailability = async () => {
+    setUpdating(true);
+    try {
+      const res = await fetch("/api/user", {
+        method: "PATCH",
+        body: JSON.stringify({ availabilities }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message);
+      }
+      notify({
+        title: "Availability updated!",
+        type: "success",
+        message: `Your availability has been updated.`,
+      });
+      reloadUser();
+    } catch (e) {
+      notify({
+        title: "Request failed",
+        type: "danger",
+        message: e.message,
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  return (
+    <SettingsBox title="Availability" description="Set your availability">
+      <AvailabilitySettings
+        availabilities={availabilities}
+        onChange={setAvailabilities}
+      />
+      <Button
+        className="mt-4 float-left"
+        style="primary"
+        disabled={updating || equal(user.availabilities, availabilities)}
+        onClick={updateAvailability}
+      >
+        Save
+      </Button>
+    </SettingsBox>
+  );
 }
