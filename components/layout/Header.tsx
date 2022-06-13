@@ -2,6 +2,7 @@
 
 import type { PropsWithChildren } from "react";
 import { Link, useRouter } from "aleph/react";
+import { IconLink } from "base/Button.tsx";
 import Dropdown from "base/Dropdown.tsx";
 import Copyable from "base/Copyable.tsx";
 import { ShadowBox } from "base/Container.tsx";
@@ -65,6 +66,9 @@ function UserDropdown({ user }: { user: User }) {
           <a className="text-blue-400" href={`/${user.slug}`} target="_blank">
             meet-me.deno.dev/{user.slug}
           </a>
+          <IconLink href={`/${user.slug}`} target="_blank">
+            <icons.ExternalLink />
+          </IconLink>
           <Copyable value={`https://meet-me.deno.dev/${user.slug}`} />
         </div>
       </div>

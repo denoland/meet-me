@@ -1,9 +1,16 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-import { ButtonHTMLAttributes, PropsWithChildren, useMemo } from "react";
+import {
+  AnchorHTMLAttributes,
+  ButtonHTMLAttributes,
+  PropsWithChildren,
+  useMemo,
+} from "react";
+import cx from "utils/cx.ts";
 
 type ButtonProps = PropsWithChildren<
   {
+    href?: string;
     style?:
       | "primary"
       | "secondary"
@@ -36,5 +43,33 @@ export default function Button(
     <button className={btnClassName} disabled={disabled} {...rest}>
       {children}
     </button>
+  );
+}
+
+const ICON_BUTTON_BASE =
+  "flex items-center justify-center hover:bg-gray-200/60 rounded-full w-6 h-6";
+
+export function IconButton(
+  { children, className, disabled, size: _, style: __, href, ...rest }:
+    ButtonProps,
+) {
+  return (
+    <button
+      className={cx(ICON_BUTTON_BASE, className)}
+      disabled={disabled}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+}
+
+type IconLinkProps = PropsWithChildren<AnchorHTMLAttributes<HTMLAnchorElement>>;
+
+export function IconLink({ children, className, ...rest }: IconLinkProps) {
+  return (
+    <a className={cx(ICON_BUTTON_BASE, className)} {...rest}>
+      {children}
+    </a>
   );
 }

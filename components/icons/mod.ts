@@ -9,6 +9,7 @@ import Copy from "./Copy.tsx";
 import Deno from "./Deno.tsx";
 import Edit from "./Edit.tsx";
 import Exclamation from "./Exclamation.tsx";
+import ExternalLink from "./ExternalLink.tsx";
 import Google from "./Google.tsx";
 import Logo from "./Logo.tsx";
 import Plus from "./Plus.tsx";
@@ -25,6 +26,7 @@ export default {
   Deno,
   Edit,
   Exclamation,
+  ExternalLink,
   Google,
   Logo,
   Plus,

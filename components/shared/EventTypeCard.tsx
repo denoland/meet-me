@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { MIN } from "utils/datetime.ts";
-import Button from "base/Button.tsx";
+import { IconButton, IconLink } from "base/Button.tsx";
 import Copyable from "base/Copyable.tsx";
 import { notify } from "base/Notification.tsx";
 import icons from "icons";
@@ -49,7 +49,8 @@ export default function EventTypeCard(
     }
   };
 
-  const eventUrl = `https://meet-me.deno.dev/${user.slug}/${eventType.slug || eventType.id}`
+  const eventPath = `/${user.slug}/${eventType.slug || eventType.id}`;
+  const eventUrl = `https://meet-me.deno.dev${eventPath}`;
 
   return (
     <div
@@ -63,6 +64,9 @@ export default function EventTypeCard(
           </span>
         </div>
         <div className="flex items-center">
+          <IconLink href={eventPath} target="_blank">
+            <icons.ExternalLink />
+          </IconLink>
           <Copyable value={eventUrl} />
           <EditEventTypeDialog
             key={eventType.title + eventType.description + eventType.duration +
@@ -71,12 +75,11 @@ export default function EventTypeCard(
             reloadUser={reloadUser}
             eventTypeId={eventType.id}
           >
-            <Button size="xs" disabled={updating}>
+            <IconButton disabled={updating}>
               <icons.Edit />
-            </Button>
+            </IconButton>
           </EditEventTypeDialog>
-          <Button
-            size="xs"
+          <IconButton
             onClick={() => {
               if (
                 confirm(
@@ -89,7 +92,7 @@ export default function EventTypeCard(
             disabled={updating}
           >
             <icons.TrashBin />
-          </Button>
+          </IconButton>
         </div>
       </div>
       <h2 className="font-bold">{eventType.title}</h2>
