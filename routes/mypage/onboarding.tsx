@@ -61,13 +61,13 @@ export default function OnboardingPage() {
     setPanelState("center");
   };
 
-  if (!user || isUserReady(user)) {
+  if (!user) {
     return null;
   }
 
   return (
     <div>
-      {step === "slug" && (
+      {step === "slug" && !isUserReady(user) && (
         <SlidingPanel state={panelState}>
           <ChooseURL
             slug={user.slug || ""}
