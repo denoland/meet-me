@@ -181,7 +181,9 @@ function ChooseAvailabilities(
   const [updating, setUpdating] = useState(false);
   const [timeZone, setTimeZone] = useState("");
 
-  const [availabilities, setAvailabilities] = useState(user.availabilities ?? DEFAULT_AVAILABILITIES);
+  const [availabilities, setAvailabilities] = useState(
+    user.availabilities ?? DEFAULT_AVAILABILITIES,
+  );
 
   useEffect(() => {
     setTimeZone(
@@ -228,7 +230,10 @@ function ChooseAvailabilities(
         timeZone={timeZone}
         onTimeZoneSelect={(timeZone) => setTimeZone(timeZone)}
       />
-      <AvailabilitySettings availabilities={availabilities} onChange={setAvailabilities} />
+      <AvailabilitySettings
+        availabilities={availabilities}
+        onChange={setAvailabilities}
+      />
       <div className="self-end flex items-center gap-2 mt-4">
         <Button
           disabled={updating}

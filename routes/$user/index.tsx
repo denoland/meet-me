@@ -9,7 +9,11 @@ export const data = {
     const slug = ctx.params.user;
     const user = await getUserBySlug(slug);
     // Passes only necessary info
-    return ok({ givenName: user?.givenName, slug: user?.slug, eventTypes: user?.eventTypes });
+    return ok({
+      givenName: user?.givenName,
+      slug: user?.slug,
+      eventTypes: user?.eventTypes,
+    });
   },
 };
 
@@ -21,7 +25,12 @@ export default function () {
       <ul>
         {data.eventTypes!.map((et) => (
           <li>
-            <a className="text-blue-400" href={`/${data.slug}/${et.slug || et.id}`}>{et.title}</a>
+            <a
+              className="text-blue-400"
+              href={`/${data.slug}/${et.slug || et.id}`}
+            >
+              {et.title}
+            </a>
           </li>
         ))}
       </ul>
