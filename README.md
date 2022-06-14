@@ -25,7 +25,7 @@ MIT
 
 ## Notes
 
-### How to get create `CLIENT_ID` and `CLEINT_SECRET` values in Google Cloud Platform
+### How to configure GCP Project and get create `CLIENT_ID` and `CLEINT_SECRET` values
 
 You need [Google Cloud Platform](https://console.cloud.google.com/) Project to
 develop this app.
@@ -33,6 +33,8 @@ develop this app.
 - First go to [GCP Console](https://console.cloud.google.com/) and create a
   project.
 - Then go to `APIs & Services`.
+- Enable Calendar API from `+ ENABLE APIS AND SERVICES` link.
+  ![](doc/enable-api.png)
 - In `OAuth consent screen` tab, set up the project's consent screen.
 - In `Credentials` tab, create `OAuth client ID` with `Web application` type.
 - TODO(kt3k): document the parameters to set.
