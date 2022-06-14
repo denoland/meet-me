@@ -8,7 +8,6 @@ export const data = {
   async get(_req: Request, ctx: Context) {
     const slug = ctx.params.user;
     const eventId = ctx.params.event_type;
-    console.log(eventId);
     const user = await getUserBySlug(slug);
     const eventType = user?.eventTypes?.find((et) =>
       et.id === eventId || et.slug === eventId

@@ -21,13 +21,7 @@ export const GET = async (req: Request) => {
   const accessTokenExpiresIn = resp.expires_in;
   const idToken = resp.id_token;
   const idTokenPayload = parsePayload(idToken);
-  console.log("idTokenPayload", idTokenPayload);
   const email = idTokenPayload.email;
-
-  console.log("accessToken", accessToken);
-  console.log("refreshToken", refreshToken);
-  console.log("accessTokenExpiresIn", accessTokenExpiresIn);
-  console.log("email", email);
 
   const user = await getOrCreateUserByEmail(email);
   user.googleRefreshToken = refreshToken;
