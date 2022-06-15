@@ -8,15 +8,15 @@ import {
   secToHourMinute,
   WeekDay,
 } from "utils/datetime.ts";
-import { Range } from "utils/db.ts";
+import { WeekRange } from "utils/db.ts";
 import cx from "utils/cx.ts";
 import Button from "base/Button.tsx";
 import Input from "base/Input.tsx";
 import icons from "icons";
 
-type RangeMap = Record<WeekDay, Range[]>;
+type RangeMap = Record<WeekDay, WeekRange[]>;
 
-function rangesToRangeMap(ranges: Range[]): RangeMap {
+function rangesToRangeMap(ranges: WeekRange[]): RangeMap {
   return {
     SUN: ranges.filter((range) => range.weekDay === "SUN"),
     MON: ranges.filter((range) => range.weekDay === "MON"),
@@ -29,8 +29,8 @@ function rangesToRangeMap(ranges: Range[]): RangeMap {
 }
 
 type Props = {
-  availabilities: Range[];
-  onChange: (ranges: Range[]) => void;
+  availabilities: WeekRange[];
+  onChange: (ranges: WeekRange[]) => void;
 };
 
 export default function AvailabilitySettings(
@@ -45,7 +45,7 @@ export default function AvailabilitySettings(
           weekDay={weekDay as WeekDay}
           ranges={ranges}
           onRangeUpdate={(r) => {
-            const newAvailabilities = Object.values<Range[]>({
+            const newAvailabilities = Object.values<WeekRange[]>({
               ...rangeMap,
               [weekDay]: r,
             }).flat();
@@ -60,8 +60,8 @@ export default function AvailabilitySettings(
 function WeekRow(
   { weekDay, ranges, onRangeUpdate }: {
     weekDay: WeekDay;
-    ranges: Range[];
-    onRangeUpdate: (ranges: Range[]) => void;
+    ranges: WeekRange[];
+    onRangeUpdate: (ranges: WeekRange[]) => void;
   },
 ) {
   const noRanges = ranges.length === 0;

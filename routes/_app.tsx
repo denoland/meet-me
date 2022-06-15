@@ -12,6 +12,8 @@ export const data = {
   async get(_: Request, ctx: Context) {
     const token = ctx.cookies.get("token");
     const user = token ? await getUserByToken(token) : undefined;
+    console.log("user.googleAccessToken", user?.googleAccessToken);
+    console.log("user.googleRefreshToken", user?.googleRefreshToken);
     return ok({
       user,
       clientId: Deno.env.get("CLIENT_ID"),

@@ -25,7 +25,7 @@ export type User = {
   googleAccessToken?: string;
   googleAccessTokenExpires?: Date;
   timeZone?: string;
-  availabilities?: Range[];
+  availabilities?: WeekRange[];
   eventTypes?: EventType[];
 };
 
@@ -44,7 +44,8 @@ export type EventType = {
   slug?: string;
 };
 
-export type Range = {
+/** WeekRange represents an available range in a week. */
+export type WeekRange = {
   weekDay: WeekDay;
   startTime: string; // "HH:mm" format
   endTime: string; // "HH:mm" format
@@ -100,7 +101,7 @@ export function isValidEventType(event: EventType): event is EventType {
 }
 
 // deno-lint-ignore no-explicit-any
-export function isValidRange(range: any = {}): range is Range {
+export function isValidRange(range: any = {}): range is WeekRange {
   const { weekDay, startTime, endTime } = range;
   return isValidWeekDay(weekDay) &&
     isValidHourMinute(startTime) &&
