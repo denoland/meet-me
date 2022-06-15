@@ -6,6 +6,7 @@ import {
   isValidHourMinute,
   isValidWeekDay,
   MIN,
+  Range,
   WeekDay,
 } from "./datetime.ts";
 
@@ -173,10 +174,13 @@ export async function getUserAvailability(
     }),
     headers: {
       "Content-Type": "application/json",
+      "Authorization": `Bearer ${user.googleAccessToken}`,
     },
   });
   const data = await resp.json();
-  const busyRanges = data.calendars[user.email].busy;
+  const busyRanges = data.calendars[user.email].busy.map((
+    { start, end }: { start: string; end: string },
+  ) => ({ start: new Date(start), end: new Date(end) })) as Range[];
   return busyRanges;
 }
 

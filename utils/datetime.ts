@@ -46,6 +46,11 @@ export function isValidWeekDay(day: unknown): day is WeekDay {
   return weekDays.includes(day as any);
 }
 
+export type Range = {
+  start: Date;
+  end: Date;
+};
+
 export const timeZones = [
   "Africa/Abidjan",
   "Africa/Accra",
