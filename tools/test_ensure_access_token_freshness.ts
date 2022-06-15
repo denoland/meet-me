@@ -1,11 +1,7 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
 import { parse } from "https://deno.land/std@0.143.0/flags/mod.ts";
-import {
-  createUserByEmail,
-  ensureAccessTokenIsFreshEnough,
-  User,
-} from "../utils/db.ts";
+import { ensureAccessTokenIsFreshEnough, User } from "../utils/db.ts";
 import { TOKEN_ENDPOINT } from "../utils/const.ts";
 import "https://deno.land/std@0.143.0/dotenv/load.ts";
 
