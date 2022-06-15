@@ -26,7 +26,7 @@ export const GET = async (req: Request) => {
   const user = await getOrCreateUserByEmail(email);
   user.googleRefreshToken = refreshToken;
   user.googleAccessToken = accessToken;
-  user.googleAccessTokenExpres = new Date(
+  user.googleAccessTokenExpires = new Date(
     Date.now() + accessTokenExpiresIn * 1000,
   );
   user.picture = idTokenPayload.picture;
