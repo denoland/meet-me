@@ -23,7 +23,7 @@ export type User = {
   slug?: string;
   googleRefreshToken?: string;
   googleAccessToken?: string;
-  googleAccessTokenExpres?: Date;
+  googleAccessTokenExpires?: Date;
   timeZone?: string;
   availabilities?: Range[];
   eventTypes?: EventType[];
@@ -136,6 +136,8 @@ export async function saveUser(user: User): Promise<void> {
   Users[user.id] = user;
 }
 
+/** Returns true if the user's settings are ready to start using Meet Me.
+ * This check is used for sending user to onboarding flow. */
 export function isUserReady(
   user: Omit<User, "googleRefreshToken"> | undefined,
 ) {
@@ -150,8 +152,69 @@ export function isUserAuthorized(user: Pick<User, "googleRefreshToken">) {
   return user.googleRefreshToken !== undefined;
 }
 
+/** Gets the availability of the user in the given period of time. */
+export async function getUserAvailability(user: User, start: Date, end: Date, opts: {
+  freeBusyApi: string,
+  tokenEndpoint: string,
+}) {
+  await ensureAccessTokenIsFreshEnough(user, opts.tokenEndpoint);
+  const resp = await fetch(opts.freeBusyApi, {
+    method: "POST",
+    body: JSON.stringify({
+      timeMin: start.toISOString(),
+      timeMax: end.toISOString(),
+      items: [{ id: user.email }],
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
+  const data = await resp.json();
+  const busyRanges = data.calendars[user.email].busy;
+  return busyRanges;
+}
+
+export async function ensureAccessTokenIsFreshEnough(user: User, tokenEndpoint: string) {
+  if (needsAccessTokenRefresh(user)) {
+    const params = new URLSearchParams();
+    params.append("client_id", Deno.env.get("CLIENT_ID")!);
+    params.append("client_secret", Deno.env.get("CLIENT_SECRET")!);
+    params.append("refresh_token", user.googleRefreshToken!);
+    params.append("grant_type", "refresh_token");
+    const resp = await fetch(tokenEndpoint, {
+      method: "POST",
+      body: params,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      }
+    });
+    if (!resp.ok) {
+      const data = await resp.json();
+      throw Error(`Token refresh failed: ${data.error_description}`);
+    }
+    const body = await resp.json() as {
+      access_token: string,
+      expires_in: number,
+    };
+    user.googleAccessToken = body.access_token;
+    user.googleAccessTokenExpires = new Date(Date.now() + body.expires_in * 1000);
+    await saveUser(user);
+  }
+}
+
+/** Returns true if the access token needs to be refreshed */
+export function needsAccessTokenRefresh(user: Pick<User, "googleAccessTokenExpires">): boolean {
+  const expires = user.googleAccessTokenExpires;
+  if (!expires) {
+    return false;
+  }
+
+  // If the access token expires in 10 sec, then returns true.
+  return +expires < Date.now() - 10000;
+}
+
 // deno-lint-ignore require-await
-export async function getTokenByHash(hash: string) {
+export async function getTokenByHash(hash: string): Promise<Token | undefined> {
   return Object.values(Tokens).find((t) => t.hash === hash);
 }
 
