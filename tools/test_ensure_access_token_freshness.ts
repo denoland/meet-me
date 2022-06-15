@@ -1,13 +1,19 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
 import { parse } from "https://deno.land/std@0.143.0/flags/mod.ts";
-import { ensureAccessTokenIsFreshEnough, createUserByEmail, User } from "../utils/db.ts";
+import {
+  createUserByEmail,
+  ensureAccessTokenIsFreshEnough,
+  User,
+} from "../utils/db.ts";
 import { TOKEN_ENDPOINT } from "../utils/const.ts";
 import "https://deno.land/std@0.143.0/dotenv/load.ts";
 
 function usage() {
-  console.log(`Usage: ./tools/test_ensure_access_token_freshness.ts --access-token <token> --refresh-token <token> --expires <date>
-Note: This tool checks the behavior of ensureAccessTokenIsFreshEnough function against actual google OAuth token endpoint`)
+  console.log(
+    `Usage: ./tools/test_ensure_access_token_freshness.ts --access-token <token> --refresh-token <token> --expires <date>
+Note: This tool checks the behavior of ensureAccessTokenIsFreshEnough function against actual google OAuth token endpoint`,
+  );
 }
 
 const args = parse(Deno.args, {

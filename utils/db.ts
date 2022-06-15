@@ -153,10 +153,15 @@ export function isUserAuthorized(user: Pick<User, "googleRefreshToken">) {
 }
 
 /** Gets the availability of the user in the given period of time. */
-export async function getUserAvailability(user: User, start: Date, end: Date, opts: {
-  freeBusyApi: string,
-  tokenEndpoint: string,
-}) {
+export async function getUserAvailability(
+  user: User,
+  start: Date,
+  end: Date,
+  opts: {
+    freeBusyApi: string;
+    tokenEndpoint: string;
+  },
+) {
   await ensureAccessTokenIsFreshEnough(user, opts.tokenEndpoint);
   const resp = await fetch(opts.freeBusyApi, {
     method: "POST",
@@ -167,14 +172,17 @@ export async function getUserAvailability(user: User, start: Date, end: Date, op
     }),
     headers: {
       "Content-Type": "application/json",
-    }
+    },
   });
   const data = await resp.json();
   const busyRanges = data.calendars[user.email].busy;
   return busyRanges;
 }
 
-export async function ensureAccessTokenIsFreshEnough(user: User, tokenEndpoint: string) {
+export async function ensureAccessTokenIsFreshEnough(
+  user: User,
+  tokenEndpoint: string,
+) {
   if (needsAccessTokenRefresh(user)) {
     const params = new URLSearchParams();
     params.append("client_id", Deno.env.get("CLIENT_ID")!);
@@ -186,24 +194,28 @@ export async function ensureAccessTokenIsFreshEnough(user: User, tokenEndpoint: 
       body: params,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-      }
+      },
     });
     if (!resp.ok) {
       const data = await resp.json();
       throw Error(`Token refresh failed: ${data.error_description}`);
     }
     const body = await resp.json() as {
-      access_token: string,
-      expires_in: number,
+      access_token: string;
+      expires_in: number;
     };
     user.googleAccessToken = body.access_token;
-    user.googleAccessTokenExpires = new Date(Date.now() + body.expires_in * 1000);
+    user.googleAccessTokenExpires = new Date(
+      Date.now() + body.expires_in * 1000,
+    );
     await saveUser(user);
   }
 }
 
 /** Returns true if the access token needs to be refreshed */
-export function needsAccessTokenRefresh(user: Pick<User, "googleAccessTokenExpires">): boolean {
+export function needsAccessTokenRefresh(
+  user: Pick<User, "googleAccessTokenExpires">,
+): boolean {
   const expires = user.googleAccessTokenExpires;
   if (!expires) {
     return false;
