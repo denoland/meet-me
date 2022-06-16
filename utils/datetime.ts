@@ -1,5 +1,7 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
+import { tzOffset } from "https://raw.githubusercontent.com/Tak-Iwamoto/ptera/ec29b7cfa3038b1cea07b9d0d1e69c39ee472d6d/timezone.ts";
+
 export const SEC = 1000;
 export const MIN = 60 * SEC;
 export const HOUR = 60 * MIN;
@@ -44,6 +46,28 @@ export type WeekDay = (typeof weekDays)[number];
 export function isValidWeekDay(day: unknown): day is WeekDay {
   // deno-lint-ignore no-explicit-any
   return weekDays.includes(day as any);
+}
+
+/** Returns a date of the given date string in the given time zone.
+ * The given date needs to be in form of "YYYY-MM-DDTHH:mm:ssZ"
+ *
+ * If you want to get the date of 2022/10/02 1am in Australia/Sydney
+ * Then call this like:
+ *
+ * ```ts
+ * const d = zonedDate("2022-10-02T01:00Z", "Australia/Sydney");
+ * ```
+ */
+export function zonedDate(date: string, timeZone: TimeZone): Date {
+  const d = new Date(date);
+  // First get an offset from the given date and timeZone.
+  // This can be wrong 1 hour when d is close to daylight saving time
+  // boundary.
+  const offset = tzOffset(d, timeZone);
+  // We get an offset again with the adjusted date object.
+  // This is better approximation than the above.
+  const betterOffset = tzOffset(new Date(+d - offset), timeZone);
+  return new Date(+d - betterOffset);
 }
 
 export type Range = {
