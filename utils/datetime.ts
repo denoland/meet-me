@@ -5,6 +5,7 @@ import { tzOffset } from "https://raw.githubusercontent.com/Tak-Iwamoto/ptera/ec
 export const SEC = 1000;
 export const MIN = 60 * SEC;
 export const HOUR = 60 * MIN;
+export const DAY = 24 * HOUR;
 
 export type TimeZone = (typeof timeZones)[number];
 
@@ -70,10 +71,95 @@ export function zonedDate(date: string, timeZone: TimeZone): Date {
   return new Date(+d - betterOffset);
 }
 
+/** WeekRange represents an available range in a week. */
+export type WeekRange = {
+  weekDay: WeekDay;
+  startTime: string; // "HH:mm" format
+  endTime: string; // "HH:mm" format
+};
+
+export type WeekRangeMap = Record<WeekDay, WeekRange[]>;
+
 export type Range = {
   start: Date;
   end: Date;
 };
+
+export function weekRangeListToMap(ranges: WeekRange[]): WeekRangeMap {
+  return {
+    SUN: ranges.filter((r) => r.weekDay === "SUN"),
+    MON: ranges.filter((r) => r.weekDay === "MON"),
+    TUE: ranges.filter((r) => r.weekDay === "TUE"),
+    WED: ranges.filter((r) => r.weekDay === "WED"),
+    THU: ranges.filter((r) => r.weekDay === "THU"),
+    FRI: ranges.filter((r) => r.weekDay === "FRI"),
+    SAT: ranges.filter((r) => r.weekDay === "SAT"),
+  };
+}
+
+function numberToWeekDay(num: number): WeekDay {
+  switch (num) {
+    case 0:
+      return "SUN";
+    case 1:
+      return "MON";
+    case 2:
+      return "TUE";
+    case 3:
+      return "WED";
+    case 4:
+      return "THU";
+    case 5:
+      return "FRI";
+    case 6:
+      return "SAT";
+    default:
+      throw new Error(`Invalid number for week day: ${num}`);
+  }
+}
+
+/** Converts the given WeekRange to a Range with given date and time zone.
+ * date needs to be in the form of YYYY-MM-DD. */
+function weekRangeToRange(
+  date: string,
+  weekRange: WeekRange,
+  timeZone: TimeZone,
+): Range {
+  return {
+    start: zonedDate(date + "T" + weekRange.startTime + "Z", timeZone),
+    end: zonedDate(date + "T" + weekRange.endTime + "Z", timeZone),
+  };
+}
+
+export function formatToYearMonthDate(d: Date) {
+  return d.toISOString().slice(0, 10);
+}
+
+export function getAvailableRangesBetween(
+  start: Date,
+  end: Date,
+  availabilities: WeekRange[],
+  timeZone: TimeZone,
+): Range[] {
+  const map = weekRangeListToMap(availabilities);
+  let d = new Date(+start - 2 * DAY);
+  const endWithMargin = new Date(+end + 2 * DAY);
+  const result = [];
+  while (d < endWithMargin) {
+    const date = formatToYearMonthDate(d);
+    const weekRanges = map[numberToWeekDay(d.getDay())];
+    for (const wr of weekRanges) {
+      const r = weekRangeToRange(date, wr, timeZone);
+      if (r.end > start && r.start < end) {
+        result.push(r);
+      }
+    }
+    d = new Date(+d + DAY);
+  }
+  console.log(result);
+
+  return result;
+}
 
 export const timeZones = [
   "Africa/Abidjan",

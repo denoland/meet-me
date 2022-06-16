@@ -7,7 +7,7 @@ import {
   isValidWeekDay,
   MIN,
   Range,
-  WeekDay,
+  WeekRange,
 } from "./datetime.ts";
 
 const enc = new TextEncoder();
@@ -43,13 +43,6 @@ export type EventType = {
    * like `https://meet-me.deno.dev/[user-slug]/[event-type-slug]`.
    */
   slug?: string;
-};
-
-/** WeekRange represents an available range in a week. */
-export type WeekRange = {
-  weekDay: WeekDay;
-  startTime: string; // "HH:mm" format
-  endTime: string; // "HH:mm" format
 };
 
 type Token = {

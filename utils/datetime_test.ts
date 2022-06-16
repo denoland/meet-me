@@ -1,11 +1,15 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
 import {
+  formatToYearMonthDate,
+  getAvailableRangesBetween,
   HOUR,
   hourMinuteToSec,
   isValidHourMinute,
   MIN,
   secToHourMinute,
+  WeekRange,
+  weekRangeListToMap,
   zonedDate,
 } from "./datetime.ts";
 import {
@@ -119,5 +123,94 @@ Deno.test("zonedDate", () => {
   assertEquals(
     zonedDate("2023-04-02T03:00Z", "Australia/Sydney"),
     new Date("2023-04-01T17:00Z"),
+  );
+});
+
+Deno.test("formatToYearMonthDate", () => {
+  assertEquals(
+    formatToYearMonthDate(new Date("2022-06-17T01:23Z")),
+    "2022-06-17",
+  );
+});
+
+const EXAMPLE_AVAILABILITY = [
+  { weekDay: "MON", startTime: "09:00", endTime: "17:00" },
+  { weekDay: "TUE", startTime: "09:00", endTime: "17:00" },
+  { weekDay: "WED", startTime: "10:00", endTime: "17:00" },
+  { weekDay: "THU", startTime: "09:00", endTime: "18:00" },
+  { weekDay: "FRI", startTime: "09:00", endTime: "15:00" },
+] as WeekRange[];
+
+Deno.test("weekRangeListToMap", () => {
+  assertEquals(
+    weekRangeListToMap(EXAMPLE_AVAILABILITY),
+    {
+      SUN: [],
+      MON: [{ weekDay: "MON", startTime: "09:00", endTime: "17:00" }],
+      TUE: [{ weekDay: "TUE", startTime: "09:00", endTime: "17:00" }],
+      WED: [{ weekDay: "WED", startTime: "10:00", endTime: "17:00" }],
+      THU: [{ weekDay: "THU", startTime: "09:00", endTime: "18:00" }],
+      FRI: [{ weekDay: "FRI", startTime: "09:00", endTime: "15:00" }],
+      SAT: [],
+    },
+  );
+});
+
+Deno.test("getAvailableRangesBetween", () => {
+  const start = new Date("2022-06-01Z");
+  const end = new Date("2022-06-16Z");
+  assertEquals(
+    getAvailableRangesBetween(
+      start,
+      end,
+      EXAMPLE_AVAILABILITY,
+      "Europe/London",
+    ),
+    [
+      {
+        start: new Date("2022-06-01T09:00Z"),
+        end: new Date("2022-06-01T16:00Z"),
+      },
+      {
+        start: new Date("2022-06-02T08:00Z"),
+        end: new Date("2022-06-02T17:00Z"),
+      },
+      {
+        start: new Date("2022-06-03T08:00Z"),
+        end: new Date("2022-06-03T14:00Z"),
+      },
+      {
+        start: new Date("2022-06-06T08:00Z"),
+        end: new Date("2022-06-06T16:00Z"),
+      },
+      {
+        start: new Date("2022-06-07T08:00Z"),
+        end: new Date("2022-06-07T16:00Z"),
+      },
+      {
+        start: new Date("2022-06-08T09:00Z"),
+        end: new Date("2022-06-08T16:00Z"),
+      },
+      {
+        start: new Date("2022-06-09T08:00Z"),
+        end: new Date("2022-06-09T17:00Z"),
+      },
+      {
+        start: new Date("2022-06-10T08:00Z"),
+        end: new Date("2022-06-10T14:00Z"),
+      },
+      {
+        start: new Date("2022-06-13T08:00Z"),
+        end: new Date("2022-06-13T16:00Z"),
+      },
+      {
+        start: new Date("2022-06-14T08:00Z"),
+        end: new Date("2022-06-14T16:00Z"),
+      },
+      {
+        start: new Date("2022-06-15T09:00Z"),
+        end: new Date("2022-06-15T16:00Z"),
+      },
+    ],
   );
 });
