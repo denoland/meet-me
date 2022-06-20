@@ -135,6 +135,18 @@ export function formatToYearMonthDate(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
+export function startOfMonth(d: Date, n = 0) {
+  return new Date(d.getFullYear(), d.getMonth() + n);
+}
+
+export function endOfMonth(d: Date, n = 0) {
+  return new Date(+new Date(d.getFullYear(), d.getMonth() + 1 + n) - DAY);
+}
+
+export function daysOfMonth(d: Date) {
+  return (+endOfMonth(d) - +startOfMonth(d)) / DAY + 1;
+}
+
 export function getAvailableRangesBetween(
   start: Date,
   end: Date,

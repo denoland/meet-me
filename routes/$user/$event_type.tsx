@@ -1,12 +1,14 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useData, useRouter } from "aleph/react";
 import icons from "icons";
 import { CALENDAR_FREE_BUSY_API, TOKEN_ENDPOINT } from "utils/const.ts";
 import { EventType, getUserAvailability, getUserBySlug } from "utils/db.ts";
-import { MIN } from "utils/datetime.ts";
+import { daysOfMonth, MIN, startOfMonth } from "utils/datetime.ts";
 import cx from "utils/cx.ts";
+
+const longMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "long" });
 
 export const data = {
   async get(_req: Request, ctx: Context) {
@@ -47,6 +49,7 @@ export default function () {
       error?: { message: string };
     }
   >();
+  const [date, setDate] = useState(new Date());
   useEffect(() => {
     if (error) {
       redirect("/");
@@ -67,9 +70,9 @@ export default function () {
         <span className="absolute -top-4 pr-8 bg-dark-400 text-lg font-medium">
           Select the date
         </span>
-        <div className="grid grid-cols-2 gap-10 mt-5 py-5">
-          <CalendarMonth side="left" />
-          <CalendarMonth side="right" />
+        <div className="grid grid-cols-2 gap-10 mt-4 py-5">
+          <CalendarMonth side="left" startDate={startOfMonth(date)} />
+          <CalendarMonth side="right" startDate={startOfMonth(date, 1)} />
         </div>
       </div>
     </div>
@@ -77,9 +80,10 @@ export default function () {
 }
 
 type CalendarMonthProp = {
+  startDate: Date;
   side: "left" | "right";
 };
-function CalendarMonth({ side }: CalendarMonthProp) {
+function CalendarMonth({ side, startDate }: CalendarMonthProp) {
   return (
     <div>
       <p
@@ -90,12 +94,13 @@ function CalendarMonth({ side }: CalendarMonthProp) {
           },
         )}
       >
-        {side === "left" && <icons.CaretRight size={24} />}
-        May
+        {side === "left" && <icons.CaretLeft size={24} />}
+        {longMonthFormatter.format(startDate).toUpperCase()}
         {side === "right" && <icons.CaretRight size={24} />}
       </p>
       <div className="mt-10 grid grid-cols-7 gap-6">
-        {[...Array(31)].map((_, i) => (
+        {[...Array(startDate.getDay())].map(() => <div></div>)}
+        {[...Array(daysOfMonth(startDate))].map((_, i) => (
           <div className="flex justify-center text-lg">
             {i + 1}
           </div>

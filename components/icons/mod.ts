@@ -2,6 +2,7 @@
 
 import Calendar from "./Calendar.tsx";
 import CaretDown from "./CaretDown.tsx";
+import CaretLeft from "./CaretLeft.tsx";
 import CaretRight from "./CaretRight.tsx";
 import Check from "./Check.tsx";
 import Close from "./Close.tsx";
@@ -19,6 +20,7 @@ import TrashBin from "./TrashBin.tsx";
 export default {
   Calendar,
   CaretDown,
+  CaretLeft,
   CaretRight,
   Check,
   Close,
