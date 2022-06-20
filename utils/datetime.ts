@@ -131,8 +131,23 @@ function weekRangeToRange(
   };
 }
 
-export function formatToYearMonthDate(d: Date) {
+/** Formats the date in YYYY-MM-DD format in UTC timezone */
+export function formatToYearMonthDateUTC(d: Date) {
   return d.toISOString().slice(0, 10);
+}
+
+/** Formats the date in YYYY-MM-DD format in local timezone */
+export function formatToYearMonthDateLocal(date: Date) {
+  const y = date.getFullYear();
+  let m = "" + date.getMonth() + 1;
+  if (m.length === 1) {
+    m = "0" + m;
+  }
+  let d = "" + date.getDate();
+  if (d.length === 1) {
+    d = "0" + d;
+  }
+  return `${y}-${m}-${d}`;
 }
 
 export function startOfMonth(d: Date, n = 0) {
@@ -158,7 +173,7 @@ export function getAvailableRangesBetween(
   const endWithMargin = new Date(+end + 2 * DAY);
   const result = [];
   while (d < endWithMargin) {
-    const date = formatToYearMonthDate(d);
+    const date = formatToYearMonthDateUTC(d);
     const weekRanges = map[numberToWeekDay(d.getDay())];
     for (const wr of weekRanges) {
       const r = weekRangeToRange(date, wr, timeZone);
@@ -225,11 +240,32 @@ export function rangeIsLonger(duration: number) {
   return (range: Range) => +range.end - +range.start >= duration;
 }
 
+/** Converts the given data transfer object (parsed json) to Range */
 export function rangeFromObj(obj: { start: string; end: string }) {
   return {
     start: new Date(obj.start),
     end: new Date(obj.end),
   };
+}
+
+export type DateRangeMap = Record<string, Range[]>;
+
+/** Returns a date-to-ranges map from the given list of ranges. */
+export function rangeListToLocalDateRangeMap(ranges: Range[]): DateRangeMap {
+  const map: DateRangeMap = {};
+  for (const r of ranges) {
+    const ymdStart = formatToYearMonthDateLocal(r.start);
+    const ranges = map[ymdStart] ??= [];
+    ranges.push(r);
+    const ymdEnd = formatToYearMonthDateLocal(r.end);
+    if (ymdEnd !== ymdEnd) {
+      // Here we suppose every range has less than 24 hour duration.
+      // So it's enough to check start date and end date.
+      const ranges = map[ymdEnd] ??= [];
+      ranges.push(r);
+    }
+  }
+  return map;
 }
 
 export function subtractRangeFromRange(

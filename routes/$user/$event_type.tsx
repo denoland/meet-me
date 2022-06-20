@@ -7,10 +7,15 @@ import { IconButton } from "base/Button.tsx";
 import { CALENDAR_FREE_BUSY_API, TOKEN_ENDPOINT } from "utils/const.ts";
 import { EventType, getUserAvailability, getUserBySlug } from "utils/db.ts";
 import {
+  type DateRangeMap,
+  DAY,
   daysOfMonth,
+  formatToYearMonthDateLocal as format,
   MIN,
+  Range,
   rangeFromObj,
   rangeIsLonger,
+  rangeListToLocalDateRangeMap,
   startOfMonth,
 } from "utils/datetime.ts";
 import cx from "utils/cx.ts";
@@ -18,7 +23,7 @@ import cx from "utils/cx.ts";
 const longMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "long" });
 
 export const data = {
-  async get(_req: Request, ctx: Context) {
+  async get(req: Request, ctx: Context) {
     const slug = ctx.params.user;
     const eventId = ctx.params.event_type;
     const user = await getUserBySlug(slug);
@@ -28,15 +33,26 @@ export const data = {
     const eventType = user?.eventTypes?.find((et) =>
       et.id === eventId || et.slug === eventId
     );
-    const availableRanges = await getUserAvailability(
-      user!,
-      new Date(),
-      new Date("2022-07-31"),
-      {
-        freeBusyApi: CALENDAR_FREE_BUSY_API,
-        tokenEndpoint: TOKEN_ENDPOINT,
-      },
-    );
+    const query = new URLSearchParams(new URL(req.url).search);
+    const start = query.get("start");
+    const end = query.get("end");
+    let availableRanges: Range[] = [];
+    if (start && end) {
+      let startDate = new Date(start);
+      if (+startDate < Date.now()) {
+        startDate = new Date();
+      }
+      const endDate = new Date(end);
+      availableRanges = await getUserAvailability(
+        user!,
+        startDate,
+        endDate,
+        {
+          freeBusyApi: CALENDAR_FREE_BUSY_API,
+          tokenEndpoint: TOKEN_ENDPOINT,
+        },
+      );
+    }
     // Passes only necessary info
     return Response.json({
       name: user?.name,
@@ -48,7 +64,7 @@ export const data = {
 
 export default function () {
   const { redirect } = useRouter();
-  const { data: { eventType, error, name, availableRanges } } = useData<
+  const { data: { eventType, error, name } } = useData<
     {
       name: string;
       availableRanges: { start: string; end: string }[];
@@ -57,8 +73,28 @@ export default function () {
     }
   >();
   const [date, setDate] = useState(new Date());
-  const rangeList = availableRanges?.map(rangeFromObj);
-  console.log("availableRanges", rangeList);
+  const [rangeList, setRangeList] = useState<Range[]>([]);
+
+  useEffect(() => {
+    const start = date ?? new Date();
+    const end = startOfMonth(date, 2);
+    (async () => {
+      const resp = await fetch(
+        location.pathname +
+          `?start=${encodeURIComponent(start.toISOString())}&end=${
+            encodeURIComponent(end.toISOString())
+          }`,
+        { method: "GET" },
+      );
+      const data = await resp.json();
+      const rangeList = data.availableRanges?.map(rangeFromObj).filter(
+        rangeIsLonger(eventType?.duration),
+      );
+      setRangeList(rangeList);
+      console.log(rangeList);
+    })();
+  }, [date]);
+
   useEffect(() => {
     if (error) {
       redirect("/");
@@ -67,6 +103,7 @@ export default function () {
   if (error) {
     return null;
   }
+  const dateRangeMap = rangeListToLocalDateRangeMap(rangeList);
   return (
     <div className="max-w-screen-xl px-4 mt-10 m-auto grid grid-cols-3 gap-20">
       <div className="border-t border-neutral-600 pt-4">
@@ -81,11 +118,13 @@ export default function () {
         </span>
         <div className="grid grid-cols-2 gap-10 mt-4 py-5">
           <CalendarMonth
+            dateRangeMap={dateRangeMap}
             side="left"
             startDate={startOfMonth(date)}
             onClickLeft={() => setDate(startOfMonth(date, -1))}
           />
           <CalendarMonth
+            dateRangeMap={dateRangeMap}
             side="right"
             startDate={startOfMonth(date, 1)}
             onClickRight={() => setDate(startOfMonth(date, 1))}
@@ -99,11 +138,13 @@ export default function () {
 type CalendarMonthProp = {
   startDate: Date;
   side: "left" | "right";
+  dateRangeMap: DateRangeMap;
   onClickLeft?: () => void;
   onClickRight?: () => void;
 };
 function CalendarMonth(
-  { side, startDate, onClickLeft, onClickRight }: CalendarMonthProp,
+  { dateRangeMap, side, startDate, onClickLeft, onClickRight }:
+    CalendarMonthProp,
 ) {
   const canGoBack = side === "left" &&
     startOfMonth(new Date()).valueOf() !== startDate.valueOf();
@@ -129,15 +170,27 @@ function CalendarMonth(
           </IconButton>
         )}
       </p>
-      <div className="mt-10 grid grid-cols-7 gap-6">
+      <div className="mt-10 grid grid-cols-7 gap-3.5">
         {[...Array(startDate.getDay())].map((_, i) => (
           <div key={"empty-" + i}></div>
         ))}
-        {[...Array(daysOfMonth(startDate))].map((_, i) => (
-          <div key={i} className="flex justify-center text-lg">
-            {i + 1}
-          </div>
-        ))}
+        {[...Array(daysOfMonth(startDate))].map((_, i) => {
+          const date = new Date(+startDate + (i) * DAY);
+          const available = dateRangeMap[format(date)] !== undefined;
+          return (
+            <div
+              key={i}
+              className={cx("flex justify-center text-lg rounded-full p-1.5", {
+                "text-neutral-400": !available,
+                "hover:bg-primary/30": available,
+                "cursor-pointer": available,
+                "cursor-not-allowed": !available,
+              })}
+            >
+              {i + 1}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
