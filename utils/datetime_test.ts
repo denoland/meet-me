@@ -8,6 +8,9 @@ import {
   isValidHourMinute,
   MIN,
   secToHourMinute,
+  subtractRangeFromRange,
+  subtractRangeListFromRange,
+  subtractRangeListFromRangeList,
   WeekRange,
   weekRangeListToMap,
   zonedDate,
@@ -212,5 +215,168 @@ Deno.test("getAvailableRangesBetween", () => {
         end: new Date("2022-06-15T16:00Z"),
       },
     ],
+  );
+});
+
+Deno.test("subtractRangeFromRange", () => {
+  assertEquals(
+    subtractRangeFromRange({
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }, {
+      start: new Date("2022-06-20T07:00Z"),
+      end: new Date("2022-06-20T08:00Z"),
+    }),
+    [{
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }],
+  );
+  assertEquals(
+    subtractRangeFromRange({
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }, {
+      start: new Date("2022-06-20T18:00Z"),
+      end: new Date("2022-06-20T19:00Z"),
+    }),
+    [{
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }],
+  );
+  assertEquals(
+    subtractRangeFromRange({
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }, {
+      start: new Date("2022-06-20T08:00Z"),
+      end: new Date("2022-06-20T10:00Z"),
+    }),
+    [{
+      start: new Date("2022-06-20T10:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }],
+  );
+  assertEquals(
+    subtractRangeFromRange({
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }, {
+      start: new Date("2022-06-20T16:30Z"),
+      end: new Date("2022-06-20T17:30Z"),
+    }),
+    [{
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T16:30Z"),
+    }],
+  );
+  assertEquals(
+    subtractRangeFromRange({
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }, {
+      start: new Date("2022-06-20T10:30Z"),
+      end: new Date("2022-06-20T11:30Z"),
+    }),
+    [{
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T10:30Z"),
+    }, {
+      start: new Date("2022-06-20T11:30Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }],
+  );
+});
+
+Deno.test("subtractRangeListFromRange", () => {
+  assertEquals(
+    subtractRangeListFromRange({
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }, [{
+      start: new Date("2022-06-20T07:00Z"),
+      end: new Date("2022-06-20T08:00Z"),
+    }, {
+      start: new Date("2022-06-20T08:30Z"),
+      end: new Date("2022-06-20T09:30Z"),
+    }, {
+      start: new Date("2022-06-20T10:00Z"),
+      end: new Date("2022-06-20T11:00Z"),
+    }, {
+      start: new Date("2022-06-20T13:00Z"),
+      end: new Date("2022-06-20T14:00Z"),
+    }, {
+      start: new Date("2022-06-20T15:30Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }, {
+      start: new Date("2022-06-20T18:00Z"),
+      end: new Date("2022-06-20T19:00Z"),
+    }]),
+    [{
+      start: new Date("2022-06-20T09:30Z"),
+      end: new Date("2022-06-20T10:00Z"),
+    }, {
+      start: new Date("2022-06-20T11:00Z"),
+      end: new Date("2022-06-20T13:00Z"),
+    }, {
+      start: new Date("2022-06-20T14:00Z"),
+      end: new Date("2022-06-20T15:30Z"),
+    }],
+  );
+});
+
+Deno.test("subtractRangeListFromRangeList", () => {
+  assertEquals(
+    subtractRangeListFromRangeList([{
+      start: new Date("2022-06-20T09:00Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }, {
+      start: new Date("2022-06-21T09:00Z"),
+      end: new Date("2022-06-21T17:00Z"),
+    }, {
+      start: new Date("2022-06-22T09:00Z"),
+      end: new Date("2022-06-22T17:00Z"),
+    }, {
+      start: new Date("2022-06-23T09:00Z"),
+      end: new Date("2022-06-23T17:00Z"),
+    }], [{
+      start: new Date("2022-06-20T07:00Z"),
+      end: new Date("2022-06-20T08:00Z"),
+    }, {
+      start: new Date("2022-06-20T08:30Z"),
+      end: new Date("2022-06-20T09:30Z"),
+    }, {
+      start: new Date("2022-06-20T10:00Z"),
+      end: new Date("2022-06-20T11:00Z"),
+    }, {
+      start: new Date("2022-06-20T13:00Z"),
+      end: new Date("2022-06-20T14:00Z"),
+    }, {
+      start: new Date("2022-06-20T15:30Z"),
+      end: new Date("2022-06-20T17:00Z"),
+    }, {
+      start: new Date("2022-06-20T18:00Z"),
+      end: new Date("2022-06-20T19:00Z"),
+    }]),
+    [{
+      start: new Date("2022-06-20T09:30Z"),
+      end: new Date("2022-06-20T10:00Z"),
+    }, {
+      start: new Date("2022-06-20T11:00Z"),
+      end: new Date("2022-06-20T13:00Z"),
+    }, {
+      start: new Date("2022-06-20T14:00Z"),
+      end: new Date("2022-06-20T15:30Z"),
+    }, {
+      start: new Date("2022-06-21T09:00Z"),
+      end: new Date("2022-06-21T17:00Z"),
+    }, {
+      start: new Date("2022-06-22T09:00Z"),
+      end: new Date("2022-06-22T17:00Z"),
+    }, {
+      start: new Date("2022-06-23T09:00Z"),
+      end: new Date("2022-06-23T17:00Z"),
+    }],
   );
 });

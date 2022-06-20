@@ -156,9 +156,85 @@ export function getAvailableRangesBetween(
     }
     d = new Date(+d + DAY);
   }
-  console.log(result);
 
   return result;
+}
+
+/**
+ * Subtract (take difference) the range list from the other range list.
+ * Note: used for calculating diff of user set availability and already
+ * occupied slots. The result returns the actual available slots of the user.
+ *
+ * TODO(kt3k): We can optimize this method if we group the source list and
+ * subtract list by, for example, date (YYYY-MM-DD).
+ * @param sources
+ * @param subtractList
+ * @returns
+ */
+export function subtractRangeListFromRangeList(
+  sourceList: Range[],
+  subtractList: Range[],
+): Range[] {
+  const result = [];
+  for (const source of sourceList) {
+    // We assume sources are disjoint
+    result.push(...subtractRangeListFromRange(source, subtractList));
+  }
+  return result;
+}
+
+export function subtractRangeListFromRange(
+  source: Range,
+  subtractList: Range[],
+): Range[] {
+  subtractList = [...subtractList];
+  while (subtractList.length > 0) {
+    const subtract = subtractList.pop();
+    const res = subtractRangeFromRange(source, subtract!);
+    if (res.length === 0) {
+      return [];
+    }
+    if (res.length === 1) {
+      source = res[0];
+    }
+    if (res.length === 2) {
+      const remains = [...subtractList];
+      const leftResult = subtractRangeListFromRange(res[0], remains);
+      const rightResult = subtractRangeListFromRange(res[1], remains);
+      return leftResult.concat(rightResult);
+    }
+  }
+  return [source];
+}
+
+export function subtractRangeFromRange(
+  source: Range,
+  subtract: Range,
+): Range[] {
+  if (subtract.end <= source.start) {
+    // subtract is too early and no intersection
+    return [{ ...source }];
+  } else if (source.end <= subtract.start) {
+    // subtract is too late and no intersection
+    return [{ ...source }];
+  } else if (subtract.start <= source.start && source.end <= subtract.end) {
+    // subtract covers the entire source
+    return [];
+  } else if (subtract.start <= source.start && subtract.end < source.end) {
+    // subtract covers the first part of source
+    return [{ start: subtract.end, end: source.end }];
+  } else if (source.start < subtract.start && source.end <= subtract.end) {
+    // subtract covers the last part of source
+    return [{ start: source.start, end: subtract.start }];
+  } else if (source.start < subtract.start && subtract.end < source.end) {
+    // subtract is contained in source, so the source is split into two parts
+    return [{ start: source.start, end: subtract.start }, {
+      start: subtract.end,
+      end: source.end,
+    }];
+  }
+  console.log(source, subtract);
+  throw new Error("unreachable");
 }
 
 export const timeZones = [
