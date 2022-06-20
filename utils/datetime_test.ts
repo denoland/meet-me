@@ -1,7 +1,6 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
 import {
-  formatToYearMonthDate,
   getAvailableRangesBetween,
   HOUR,
   hourMinuteToSec,
@@ -126,13 +125,6 @@ Deno.test("zonedDate", () => {
   assertEquals(
     zonedDate("2023-04-02T03:00Z", "Australia/Sydney"),
     new Date("2023-04-01T17:00Z"),
-  );
-});
-
-Deno.test("formatToYearMonthDate", () => {
-  assertEquals(
-    formatToYearMonthDate(new Date("2022-06-17T01:23Z")),
-    "2022-06-17",
   );
 });
 
