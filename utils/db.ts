@@ -2,11 +2,13 @@
 
 import { validate as uuidValidate } from "std/uuid/v4.ts";
 import {
+  getAvailableRangesBetween,
   hourMinuteToSec,
   isValidHourMinute,
   isValidWeekDay,
   MIN,
   Range,
+  subtractRangeListFromRangeList,
   WeekRange,
 } from "./datetime.ts";
 
@@ -158,23 +160,35 @@ export async function getUserAvailability(
   },
 ) {
   await ensureAccessTokenIsFreshEnough(user, opts.tokenEndpoint);
+  const body = JSON.stringify({
+    timeMin: start.toISOString(),
+    timeMax: end.toISOString(),
+    items: [{ id: user.email }],
+  });
   const resp = await fetch(opts.freeBusyApi, {
     method: "POST",
-    body: JSON.stringify({
-      timeMin: start.toISOString(),
-      timeMax: end.toISOString(),
-      items: [{ id: user.email }],
-    }),
+    body,
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${user.googleAccessToken}`,
     },
   });
   const data = await resp.json();
+  if (!resp.ok) {
+    throw new Error(data.error.message);
+  }
   const busyRanges = data.calendars[user.email].busy.map((
     { start, end }: { start: string; end: string },
   ) => ({ start: new Date(start), end: new Date(end) })) as Range[];
-  return busyRanges;
+  // deno-lint-ignore no-explicit-any
+  const sourceAvailableRanges = getAvailableRangesBetween(
+    start,
+    end,
+    user.availabilities!,
+    user.timeZone as any,
+  );
+
+  return subtractRangeListFromRangeList(sourceAvailableRanges, busyRanges);
 }
 
 export async function ensureAccessTokenIsFreshEnough(

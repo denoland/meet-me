@@ -42,7 +42,27 @@ const user: User = {
   googleAccessToken: args["access-token"],
   googleAccessTokenExpires: new Date(args["expires"]),
   timeZone: "Europe/London",
-  availabilities: [],
+  availabilities: [{
+    weekDay: "MON",
+    startTime: "09:00",
+    endTime: "17:00",
+  }, {
+    weekDay: "TUE",
+    startTime: "09:00",
+    endTime: "17:00",
+  }, {
+    weekDay: "WED",
+    startTime: "09:00",
+    endTime: "17:00",
+  }, {
+    weekDay: "THU",
+    startTime: "09:00",
+    endTime: "17:00",
+  }, {
+    weekDay: "FRI",
+    startTime: "09:00",
+    endTime: "17:00",
+  }],
   eventTypes: [],
 };
 const availability = await getUserAvailability(
