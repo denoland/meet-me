@@ -1,6 +1,5 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-import { useState } from "react";
 import {
   HOUR,
   hourMinuteToSec,
@@ -8,25 +7,11 @@ import {
   secToHourMinute,
   WeekDay,
 } from "utils/datetime.ts";
-import { WeekRange } from "utils/db.ts";
+import { WeekRange, weekRangeListToMap } from "utils/datetime.ts";
 import cx from "utils/cx.ts";
 import Button from "base/Button.tsx";
 import Input from "base/Input.tsx";
 import icons from "icons";
-
-type RangeMap = Record<WeekDay, WeekRange[]>;
-
-function rangesToRangeMap(ranges: WeekRange[]): RangeMap {
-  return {
-    SUN: ranges.filter((range) => range.weekDay === "SUN"),
-    MON: ranges.filter((range) => range.weekDay === "MON"),
-    TUE: ranges.filter((range) => range.weekDay === "TUE"),
-    WED: ranges.filter((range) => range.weekDay === "WED"),
-    THU: ranges.filter((range) => range.weekDay === "THU"),
-    FRI: ranges.filter((range) => range.weekDay === "FRI"),
-    SAT: ranges.filter((range) => range.weekDay === "SAT"),
-  };
-}
 
 type Props = {
   availabilities: WeekRange[];
@@ -36,7 +21,7 @@ type Props = {
 export default function AvailabilitySettings(
   { availabilities, onChange }: Props,
 ) {
-  const rangeMap = rangesToRangeMap(availabilities);
+  const rangeMap = weekRangeListToMap(availabilities);
   return (
     <ul>
       {Object.entries(rangeMap).map(([weekDay, ranges]) => (
