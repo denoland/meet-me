@@ -3,9 +3,16 @@
 import { useEffect, useState } from "react";
 import { useData, useRouter } from "aleph/react";
 import icons from "icons";
+import { IconButton } from "base/Button.tsx";
 import { CALENDAR_FREE_BUSY_API, TOKEN_ENDPOINT } from "utils/const.ts";
 import { EventType, getUserAvailability, getUserBySlug } from "utils/db.ts";
-import { daysOfMonth, MIN, startOfMonth } from "utils/datetime.ts";
+import {
+  daysOfMonth,
+  MIN,
+  rangeFromObj,
+  rangeIsLonger,
+  startOfMonth,
+} from "utils/datetime.ts";
 import cx from "utils/cx.ts";
 
 const longMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "long" });
@@ -50,6 +57,8 @@ export default function () {
     }
   >();
   const [date, setDate] = useState(new Date());
+  const rangeList = availableRanges?.map(rangeFromObj);
+  console.log("availableRanges", rangeList);
   useEffect(() => {
     if (error) {
       redirect("/");
@@ -71,8 +80,16 @@ export default function () {
           Select the date
         </span>
         <div className="grid grid-cols-2 gap-10 mt-4 py-5">
-          <CalendarMonth side="left" startDate={startOfMonth(date)} />
-          <CalendarMonth side="right" startDate={startOfMonth(date, 1)} />
+          <CalendarMonth
+            side="left"
+            startDate={startOfMonth(date)}
+            onClickLeft={() => setDate(startOfMonth(date, -1))}
+          />
+          <CalendarMonth
+            side="right"
+            startDate={startOfMonth(date, 1)}
+            onClickRight={() => setDate(startOfMonth(date, 1))}
+          />
         </div>
       </div>
     </div>
@@ -82,8 +99,14 @@ export default function () {
 type CalendarMonthProp = {
   startDate: Date;
   side: "left" | "right";
+  onClickLeft?: () => void;
+  onClickRight?: () => void;
 };
-function CalendarMonth({ side, startDate }: CalendarMonthProp) {
+function CalendarMonth(
+  { side, startDate, onClickLeft, onClickRight }: CalendarMonthProp,
+) {
+  const canGoBack = side === "left" &&
+    startOfMonth(new Date()).valueOf() !== startDate.valueOf();
   return (
     <div>
       <p
@@ -94,14 +117,24 @@ function CalendarMonth({ side, startDate }: CalendarMonthProp) {
           },
         )}
       >
-        {side === "left" && <icons.CaretLeft size={24} />}
+        {canGoBack && (
+          <IconButton onClick={onClickLeft}>
+            <icons.CaretLeft size={24} />
+          </IconButton>
+        )}
         {longMonthFormatter.format(startDate).toUpperCase()}
-        {side === "right" && <icons.CaretRight size={24} />}
+        {side === "right" && (
+          <IconButton onClick={onClickRight}>
+            <icons.CaretRight size={24} />
+          </IconButton>
+        )}
       </p>
       <div className="mt-10 grid grid-cols-7 gap-6">
-        {[...Array(startDate.getDay())].map(() => <div></div>)}
+        {[...Array(startDate.getDay())].map((_, i) => (
+          <div key={"empty-" + i}></div>
+        ))}
         {[...Array(daysOfMonth(startDate))].map((_, i) => (
-          <div className="flex justify-center text-lg">
+          <div key={i} className="flex justify-center text-lg">
             {i + 1}
           </div>
         ))}

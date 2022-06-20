@@ -219,6 +219,19 @@ export function subtractRangeListFromRange(
   return [source];
 }
 
+/** Returns true if the given range is longer than the given duration.
+ * Higher order function, used for filtering the range list. */
+export function rangeIsLonger(duration: number) {
+  return (range: Range) => +range.end - +range.start >= duration;
+}
+
+export function rangeFromObj(obj: { start: string; end: string }) {
+  return {
+    start: new Date(obj.start),
+    end: new Date(obj.end),
+  };
+}
+
 export function subtractRangeFromRange(
   source: Range,
   subtract: Range,
