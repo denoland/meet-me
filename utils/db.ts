@@ -180,11 +180,11 @@ export async function getUserAvailability(
   const busyRanges = data.calendars[user.email].busy.map((
     { start, end }: { start: string; end: string },
   ) => ({ start: new Date(start), end: new Date(end) })) as Range[];
-  // deno-lint-ignore no-explicit-any
   const sourceAvailableRanges = getAvailableRangesBetween(
     start,
     end,
     user.availabilities!,
+    // deno-lint-ignore no-explicit-any
     user.timeZone as any,
   );
 
