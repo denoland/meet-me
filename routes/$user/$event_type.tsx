@@ -84,7 +84,7 @@ export default function () {
           `?start=${encodeURIComponent(start.toISOString())}&end=${
             encodeURIComponent(end.toISOString())
           }`,
-        { method: "GET" },
+        { method: "GET", headers: { "Accept": "application/json" } },
       );
       const data = await resp.json();
       const rangeList = data.availableRanges?.map(rangeFromObj).filter(

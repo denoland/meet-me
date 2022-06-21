@@ -56,7 +56,7 @@ function RightArea() {
   return (
     <div className="lt-sm:!hidden opacity-75">
       {[...Array(9)].map((_, i) => (
-        <div className="flex items-center gap-2 text-sm select-none">
+        <div key={i} className="flex items-center gap-2 text-sm select-none">
           {[...Array(100)].map((_, j) => {
             const r = Math.random();
             const thr = 0.02;
