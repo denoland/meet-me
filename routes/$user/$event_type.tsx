@@ -387,9 +387,10 @@ function AvailableHourList(
           message={
             <div className="mt-6 grid grid-cols-[300px_minmax(400px,_1fr)]">
               <div className="">
+                <p>TODO: add design</p>
                 <p>{userName}</p>
-                <p className="text-5xl font-extrabold">{eventType.title}</p>
-                <p className="text-2xl font-semibold">
+                <p className="text-2xl font-bold">{eventType.title}</p>
+                <p>
                   {eventType.duration / MIN} min
                 </p>
                 <p>{dateFormatter.format(range.start)}</p>
@@ -400,13 +401,13 @@ function AvailableHourList(
               </div>
               <div className="border-l border-neutral-600 pl-4 grid grid-cols-[100px_minmax(300px,_1fr)] gap-4">
                 <span>Name</span>
-                <Input />
+                <Input placeholder="name" />
                 <span>Email</span>
-                <Input />
+                <Input placeholder="email" />
                 <span>Guest Emails</span>
                 <textarea
                   className="rounded-md p-2 min-h-20 text-black"
-                  placeholder="email(s)"
+                  placeholder="guest email(s)"
                 >
                 </textarea>
                 <span>Description</span>
@@ -421,7 +422,7 @@ function AvailableHourList(
         >
           <div
             role="button"
-            className="w-full border border-neutral-500 rounded-lg py-5 flex justify-center hover:bg-dark-400"
+            className="w-full border border-neutral-500 rounded-lg py-5 flex justify-center bg-dark-400 hover:bg-dark-100"
           >
             {hourMinuteFormatter.format(range.start)}
           </div>
