@@ -5,6 +5,8 @@ import { useData, useRouter } from "aleph/react";
 import icons from "icons";
 import Button, { IconButton } from "base/Button.tsx";
 import SlidingPanel from "base/SlidingPanel.tsx";
+import Input from "base/Input.tsx";
+import Dialog from "base/Dialog.tsx";
 import { CALENDAR_FREE_BUSY_API, TOKEN_ENDPOINT } from "utils/const.ts";
 import { EventType, getUserAvailability, getUserBySlug } from "utils/db.ts";
 import {
@@ -230,6 +232,8 @@ export default function BookPage() {
                 state={showHours ? "center" : "left"}
               >
                 <AvailableHourList
+                  userName={name}
+                  eventType={eventType}
                   ranges={selectedDate
                     ? dateRangeMap[format(selectedDate)]
                     : []}
@@ -344,31 +348,82 @@ function CalendarMonth(
   );
 }
 
-type AvailableHourListProps = {
-  ranges: Range[];
-};
-
 const hourMinuteFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "2-digit",
   minute: "2-digit",
 });
 
-function AvailableHourList({ ranges }: AvailableHourListProps) {
-  const [memoedRanges] = useState(ranges);
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+});
+const timeFormatter = new Intl.DateTimeFormat("en-US", {
+  hour12: false,
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+type AvailableHourListProps = {
+  userName: string;
+  ranges: Range[];
+  eventType: EventType;
+};
+
+function AvailableHourList(
+  { userName, eventType, ranges }: AvailableHourListProps,
+) {
   return (
     <div className="flex flex-col pt-6 px-6 gap-6 sm:max-h-110 overflow-scroll bg-dark-300 rounded-lg">
-      {memoedRanges.map((
+      {ranges.map((
         range,
       ) => (
-        <div
-          role="button"
-          onClick={() => {
-            alert(range.start);
+        <Dialog
+          title="Enter event details"
+          okText="Create"
+          onOk={() => {
+            alert("TODO");
           }}
-          className="w-full border border-neutral-500 rounded-lg py-5 flex justify-center hover:bg-dark-400"
+          message={
+            <div className="mt-6 grid grid-cols-[300px_minmax(400px,_1fr)]">
+              <div className="">
+                <p>{userName}</p>
+                <p className="text-5xl font-extrabold">{eventType.title}</p>
+                <p className="text-2xl font-semibold">
+                  {eventType.duration / MIN} min
+                </p>
+                <p>{dateFormatter.format(range.start)}</p>
+                <p className="text-4xl font-thin">
+                  {timeFormatter.format(range.start)} -{" "}
+                  {timeFormatter.format(range.end)}
+                </p>
+              </div>
+              <div className="border-l border-neutral-600 pl-4 grid grid-cols-[100px_minmax(300px,_1fr)] gap-4">
+                <span>Name</span>
+                <Input />
+                <span>Email</span>
+                <Input />
+                <span>Guest Emails</span>
+                <textarea
+                  className="rounded-md p-2 min-h-20 text-black"
+                  placeholder="email(s)"
+                >
+                </textarea>
+                <span>Description</span>
+                <textarea
+                  className="rounded-md p-2 min-h-20 text-black"
+                  placeholder="description"
+                >
+                </textarea>
+              </div>
+            </div>
+          }
         >
-          {hourMinuteFormatter.format(range.start)}
-        </div>
+          <div
+            role="button"
+            className="w-full border border-neutral-500 rounded-lg py-5 flex justify-center hover:bg-dark-400"
+          >
+            {hourMinuteFormatter.format(range.start)}
+          </div>
+        </Dialog>
       ))}
     </div>
   );
