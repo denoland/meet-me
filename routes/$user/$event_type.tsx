@@ -400,17 +400,17 @@ function AvailableHourList(
                 </p>
               </div>
               <div className="border-l border-neutral-600 pl-4 grid grid-cols-[100px_minmax(300px,_1fr)] gap-4">
-                <span>Name</span>
+                <span className="text-right pt-1">Name</span>
                 <Input placeholder="name" />
-                <span>Email</span>
+                <span className="text-right pt-1">Email</span>
                 <Input placeholder="email" />
-                <span>Guest Emails</span>
+                <span className="text-right pt-1">Guest Emails</span>
                 <textarea
                   className="rounded-md p-2 min-h-20 text-black"
                   placeholder="guest email(s)"
                 >
                 </textarea>
-                <span>Description</span>
+                <span className="text-right pt-1">Description</span>
                 <textarea
                   className="rounded-md p-2 min-h-20 text-black"
                   placeholder="description"
