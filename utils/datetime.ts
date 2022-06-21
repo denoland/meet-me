@@ -134,10 +134,21 @@ function weekRangeToRange(
 /** Returns true if the given date is between the given start date
  * and end date. */
 export function inRange(date: Date, start: Date, end: Date): boolean {
-  const s = start.valueOf();
-  const e = end.valueOf();
-  const d = date.valueOf();
+  const s = +start;
+  const e = +end;
+  const d = +date;
   return s <= d && d <= e;
+}
+
+/**
+ * Returns true when the 1st given range is contained in the 2nd given range.
+ */
+export function rangeIsInRange(x: Range, y: Range): boolean {
+  const xs = +x.start;
+  const xe = +x.end;
+  const ys = +y.start;
+  const ye = +y.end;
+  return ys <= xs && xe <= ye;
 }
 
 /** Formats the date in YYYY-MM-DD format in UTC timezone */

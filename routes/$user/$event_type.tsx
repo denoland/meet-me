@@ -282,7 +282,7 @@ function CalendarMonth(
         {[...Array(daysOfMonth(startDate))].map((_, i) => {
           const date = new Date(+startDate + (i) * DAY);
           const selected = selectedDate !== null &&
-            date.valueOf() === selectedDate.valueOf();
+            +date === +selectedDate;
           const available = !selected &&
             dateRangeMap[format(date)] !== undefined;
           const unavailable = !available && !selected;
@@ -317,7 +317,7 @@ type AvailableHourListProps = {
   ranges: Range[];
 };
 
-function AvailableHourList({}: AvailableHourListProps) {
+function AvailableHourList({ ranges }: AvailableHourListProps) {
   return (
     <div className="flex flex-col gap-6 sm:max-h-110 overflow-scroll">
       {["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00"].map((

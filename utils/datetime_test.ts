@@ -7,6 +7,7 @@ import {
   inRange,
   isValidHourMinute,
   MIN,
+  rangeIsInRange,
   secToHourMinute,
   subtractRangeFromRange,
   subtractRangeListFromRange,
@@ -389,5 +390,62 @@ Deno.test("inRange", () => {
   );
   assert(
     !inRange(new Date("2022-08Z"), new Date("2022-05Z"), new Date("2022-07Z")),
+  );
+});
+
+Deno.test("rangeIsInRange", () => {
+  assert(
+    !rangeIsInRange(
+      { start: new Date("2017Z"), end: new Date("2019Z") },
+      { start: new Date("2020Z"), end: new Date("2024Z") },
+    ),
+  );
+  assert(
+    !rangeIsInRange(
+      { start: new Date("2018Z"), end: new Date("2020Z") },
+      { start: new Date("2020Z"), end: new Date("2024Z") },
+    ),
+  );
+  assert(
+    !rangeIsInRange(
+      { start: new Date("2019Z"), end: new Date("2021Z") },
+      { start: new Date("2020Z"), end: new Date("2024Z") },
+    ),
+  );
+  assert(
+    rangeIsInRange(
+      { start: new Date("2020Z"), end: new Date("2022Z") },
+      { start: new Date("2020Z"), end: new Date("2024Z") },
+    ),
+  );
+  assert(
+    rangeIsInRange(
+      { start: new Date("2021Z"), end: new Date("2023Z") },
+      { start: new Date("2020Z"), end: new Date("2024Z") },
+    ),
+  );
+  assert(
+    rangeIsInRange(
+      { start: new Date("2022Z"), end: new Date("2024Z") },
+      { start: new Date("2020Z"), end: new Date("2024Z") },
+    ),
+  );
+  assert(
+    !rangeIsInRange(
+      { start: new Date("2023Z"), end: new Date("2025Z") },
+      { start: new Date("2020Z"), end: new Date("2024Z") },
+    ),
+  );
+  assert(
+    !rangeIsInRange(
+      { start: new Date("2024Z"), end: new Date("2026Z") },
+      { start: new Date("2020Z"), end: new Date("2024Z") },
+    ),
+  );
+  assert(
+    !rangeIsInRange(
+      { start: new Date("2025Z"), end: new Date("2027Z") },
+      { start: new Date("2020Z"), end: new Date("2024Z") },
+    ),
   );
 });
