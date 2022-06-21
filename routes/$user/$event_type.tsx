@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useData, useRouter } from "aleph/react";
 import icons from "icons";
-import { IconButton } from "base/Button.tsx";
+import Button, { IconButton } from "base/Button.tsx";
+import SlidingPanel from "base/SlidingPanel.tsx";
 import { CALENDAR_FREE_BUSY_API, TOKEN_ENDPOINT } from "utils/const.ts";
 import { EventType, getUserAvailability, getUserBySlug } from "utils/db.ts";
 import {
@@ -19,8 +20,16 @@ import {
   startOfMonth,
 } from "utils/datetime.ts";
 import cx from "utils/cx.ts";
+import { delay } from "std/async/delay.ts";
 
 const longMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "long" });
+
+function inRange(date: Date, start: Date, end: Date): boolean {
+  const s = start.valueOf();
+  const e = end.valueOf();
+  const d = date.valueOf();
+  return s <= d && d < e;
+}
 
 export const data = {
   async get(req: Request, ctx: Context) {
@@ -62,7 +71,7 @@ export const data = {
   },
 };
 
-export default function () {
+export default function BookPage() {
   const { redirect } = useRouter();
   const { data: { eventType, error, name } } = useData<
     {
@@ -73,7 +82,13 @@ export default function () {
     }
   >();
   const [date, setDate] = useState(new Date());
+  const start = startOfMonth(date);
+  const end = startOfMonth(date, 2);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dateRangeMap, setDateRangeMap] = useState<DateRangeMap>({});
+  const [showHours, setShowHours] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(true);
+  const [mode, setMode] = useState<"calendar" | "hours">("calendar");
 
   useEffect(() => {
     const start = date ?? new Date();
@@ -96,6 +111,33 @@ export default function () {
     })();
   }, [date]);
 
+  const showAvailableHourList = async () => {
+    if (
+      selectedDate &&
+      !inRange(
+        selectedDate,
+        startOfMonth(date),
+        startOfMonth(date, 1),
+      )
+    ) {
+      setDate(selectedDate);
+    }
+    setShowCalendar(false);
+    await delay(500);
+    setMode("hours");
+    await delay(50);
+    setShowHours(true);
+  };
+
+  const hideAvailableHourList = async () => {
+    setShowHours(false);
+
+    await delay(500);
+    setMode("calendar");
+    await delay(50);
+    setShowCalendar(true);
+  };
+
   useEffect(() => {
     if (error) {
       redirect("/");
@@ -114,21 +156,74 @@ export default function () {
       </div>
       <div className="col-span-2 border-t border-neutral-600 relative">
         <span className="absolute -top-4 pr-8 bg-dark-400 text-lg font-medium">
-          Select the date
+          Select a date and time
         </span>
         <div className="grid grid-cols-2 gap-10 mt-4 py-5">
           <CalendarMonth
+            canMoveMonth={showCalendar}
             dateRangeMap={dateRangeMap}
+            selectedDate={selectedDate}
             side="left"
             startDate={startOfMonth(date)}
-            onClickLeft={() => setDate(startOfMonth(date, -1))}
+            onClickLeft={() => {
+              const start = startOfMonth(date, -1);
+              setDate(start);
+            }}
+            onSelectDate={setSelectedDate}
           />
-          <CalendarMonth
-            dateRangeMap={dateRangeMap}
-            side="right"
-            startDate={startOfMonth(date, 1)}
-            onClickRight={() => setDate(startOfMonth(date, 1))}
-          />
+          {mode === "calendar" && (
+            <SlidingPanel
+              state={showCalendar ? "center" : "right"}
+            >
+              <CalendarMonth
+                canMoveMonth={showCalendar}
+                dateRangeMap={dateRangeMap}
+                selectedDate={selectedDate}
+                side="right"
+                startDate={startOfMonth(date, 1)}
+                onClickRight={() => {
+                  const start = startOfMonth(date, 1);
+                  setDate(start);
+                }}
+                onSelectDate={setSelectedDate}
+              />
+            </SlidingPanel>
+          )}
+          {mode === "hours" &&
+            (
+              <SlidingPanel
+                state={showHours ? "center" : "left"}
+              >
+                <AvailableHourList
+                  ranges={selectedDate
+                    ? dateRangeMap[format(selectedDate)]
+                    : []}
+                />
+              </SlidingPanel>
+            )}
+        </div>
+        <div>
+          {selectedDate && inRange(selectedDate, start, end) && showCalendar &&
+            (
+              <Button
+                style="primary"
+                onClick={showAvailableHourList}
+              >
+                Check
+                <icons.CaretRight />
+              </Button>
+            )}
+          {showHours && (
+            <Button
+              style="secondary"
+              onClick={() => {
+                setSelectedDate(null);
+                hideAvailableHourList();
+              }}
+            >
+              Cancel
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -137,17 +232,29 @@ export default function () {
 
 type CalendarMonthProp = {
   startDate: Date;
+  selectedDate: Date | null;
   side: "left" | "right";
   dateRangeMap: DateRangeMap;
   onClickLeft?: () => void;
   onClickRight?: () => void;
+  onSelectDate: (d: Date) => void;
+  canMoveMonth: boolean;
 };
 function CalendarMonth(
-  { dateRangeMap, side, startDate, onClickLeft, onClickRight }:
-    CalendarMonthProp,
+  {
+    canMoveMonth,
+    dateRangeMap,
+    selectedDate,
+    side,
+    startDate,
+    onClickLeft,
+    onClickRight,
+    onSelectDate,
+  }: CalendarMonthProp,
 ) {
-  const canGoBack = side === "left" &&
+  const canGoBack = canMoveMonth && side === "left" &&
     startOfMonth(new Date()).valueOf() !== startDate.valueOf();
+  const canGoFowrad = canMoveMonth && side === "right";
   return (
     <div>
       <p
@@ -164,7 +271,7 @@ function CalendarMonth(
           </IconButton>
         )}
         {longMonthFormatter.format(startDate).toUpperCase()}
-        {side === "right" && (
+        {canGoFowrad && (
           <IconButton onClick={onClickRight}>
             <icons.CaretRight size={24} />
           </IconButton>
@@ -176,22 +283,56 @@ function CalendarMonth(
         ))}
         {[...Array(daysOfMonth(startDate))].map((_, i) => {
           const date = new Date(+startDate + (i) * DAY);
-          const available = dateRangeMap[format(date)] !== undefined;
+          const selected = selectedDate !== null &&
+            date.valueOf() === selectedDate.valueOf();
+          const available = !selected &&
+            dateRangeMap[format(date)] !== undefined;
+          const unavailable = !available && !selected;
           return (
             <div
+              role={available ? "button" : ""}
               key={i}
-              className={cx("flex justify-center text-lg rounded-full p-1.5", {
-                "text-neutral-400": !available,
-                "hover:bg-primary/30": available,
-                "cursor-pointer": available,
-                "cursor-not-allowed": !available,
-              })}
+              onClick={() => {
+                if (available) {
+                  onSelectDate(date);
+                }
+              }}
+              className={cx(
+                "flex justify-center text-lg rounded-full p-1.5 font-medium",
+                {
+                  "text-neutral-400 cursor-not-allowed": unavailable,
+                  "hover:bg-primary/30 cursor-pointer": available,
+                  "bg-primary text-black cursor-default": selected,
+                },
+              )}
             >
               {i + 1}
             </div>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+type AvailableHourListProps = {
+  ranges: Range[];
+};
+
+function AvailableHourList({}: AvailableHourListProps) {
+  return (
+    <div className="flex flex-col gap-6">
+      {["09:00", "09:30", "10:00", "10:30"].map((time) => (
+        <div
+          role="button"
+          onClick={() => {
+            alert(time);
+          }}
+          className="w-full border border-neutral-500 rounded-lg py-5 flex justify-center hover:bg-dark-300"
+        >
+          {time}
+        </div>
+      ))}
     </div>
   );
 }

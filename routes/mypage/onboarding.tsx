@@ -9,7 +9,8 @@ import { notify } from "base/Notification.tsx";
 import TimeZoneSelect from "shared/TimeZoneSelect.tsx";
 import AvailabilitySettings from "shared/AvailabilitySettings.tsx";
 import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
-import { Range, UserForClient as User } from "utils/db.ts";
+import { UserForClient as User } from "utils/db.ts";
+import { WeekRange } from "utils/datetime.ts";
 import { delay } from "std/async/delay.ts";
 
 const STEPS = ["slug", "availability", "eventType"] as const;
@@ -56,7 +57,7 @@ export default function OnboardingPage() {
   return (
     <div>
       {step === "slug" && (
-        <SlidingPanel state={panelState}>
+        <SlidingPanel className="w-screen" state={panelState}>
           <ChooseURL
             slug={user.slug || ""}
             onFinish={goForward}
@@ -64,7 +65,7 @@ export default function OnboardingPage() {
         </SlidingPanel>
       )}
       {step === "availability" && (
-        <SlidingPanel state={panelState}>
+        <SlidingPanel className="w-screen" state={panelState}>
           <ChooseAvailabilities
             user={user}
             onCancel={goBack}
@@ -73,7 +74,7 @@ export default function OnboardingPage() {
         </SlidingPanel>
       )}
       {step === "eventType" && (
-        <SlidingPanel state={panelState}>
+        <SlidingPanel className="w-screen" state={panelState}>
           <SetUpEventType
             user={user}
             onCancel={goBack}
@@ -163,7 +164,7 @@ function ChooseURL(
   );
 }
 
-const DEFAULT_AVAILABILITIES: Range[] = [
+const DEFAULT_AVAILABILITIES: WeekRange[] = [
   { weekDay: "MON" as const, startTime: "09:00", endTime: "17:00" },
   { weekDay: "TUE" as const, startTime: "09:00", endTime: "17:00" },
   { weekDay: "WED" as const, startTime: "09:00", endTime: "17:00" },

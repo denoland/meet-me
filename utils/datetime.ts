@@ -139,7 +139,7 @@ export function formatToYearMonthDateUTC(d: Date) {
 /** Formats the date in YYYY-MM-DD format in local timezone */
 export function formatToYearMonthDateLocal(date: Date) {
   const y = date.getFullYear();
-  let m = "" + date.getMonth() + 1;
+  let m = "" + (date.getMonth() + 1);
   if (m.length === 1) {
     m = "0" + m;
   }
