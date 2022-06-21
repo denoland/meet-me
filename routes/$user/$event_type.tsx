@@ -258,6 +258,8 @@ export default function BookPage() {
   );
 }
 
+const isClientSide = typeof Deno === "undefined";
+
 type CalendarMonthProp = {
   startDate: Date;
   selectedDate: Date | null;
@@ -314,7 +316,7 @@ function CalendarMonth(
         ))}
         {[...Array(daysOfMonth(startDate))].map((_, i) => {
           const date = new Date(+startDate + (i) * DAY);
-          const isToday = +date === +today;
+          const isToday = +date === +today && isClientSide;
           const selected = selectedDate !== null &&
             +date === +selectedDate;
           const available = !selected &&
