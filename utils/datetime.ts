@@ -174,7 +174,7 @@ export function getAvailableRangesBetween(
   const result = [];
   while (d < endWithMargin) {
     const date = formatToYearMonthDateUTC(d);
-    const weekRanges = map[numberToWeekDay(d.getDay())];
+    const weekRanges = map[numberToWeekDay(d.getUTCDay())];
     for (const wr of weekRanges) {
       const r = weekRangeToRange(date, wr, timeZone);
       if (r.end > start && r.start < end) {

@@ -73,7 +73,7 @@ export default function () {
     }
   >();
   const [date, setDate] = useState(new Date());
-  const [rangeList, setRangeList] = useState<Range[]>([]);
+  const [dateRangeMap, setDateRangeMap] = useState<DateRangeMap>({});
 
   useEffect(() => {
     const start = date ?? new Date();
@@ -90,8 +90,9 @@ export default function () {
       const rangeList = data.availableRanges?.map(rangeFromObj).filter(
         rangeIsLonger(eventType?.duration),
       );
-      setRangeList(rangeList);
-      console.log(rangeList);
+      setDateRangeMap((dateRangeMap) =>
+        Object.assign({}, dateRangeMap, rangeListToLocalDateRangeMap(rangeList))
+      );
     })();
   }, [date]);
 
@@ -103,7 +104,6 @@ export default function () {
   if (error) {
     return null;
   }
-  const dateRangeMap = rangeListToLocalDateRangeMap(rangeList);
   return (
     <div className="max-w-screen-xl px-4 mt-10 m-auto grid grid-cols-3 gap-20">
       <div className="border-t border-neutral-600 pt-4">
