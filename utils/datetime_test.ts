@@ -1,6 +1,7 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
 import {
+  createRangesInRange,
   getAvailableRangesBetween,
   HOUR,
   hourMinuteToSec,
@@ -447,5 +448,34 @@ Deno.test("rangeIsInRange", () => {
       { start: new Date("2025Z"), end: new Date("2027Z") },
       { start: new Date("2020Z"), end: new Date("2024Z") },
     ),
+  );
+});
+
+Deno.test("createRangesInRange", () => {
+  assertEquals(
+    createRangesInRange(
+      new Date("2022-06-22T00:00Z"),
+      new Date("2022-06-22T02:00Z"),
+      30 * MIN,
+      30 * MIN,
+    ),
+    [
+      {
+        start: new Date("2022-06-22T00:00Z"),
+        end: new Date("2022-06-22T00:30Z"),
+      },
+      {
+        start: new Date("2022-06-22T00:30Z"),
+        end: new Date("2022-06-22T01:00Z"),
+      },
+      {
+        start: new Date("2022-06-22T01:00Z"),
+        end: new Date("2022-06-22T01:30Z"),
+      },
+      {
+        start: new Date("2022-06-22T01:30Z"),
+        end: new Date("2022-06-22T02:00Z"),
+      },
+    ],
   );
 });

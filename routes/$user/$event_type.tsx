@@ -8,9 +8,11 @@ import SlidingPanel from "base/SlidingPanel.tsx";
 import { CALENDAR_FREE_BUSY_API, TOKEN_ENDPOINT } from "utils/const.ts";
 import { EventType, getUserAvailability, getUserBySlug } from "utils/db.ts";
 import {
+  createRangesInRange,
   type DateRangeMap,
   DAY,
   daysOfMonth,
+  filterAvailableRange,
   formatToYearMonthDateLocal as format,
   inRange,
   MIN,
@@ -19,9 +21,11 @@ import {
   rangeIsLonger,
   rangeListToLocalDateRangeMap,
   startOfMonth,
+  yearMonthDateToLocalDate,
 } from "utils/datetime.ts";
 import cx from "utils/cx.ts";
 import { delay } from "std/async/delay.ts";
+import { mapEntries } from "std/collections/map_entries.ts";
 
 const longMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "long" });
 
@@ -99,9 +103,32 @@ export default function BookPage() {
       const rangeList = data.availableRanges?.map(rangeFromObj).filter(
         rangeIsLonger(eventType?.duration),
       );
-      setDateRangeMap((dateRangeMap) =>
-        Object.assign({}, dateRangeMap, rangeListToLocalDateRangeMap(rangeList))
-      );
+      setDateRangeMap((dateRangeMap) => {
+        const map = rangeListToLocalDateRangeMap(rangeList);
+        const filteredMap = mapEntries(
+          map,
+          ([date, availableRanges]: [string, Range[]]) => {
+            const start = yearMonthDateToLocalDate(date);
+            const end = new Date(+start + DAY);
+            const candidateRanges = createRangesInRange(
+              start,
+              end,
+              eventType.duration,
+              30 * MIN,
+            );
+            const availableSlots = filterAvailableRange(
+              candidateRanges,
+              availableRanges,
+            );
+            return [date, availableSlots];
+          },
+        );
+        return Object.assign(
+          {},
+          dateRangeMap,
+          filteredMap,
+        );
+      });
     })();
   }, [date]);
 
@@ -125,7 +152,6 @@ export default function BookPage() {
 
   const hideAvailableHourList = async () => {
     setShowHours(false);
-
     await delay(500);
     setMode("calendar");
     await delay(50);
@@ -253,6 +279,9 @@ function CalendarMonth(
   const canGoBack = canMoveMonth && side === "left" &&
     startOfMonth(new Date()).valueOf() !== startDate.valueOf();
   const canGoFowrad = canMoveMonth && side === "right";
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return (
     <div>
       <p
@@ -281,6 +310,7 @@ function CalendarMonth(
         ))}
         {[...Array(daysOfMonth(startDate))].map((_, i) => {
           const date = new Date(+startDate + (i) * DAY);
+          const isToday = +date === +today;
           const selected = selectedDate !== null &&
             +date === +selectedDate;
           const available = !selected &&
@@ -301,6 +331,7 @@ function CalendarMonth(
                   "text-neutral-400 cursor-not-allowed": unavailable,
                   "hover:bg-primary/30 cursor-pointer": available,
                   "bg-primary text-black cursor-default": selected,
+                  "border border-neutral-400": isToday,
                 },
               )}
             >
@@ -317,20 +348,26 @@ type AvailableHourListProps = {
   ranges: Range[];
 };
 
+const hourMinuteFormatter = new Intl.DateTimeFormat("en-US", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 function AvailableHourList({ ranges }: AvailableHourListProps) {
+  const [memoedRanges] = useState(ranges);
   return (
-    <div className="flex flex-col gap-6 sm:max-h-110 overflow-scroll">
-      {["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00"].map((
-        time,
+    <div className="flex flex-col pt-6 px-6 gap-6 sm:max-h-110 overflow-scroll bg-dark-300 rounded-lg">
+      {memoedRanges.map((
+        range,
       ) => (
         <div
           role="button"
           onClick={() => {
-            alert(time);
+            alert(range.start);
           }}
-          className="w-full border border-neutral-500 rounded-lg py-5 flex justify-center hover:bg-dark-300"
+          className="w-full border border-neutral-500 rounded-lg py-5 flex justify-center hover:bg-dark-400"
         >
-          {time}
+          {hourMinuteFormatter.format(range.start)}
         </div>
       ))}
     </div>

@@ -140,15 +140,44 @@ export function inRange(date: Date, start: Date, end: Date): boolean {
   return s <= d && d <= e;
 }
 
-/**
- * Returns true when the 1st given range is contained in the 2nd given range.
- */
+/** Returns true when the 1st given range is contained in the 2nd given range. */
 export function rangeIsInRange(x: Range, y: Range): boolean {
   const xs = +x.start;
   const xe = +x.end;
   const ys = +y.start;
   const ye = +y.end;
   return ys <= xs && xe <= ye;
+}
+
+/** Creates a list of ranges of the give duration between the given
+ * start date and end date with given step length. */
+export function createRangesInRange(
+  start: Date,
+  end: Date,
+  duration: number,
+  step: number,
+): Range[] {
+  const s = +start;
+  const e = +end;
+  let offset = 0;
+  const result = [];
+  while (s + offset + duration <= e) {
+    result.push({
+      start: new Date(s + offset),
+      end: new Date(s + offset + duration),
+    });
+    offset += step;
+  }
+  return result;
+}
+
+export function filterAvailableRange(
+  ranges: Range[],
+  availability: Range[],
+): Range[] {
+  return ranges.filter((range) =>
+    availability.some((availableRange) => rangeIsInRange(range, availableRange))
+  );
 }
 
 /** Formats the date in YYYY-MM-DD format in UTC timezone */
@@ -168,6 +197,12 @@ export function formatToYearMonthDateLocal(date: Date) {
     d = "0" + d;
   }
   return `${y}-${m}-${d}`;
+}
+
+/** YYYY-MM-DD to Date object in local time zone */
+export function yearMonthDateToLocalDate(d: string): Date {
+  const [year, month, date] = d.split("-");
+  return new Date(+year, +month - 1, +date);
 }
 
 export function startOfMonth(d: Date, n = 0) {
