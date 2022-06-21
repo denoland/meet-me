@@ -159,18 +159,33 @@ export default function BookPage() {
           Select a date and time
         </span>
         <div className="grid grid-cols-2 gap-10 mt-4 py-5">
-          <CalendarMonth
-            canMoveMonth={showCalendar}
-            dateRangeMap={dateRangeMap}
-            selectedDate={selectedDate}
-            side="left"
-            startDate={startOfMonth(date)}
-            onClickLeft={() => {
-              const start = startOfMonth(date, -1);
-              setDate(start);
-            }}
-            onSelectDate={setSelectedDate}
-          />
+          <div>
+            <CalendarMonth
+              canMoveMonth={showCalendar}
+              dateRangeMap={dateRangeMap}
+              selectedDate={selectedDate}
+              side="left"
+              startDate={startOfMonth(date)}
+              onClickLeft={() => {
+                const start = startOfMonth(date, -1);
+                setDate(start);
+              }}
+              onSelectDate={setSelectedDate}
+            />
+            {showHours && (
+              <div className="flex justify-end mt-10">
+                <Button
+                  style="secondary"
+                  onClick={() => {
+                    setSelectedDate(null);
+                    hideAvailableHourList();
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
+          </div>
           {mode === "calendar" && (
             <SlidingPanel
               state={showCalendar ? "center" : "right"}
@@ -213,17 +228,6 @@ export default function BookPage() {
                 <icons.CaretRight />
               </Button>
             )}
-          {showHours && (
-            <Button
-              style="secondary"
-              onClick={() => {
-                setSelectedDate(null);
-                hideAvailableHourList();
-              }}
-            >
-              Cancel
-            </Button>
-          )}
         </div>
       </div>
     </div>
@@ -321,8 +325,10 @@ type AvailableHourListProps = {
 
 function AvailableHourList({}: AvailableHourListProps) {
   return (
-    <div className="flex flex-col gap-6">
-      {["09:00", "09:30", "10:00", "10:30"].map((time) => (
+    <div className="flex flex-col gap-6 sm:max-h-110 overflow-scroll">
+      {["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00"].map((
+        time,
+      ) => (
         <div
           role="button"
           onClick={() => {
