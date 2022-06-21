@@ -12,6 +12,7 @@ import {
   DAY,
   daysOfMonth,
   formatToYearMonthDateLocal as format,
+  inRange,
   MIN,
   Range,
   rangeFromObj,
@@ -23,13 +24,6 @@ import cx from "utils/cx.ts";
 import { delay } from "std/async/delay.ts";
 
 const longMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "long" });
-
-function inRange(date: Date, start: Date, end: Date): boolean {
-  const s = start.valueOf();
-  const e = end.valueOf();
-  const d = date.valueOf();
-  return s <= d && d < e;
-}
 
 export const data = {
   async get(req: Request, ctx: Context) {

@@ -4,6 +4,7 @@ import {
   getAvailableRangesBetween,
   HOUR,
   hourMinuteToSec,
+  inRange,
   isValidHourMinute,
   MIN,
   secToHourMinute,
@@ -370,5 +371,23 @@ Deno.test("subtractRangeListFromRangeList", () => {
       start: new Date("2022-06-23T09:00Z"),
       end: new Date("2022-06-23T17:00Z"),
     }],
+  );
+});
+
+Deno.test("inRange", () => {
+  assert(
+    !inRange(new Date("2022-04Z"), new Date("2022-05Z"), new Date("2022-07Z")),
+  );
+  assert(
+    inRange(new Date("2022-05Z"), new Date("2022-05Z"), new Date("2022-07Z")),
+  );
+  assert(
+    inRange(new Date("2022-06Z"), new Date("2022-05Z"), new Date("2022-07Z")),
+  );
+  assert(
+    inRange(new Date("2022-07Z"), new Date("2022-05Z"), new Date("2022-07Z")),
+  );
+  assert(
+    !inRange(new Date("2022-08Z"), new Date("2022-05Z"), new Date("2022-07Z")),
   );
 });

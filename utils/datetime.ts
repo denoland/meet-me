@@ -131,6 +131,15 @@ function weekRangeToRange(
   };
 }
 
+/** Returns true if the given date is between the given start date
+ * and end date. */
+export function inRange(date: Date, start: Date, end: Date): boolean {
+  const s = start.valueOf();
+  const e = end.valueOf();
+  const d = date.valueOf();
+  return s <= d && d <= e;
+}
+
 /** Formats the date in YYYY-MM-DD format in UTC timezone */
 export function formatToYearMonthDateUTC(d: Date) {
   return d.toISOString().slice(0, 10);
