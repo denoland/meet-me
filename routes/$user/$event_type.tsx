@@ -1,6 +1,6 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-import { useEffect, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { Link, useData, useRouter } from "aleph/react";
 import icons from "icons";
 import Button, { IconButton } from "base/Button.tsx";
@@ -69,6 +69,20 @@ export const data = {
       availableRanges,
       eventType,
     });
+  },
+  async post(req: Request, ctx: Context) {
+    const slug = ctx.params.user;
+    const eventId = ctx.params.event_type;
+    const user = await getUserBySlug(slug);
+    if (!user) {
+      return Response.json({ error: { message: "User not found" } });
+    }
+    const eventType = user?.eventTypes?.find((et) =>
+      et.id === eventId || et.slug === eventId
+    );
+    const data = await req.json();
+    await delay(3000);
+    return Response.json({});
   },
 };
 
@@ -383,52 +397,15 @@ function AvailableHourList(
   { userName, eventType, ranges }: AvailableHourListProps,
 ) {
   return (
-    <div className="flex flex-col pt-6 px-6 gap-6 sm:max-h-110 overflow-scroll bg-dark-300 rounded-lg">
+    <div className="flex flex-col pt-6 px-6 gap-6 sm:max-h-100 overflow-scroll bg-dark-300 rounded-lg">
       {ranges.map((
         range,
       ) => (
-        <Dialog
-          title="Enter event details"
-          okText="Create"
-          onOk={() => {
-            alert("TODO");
-          }}
-          message={
-            <div className="mt-6 grid grid-cols-[300px_minmax(400px,_1fr)]">
-              <div className="">
-                <p className="text-neutral-400">{userName}</p>
-                <p>
-                  <Badge>{eventType.duration / MIN} min</Badge>
-                </p>
-                <p className="text-2xl font-bold">{eventType.title}</p>
-                <p className="mt-4 flex items-center gap-2">
-                  {dateFormatter.format(range.start)}
-                </p>
-                <p className="mt-1 text-4xl font-thin">
-                  {timeFormatter.format(range.start)} -{" "}
-                  {timeFormatter.format(range.end)}
-                </p>
-              </div>
-              <div className="border-l border-neutral-600 pl-4 grid grid-cols-[100px_minmax(300px,_1fr)] gap-4">
-                <span className="text-right pt-1">Name</span>
-                <Input placeholder="name" />
-                <span className="text-right pt-1">Email</span>
-                <Input placeholder="email" />
-                <span className="text-right pt-1">Guest Emails</span>
-                <textarea
-                  className="rounded-md p-2 min-h-20 text-black"
-                  placeholder="guest email(s)"
-                >
-                </textarea>
-                <span className="text-right pt-1">Description</span>
-                <textarea
-                  className="rounded-md p-2 min-h-20 text-black"
-                  placeholder="description"
-                >
-                </textarea>
-              </div>
-            </div>
-          }
+        <BookDialog
+          key={+range.start}
+          userName={userName}
+          eventType={eventType}
+          range={range}
         >
           <div
             role="button"
@@ -436,8 +413,130 @@ function AvailableHourList(
           >
             {hourMinuteFormatter.format(range.start)}
           </div>
-        </Dialog>
+        </BookDialog>
       ))}
     </div>
+  );
+}
+
+type BookDialogProps = PropsWithChildren<{
+  userName: string;
+  eventType: EventType;
+  range: Range;
+}>;
+function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
+  const [title, setTitle] = useState("");
+  const [email, setEmail] = useState("");
+  const [guestEmails, setGuestEmails] = useState("");
+  const [description, setDescription] = useState("");
+  const [openGuestEmails, setOpenGuestEmails] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const disabled = title === "" || email === "" || updating;
+  return (
+    <Dialog
+      title="Enter event details"
+      okText="Create"
+      okDisabled={disabled}
+      onOk={async () => {
+        setUpdating(true);
+        try {
+          const resp = await fetch(location.href, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title,
+              email,
+              guestEmails,
+              description,
+              start: range.start,
+              end: range.end,
+            }),
+          });
+          const data = await resp.json();
+          if (!resp.ok) {
+            throw new Error(data.message);
+          }
+        } catch (e) {
+          // notify
+          return false;
+        } finally {
+          setUpdating(false);
+        }
+      }}
+      onCancel={() => {
+        setOpenGuestEmails(false);
+        setTitle("");
+        setEmail("");
+        setGuestEmails("");
+        setDescription("");
+      }}
+      message={
+        <div className="mt-6 grid grid-cols-[300px_minmax(400px,_1fr)]">
+          <div className="">
+            <p className="text-neutral-400">{userName}</p>
+            <p>
+              <Badge>{eventType.duration / MIN} min</Badge>
+            </p>
+            <p className="text-2xl font-bold">{eventType.title}</p>
+            <p className="mt-4 flex items-center gap-2">
+              {dateFormatter.format(range.start)}
+            </p>
+            <p className="mt-1 text-4xl font-thin">
+              {timeFormatter.format(range.start)} -{" "}
+              {timeFormatter.format(range.end)}
+            </p>
+          </div>
+          <div className="border-l border-neutral-600 pl-4 grid grid-cols-[100px_minmax(300px,_1fr)] gap-4">
+            <span className="text-right pt-1">Name *</span>
+            <Input
+              placeholder="name"
+              value={title}
+              onChange={(value) => setTitle(value)}
+            />
+            <span className="text-right pt-1">Email *</span>
+            <Input
+              placeholder="email"
+              value={email}
+              onChange={(value) => setEmail(value)}
+            />
+            {!openGuestEmails && (
+              <>
+                <span></span>
+                <Button
+                  style="outline"
+                  className="primary"
+                  onClick={() => setOpenGuestEmails(true)}
+                >
+                  <icons.Plus size={12} /> Add guest emails
+                </Button>
+              </>
+            )}
+            {openGuestEmails && (
+              <>
+                <span className="text-right pt-1">Guest Emails</span>
+
+                <textarea
+                  className="rounded-md p-2 min-h-20 text-black"
+                  placeholder="guest email(s)"
+                  onChange={(e) => setGuestEmails(e.target.value)}
+                  value={guestEmails}
+                />
+              </>
+            )}
+            <span className="text-right pt-1">Description</span>
+            <textarea
+              className="rounded-md p-2 min-h-20 text-black"
+              placeholder="description"
+              onChange={(e) => setDescription(e.target.value)}
+              value={description}
+            />
+          </div>
+        </div>
+      }
+    >
+      {children}
+    </Dialog>
   );
 }
