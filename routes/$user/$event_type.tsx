@@ -27,7 +27,6 @@ import {
   MIN,
   Range,
   rangeFromObj,
-  rangeIsInRange,
   rangeIsLonger,
   rangeListToLocalDateRangeMap,
   startOfMonth,
@@ -165,49 +164,54 @@ export default function BookPage() {
   const [showHours, setShowHours] = useState(false);
   const [showCalendar, setShowCalendar] = useState(true);
   const [mode, setMode] = useState<"calendar" | "hours">("calendar");
+  const [confirmedEvent, setConfirmedEvent] = useState<
+    { eventType: EventType; range: Range } | null
+  >(null);
 
-  useEffect(() => {
+  const loadAvailability = async () => {
     const start = date ?? new Date();
     const end = startOfMonth(date, 2);
-    (async () => {
-      const resp = await fetch(
-        location.pathname +
-          `?start=${encodeURIComponent(start.toISOString())}&end=${
-            encodeURIComponent(end.toISOString())
-          }`,
-        { method: "GET", headers: { "Accept": "application/json" } },
+    const resp = await fetch(
+      location.pathname +
+        `?start=${encodeURIComponent(start.toISOString())}&end=${
+          encodeURIComponent(end.toISOString())
+        }`,
+      { method: "GET", headers: { "Accept": "application/json" } },
+    );
+    const data = await resp.json();
+    const rangeList = data.availableRanges?.map(rangeFromObj).filter(
+      rangeIsLonger(eventType?.duration),
+    );
+    setDateRangeMap((dateRangeMap) => {
+      const map = rangeListToLocalDateRangeMap(rangeList);
+      const filteredMap = mapEntries(
+        map,
+        ([date, availableRanges]: [string, Range[]]) => {
+          const start = yearMonthDateToLocalDate(date);
+          const end = new Date(+start + DAY);
+          const candidateRanges = createRangesInRange(
+            start,
+            end,
+            eventType.duration,
+            30 * MIN,
+          );
+          const availableSlots = filterAvailableRange(
+            candidateRanges,
+            availableRanges,
+          );
+          return [date, availableSlots];
+        },
       );
-      const data = await resp.json();
-      const rangeList = data.availableRanges?.map(rangeFromObj).filter(
-        rangeIsLonger(eventType?.duration),
+      return Object.assign(
+        {},
+        dateRangeMap,
+        filteredMap,
       );
-      setDateRangeMap((dateRangeMap) => {
-        const map = rangeListToLocalDateRangeMap(rangeList);
-        const filteredMap = mapEntries(
-          map,
-          ([date, availableRanges]: [string, Range[]]) => {
-            const start = yearMonthDateToLocalDate(date);
-            const end = new Date(+start + DAY);
-            const candidateRanges = createRangesInRange(
-              start,
-              end,
-              eventType.duration,
-              30 * MIN,
-            );
-            const availableSlots = filterAvailableRange(
-              candidateRanges,
-              availableRanges,
-            );
-            return [date, availableSlots];
-          },
-        );
-        return Object.assign(
-          {},
-          dateRangeMap,
-          filteredMap,
-        );
-      });
-    })();
+    });
+  };
+
+  useEffect(() => {
+    loadAvailability();
   }, [date]);
 
   const showAvailableHourList = async () => {
@@ -236,6 +240,11 @@ export default function BookPage() {
     setShowCalendar(true);
   };
 
+  const onSuccess = (eventType: EventType, range: Range) => {
+    setConfirmedEvent({ eventType, range });
+    loadAvailability();
+  };
+
   useEffect(() => {
     if (error) {
       redirect("/");
@@ -243,6 +252,15 @@ export default function BookPage() {
   }, []);
   if (error) {
     return null;
+  }
+  if (confirmedEvent) {
+    return (
+      <ConfirmedScreen
+        userName={name}
+        eventType={confirmedEvent.eventType}
+        range={confirmedEvent.range}
+      />
+    );
   }
   return (
     <div className="mt-5 max-w-screen-xl px-4 m-auto">
@@ -319,6 +337,7 @@ export default function BookPage() {
                     ranges={selectedDate
                       ? dateRangeMap[format(selectedDate)]
                       : []}
+                    onSuccess={onSuccess}
                   />
                 </SlidingPanel>
               )}
@@ -457,13 +476,14 @@ type AvailableHourListProps = {
   userName: string;
   ranges: Range[];
   eventType: EventType;
+  onSuccess: (eventType: EventType, range: Range) => void;
 };
 
 function AvailableHourList(
-  { userName, eventType, ranges }: AvailableHourListProps,
+  { userName, eventType, ranges, onSuccess }: AvailableHourListProps,
 ) {
   return (
-    <div className="flex flex-col pt-6 px-6 gap-6 sm:max-h-100 overflow-scroll bg-dark-300 rounded-lg">
+    <div className="flex flex-col py-6 px-6 gap-6 sm:max-h-100 overflow-scroll bg-dark-300 rounded-lg">
       {ranges.map((
         range,
       ) => (
@@ -472,6 +492,7 @@ function AvailableHourList(
           userName={userName}
           eventType={eventType}
           range={range}
+          onSuccess={onSuccess}
         >
           <div
             role="button"
@@ -489,8 +510,11 @@ type BookDialogProps = PropsWithChildren<{
   userName: string;
   eventType: EventType;
   range: Range;
+  onSuccess: (eventType: EventType, range: Range) => void;
 }>;
-function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
+function BookDialog(
+  { children, userName, eventType, range, onSuccess }: BookDialogProps,
+) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [guestEmails, setGuestEmails] = useState("");
@@ -524,13 +548,7 @@ function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
           if (!resp.ok) {
             throw new Error(data.message);
           }
-          notify({
-            type: "success",
-            title: "Booked the event",
-            message: `Successfully booked the event "${name}" at ${
-              formatTimeRange(range)
-            }, ${dateFormatter.format(range.start)}`,
-          });
+          onSuccess(eventType, range);
         } catch (e) {
           notify({
             type: "danger",
@@ -615,5 +633,34 @@ function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
     >
       {children}
     </Dialog>
+  );
+}
+
+type ConfirmedScreenProps = {
+  eventType: EventType;
+  range: Range;
+  userName: string;
+};
+function ConfirmedScreen({ eventType, range, userName }: ConfirmedScreenProps) {
+  return (
+    <div className="mt-5 max-w-screen-sm px-4 m-auto">
+      <Link className="text-blue-400" to="../">
+        Back
+      </Link>
+      <div className="mt-10 flex flex-col items-center">
+        <h1 className="text-xl font-bold">Scheduled an event 🎉</h1>
+        <p className="text-neutral-400 text-sm">
+          You are scheduled with{" "}
+          <span className="font-semibold text-neutral-300">{userName}</span>.
+        </p>
+        <div className="mt-6 border-t border-b border-neutral-600 py-6 px-10">
+          <p className=" text-xl font-medium">
+            {eventType.title}
+          </p>
+          <p className="mt-5">{dateFormatter.format(range.start)}</p>
+          <p className="text-2xl font-thin">{formatTimeRange(range)}</p>
+        </div>
+      </div>
+    </div>
   );
 }
