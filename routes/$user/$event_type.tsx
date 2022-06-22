@@ -642,13 +642,20 @@ type ConfirmedScreenProps = {
   userName: string;
 };
 function ConfirmedScreen({ eventType, range, userName }: ConfirmedScreenProps) {
+  useEffect(() => {
+    party.confetti(document.querySelector("#confetti"), {
+      count: party.variation.range(20, 40),
+    });
+  }, []);
   return (
     <div className="mt-5 max-w-screen-sm px-4 m-auto">
       <Link className="text-blue-400" to="../">
         Back
       </Link>
       <div className="mt-10 flex flex-col items-center">
-        <h1 className="text-xl font-bold">Scheduled an event 🎉</h1>
+        <h1 className="text-xl font-bold">
+          Scheduled an event <span id="confetti">🎉</span>
+        </h1>
         <p className="text-neutral-400 text-sm">
           You are scheduled with{" "}
           <span className="font-semibold text-neutral-300">{userName}</span>.

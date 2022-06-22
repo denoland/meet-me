@@ -1,6 +1,7 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 declare const google: GoogleApi;
+declare const party: Party;
 
 interface IdConfiguration {
   client_id: string;
@@ -15,5 +16,12 @@ interface GoogleApi {
     };
     // deno-lint-ignore no-explicit-any
     oauth2: any;
+  };
+}
+
+interface Party {
+  confetti(...args: unknown[]);
+  variation: {
+    range(x: number, y: number);
   };
 }
