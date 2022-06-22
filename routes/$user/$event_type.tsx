@@ -8,8 +8,14 @@ import Badge from "base/Badge.tsx";
 import SlidingPanel from "base/SlidingPanel.tsx";
 import Input from "base/Input.tsx";
 import Dialog from "base/Dialog.tsx";
+import { notify } from "base/Notification.tsx";
 import { CALENDAR_FREE_BUSY_API, TOKEN_ENDPOINT } from "utils/const.ts";
-import { EventType, getUserAvailability, getUserBySlug } from "utils/db.ts";
+import {
+  ensureAccessTokenIsFreshEnough,
+  EventType,
+  getUserAvailability,
+  getUserBySlug,
+} from "utils/db.ts";
 import {
   createRangesInRange,
   type DateRangeMap,
@@ -27,6 +33,7 @@ import {
   yearMonthDateToLocalDate,
 } from "utils/datetime.ts";
 import cx from "utils/cx.ts";
+import { CALENDAR_EVENTS_API } from "utils/const.ts";
 import { delay } from "std/async/delay.ts";
 import { mapEntries } from "std/collections/map_entries.ts";
 
@@ -77,12 +84,50 @@ export const data = {
     if (!user) {
       return Response.json({ error: { message: "User not found" } });
     }
-    const eventType = user?.eventTypes?.find((et) =>
-      et.id === eventId || et.slug === eventId
-    );
-    const data = await req.json();
-    await delay(3000);
-    return Response.json({});
+    const data = await req.json() as {
+      start: string;
+      end: string;
+      title: string;
+      email: string;
+      guestEmails?: string;
+      description?: string;
+    };
+    const body = {
+      start: { dateTime: data.start },
+      end: { dateTime: data.end },
+      summary: data.title,
+      description: data.description,
+      attendees: [{ email: data.email }],
+    };
+    const guestEmails = data.guestEmails;
+    if (guestEmails) {
+      for (const email of guestEmails.trim().split(/[\s,]+/g)) {
+        body.attendees.push({ email });
+      }
+    }
+    try {
+      await ensureAccessTokenIsFreshEnough(user, TOKEN_ENDPOINT);
+      const resp = await fetch(
+        CALENDAR_EVENTS_API.replace(":calendarId", "primary") +
+          "?sendUpdates=all",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.googleAccessToken}`,
+          },
+          body: JSON.stringify(body),
+        },
+      );
+      const { error } = await resp.json();
+      console.log(1);
+      if (!resp.ok) {
+        throw new Error(error.message);
+      }
+      return Response.json({});
+    } catch (e) {
+      return Response.json({ message: e.message }, { status: 400 });
+    }
   },
 };
 
@@ -387,6 +432,11 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
   minute: "2-digit",
 });
 
+function formatTimeRange(range: Range) {
+  return timeFormatter.format(range.start) + " - " +
+    timeFormatter.format(range.end);
+}
+
 type AvailableHourListProps = {
   userName: string;
   ranges: Range[];
@@ -458,8 +508,20 @@ function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
           if (!resp.ok) {
             throw new Error(data.message);
           }
+          notify({
+            type: "success",
+            title: "Booked the event",
+            message: `Successfully booked the event "${title}" at ${
+              formatTimeRange(range)
+            }, ${dateFormatter.format(range.start)}`,
+          });
         } catch (e) {
-          // notify
+          notify({
+            type: "danger",
+            title: "Failed to book",
+            message: `Failed to book the event: ${e.message}`,
+          });
+
           return false;
         } finally {
           setUpdating(false);
@@ -484,20 +546,19 @@ function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
               {dateFormatter.format(range.start)}
             </p>
             <p className="mt-1 text-4xl font-thin">
-              {timeFormatter.format(range.start)} -{" "}
-              {timeFormatter.format(range.end)}
+              {formatTimeRange(range)}
             </p>
           </div>
           <div className="border-l border-neutral-600 pl-4 grid grid-cols-[100px_minmax(300px,_1fr)] gap-4">
             <span className="text-right pt-1">Name *</span>
             <Input
-              placeholder="name"
+              placeholder="The name of the event"
               value={title}
               onChange={(value) => setTitle(value)}
             />
             <span className="text-right pt-1">Email *</span>
             <Input
-              placeholder="email"
+              placeholder="Your email address"
               value={email}
               onChange={(value) => setEmail(value)}
             />
@@ -528,7 +589,7 @@ function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
             <span className="text-right pt-1">Description</span>
             <textarea
               className="rounded-md p-2 min-h-20 text-black"
-              placeholder="description"
+              placeholder="The description"
               onChange={(e) => setDescription(e.target.value)}
               value={description}
             />
