@@ -233,6 +233,12 @@ export function getAvailableRangesBetween(
     for (const wr of weekRanges) {
       const r = weekRangeToRange(date, wr, timeZone);
       if (r.end > start && r.start < end) {
+        if (end < r.end) {
+          r.end = end;
+        }
+        if (r.start < start) {
+          r.start = start;
+        }
         result.push(r);
       }
     }
@@ -308,6 +314,9 @@ export type DateRangeMap = Record<string, Range[]>;
 /** Returns a date-to-ranges map from the given list of ranges. */
 export function rangeListToLocalDateRangeMap(ranges: Range[]): DateRangeMap {
   const map: DateRangeMap = {};
+  if (!ranges) {
+    return map;
+  }
   for (const r of ranges) {
     const ymdStart = formatToYearMonthDateLocal(r.start);
     const ranges = map[ymdStart] ??= [];

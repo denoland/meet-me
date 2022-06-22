@@ -27,6 +27,7 @@ import {
   MIN,
   Range,
   rangeFromObj,
+  rangeIsInRange,
   rangeIsLonger,
   rangeListToLocalDateRangeMap,
   startOfMonth,
@@ -60,17 +61,15 @@ export const data = {
         startDate = new Date();
       }
       const endDate = new Date(end);
+      await ensureAccessTokenIsFreshEnough(user, TOKEN_ENDPOINT);
       availableRanges = await getUserAvailability(
         user!,
         startDate,
         endDate,
-        {
-          freeBusyApi: CALENDAR_FREE_BUSY_API,
-          tokenEndpoint: TOKEN_ENDPOINT,
-        },
+        CALENDAR_FREE_BUSY_API,
       );
     }
-    // Passes only necessary info
+    // Passes only necessary info to client
     return Response.json({
       name: user?.name,
       availableRanges,
@@ -84,10 +83,13 @@ export const data = {
     if (!user) {
       return Response.json({ error: { message: "User not found" } });
     }
+    const eventType = user?.eventTypes?.find((et) =>
+      et.id === eventId || et.slug === eventId
+    );
     const data = await req.json() as {
       start: string;
       end: string;
-      title: string;
+      name: string;
       email: string;
       guestEmails?: string;
       description?: string;
@@ -95,8 +97,8 @@ export const data = {
     const body = {
       start: { dateTime: data.start },
       end: { dateTime: data.end },
-      summary: data.title,
-      description: data.description,
+      summary: data.name + " and " + user.name,
+      description: `Event type: ${eventType?.title}\n\n` + data.description,
       attendees: [{ email: data.email }],
     };
     const guestEmails = data.guestEmails;
@@ -107,6 +109,21 @@ export const data = {
     }
     try {
       await ensureAccessTokenIsFreshEnough(user, TOKEN_ENDPOINT);
+      const start = new Date(data.start);
+      const end = new Date(data.end);
+      const [range] = await getUserAvailability(
+        user,
+        new Date(data.start),
+        new Date(data.end),
+        CALENDAR_FREE_BUSY_API,
+      );
+      if (+start !== +range.start || +end !== +range.end) {
+        return Response.json({
+          message: `The given range is not available: ${
+            formatTimeRange({ start, end })
+          }, ${dateFormatter.format(start)}`,
+        }, { status: 400 });
+      }
       const resp = await fetch(
         CALENDAR_EVENTS_API.replace(":calendarId", "primary") +
           "?sendUpdates=all",
@@ -120,7 +137,6 @@ export const data = {
         },
       );
       const { error } = await resp.json();
-      console.log(1);
       if (!resp.ok) {
         throw new Error(error.message);
       }
@@ -475,13 +491,13 @@ type BookDialogProps = PropsWithChildren<{
   range: Range;
 }>;
 function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
-  const [title, setTitle] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [guestEmails, setGuestEmails] = useState("");
   const [description, setDescription] = useState("");
   const [openGuestEmails, setOpenGuestEmails] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const disabled = title === "" || email === "" || updating;
+  const disabled = name === "" || email === "" || updating;
   return (
     <Dialog
       title="Enter event details"
@@ -496,7 +512,7 @@ function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              title,
+              name,
               email,
               guestEmails,
               description,
@@ -511,7 +527,7 @@ function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
           notify({
             type: "success",
             title: "Booked the event",
-            message: `Successfully booked the event "${title}" at ${
+            message: `Successfully booked the event "${name}" at ${
               formatTimeRange(range)
             }, ${dateFormatter.format(range.start)}`,
           });
@@ -529,7 +545,7 @@ function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
       }}
       onCancel={() => {
         setOpenGuestEmails(false);
-        setTitle("");
+        setName("");
         setEmail("");
         setGuestEmails("");
         setDescription("");
@@ -552,9 +568,9 @@ function BookDialog({ children, userName, eventType, range }: BookDialogProps) {
           <div className="border-l border-neutral-600 pl-4 grid grid-cols-[100px_minmax(300px,_1fr)] gap-4">
             <span className="text-right pt-1">Name *</span>
             <Input
-              placeholder="The name of the event"
-              value={title}
-              onChange={(value) => setTitle(value)}
+              placeholder="Your name"
+              value={name}
+              onChange={(value) => setName(value)}
             />
             <span className="text-right pt-1">Email *</span>
             <Input

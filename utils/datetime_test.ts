@@ -213,6 +213,23 @@ Deno.test("getAvailableRangesBetween", () => {
   );
 });
 
+Deno.test("getAvailableRangesBetween - cut off extra part", () => {
+  const start = new Date("2022-06-01T10:00Z");
+  const end = new Date("2022-06-01T11:00Z");
+  assertEquals(
+    getAvailableRangesBetween(
+      start,
+      end,
+      EXAMPLE_AVAILABILITY,
+      "Europe/London",
+    ),
+    [{
+      start: new Date("2022-06-01T10:00Z"),
+      end: new Date("2022-06-01T11:00Z"),
+    }],
+  );
+});
+
 Deno.test("subtractRangeFromRange", () => {
   assertEquals(
     subtractRangeFromRange({

@@ -154,18 +154,14 @@ export async function getUserAvailability(
   user: User,
   start: Date,
   end: Date,
-  opts: {
-    freeBusyApi: string;
-    tokenEndpoint: string;
-  },
+  freeBusyApi: string,
 ) {
-  await ensureAccessTokenIsFreshEnough(user, opts.tokenEndpoint);
   const body = JSON.stringify({
     timeMin: start.toISOString(),
     timeMax: end.toISOString(),
     items: [{ id: user.email }],
   });
-  const resp = await fetch(opts.freeBusyApi, {
+  const resp = await fetch(freeBusyApi, {
     method: "POST",
     body,
     headers: {
