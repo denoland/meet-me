@@ -1,9 +1,10 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
 import { useEffect, useState } from "react";
-import { useData, useRouter } from "aleph/react";
+import { Link, useData, useRouter } from "aleph/react";
 import icons from "icons";
 import Button, { IconButton } from "base/Button.tsx";
+import Badge from "base/Badge.tsx";
 import SlidingPanel from "base/SlidingPanel.tsx";
 import Input from "base/Input.tsx";
 import Dialog from "base/Dialog.tsx";
@@ -169,89 +170,97 @@ export default function BookPage() {
     return null;
   }
   return (
-    <div className="max-w-screen-xl px-4 mt-10 m-auto grid grid-cols-3 gap-20">
-      <div className="border-t border-neutral-600 pt-4">
-        <h1>{name}</h1>
-        <p>{eventType.duration / MIN}min</p>
-        <p>{eventType.title}</p>
-        <p>{eventType.description}</p>
-      </div>
-      <div className="col-span-2 border-t border-neutral-600 relative">
-        <span className="absolute -top-4 pr-8 bg-dark-400 text-lg font-medium">
-          Select a date and time
-        </span>
-        <div className="grid grid-cols-2 gap-10 mt-4 py-5">
-          <div>
-            <CalendarMonth
-              canMoveMonth={showCalendar}
-              dateRangeMap={dateRangeMap}
-              selectedDate={selectedDate}
-              side="left"
-              startDate={startOfMonth(date)}
-              onClickLeft={() => {
-                const start = startOfMonth(date, -1);
-                setDate(start);
-              }}
-              onSelectDate={setSelectedDate}
-            />
-            {showHours && (
-              <div className="flex justify-end mt-10">
-                <Button
-                  style="secondary"
-                  onClick={() => {
-                    setSelectedDate(null);
-                    hideAvailableHourList();
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            )}
-          </div>
-          {mode === "calendar" && (
-            <SlidingPanel
-              state={showCalendar ? "center" : "right"}
-            >
+    <div className="mt-5 max-w-screen-xl px-4 m-auto">
+      <Link className="text-blue-400" to="../">
+        Back
+      </Link>
+      <div className=" mt-4 w-full grid grid-cols-3 gap-20">
+        <div className="border-t border-neutral-600 pt-4">
+          <p className="text-neutral-400">{name}</p>
+          <p className="mt-4">
+            <Badge>{eventType.duration / MIN} min</Badge>
+          </p>
+          <p className="font-bold">{eventType.title}</p>
+          <p className="text-neutral-600 text-sm">{eventType.description}</p>
+        </div>
+        <div className="col-span-2 border-t border-neutral-600 relative">
+          <span className="absolute -top-4 pr-8 bg-dark-400 text-lg font-medium">
+            Select a date and time
+          </span>
+          <div className="grid grid-cols-2 gap-10 mt-4 py-5">
+            <div>
               <CalendarMonth
                 canMoveMonth={showCalendar}
                 dateRangeMap={dateRangeMap}
                 selectedDate={selectedDate}
-                side="right"
-                startDate={startOfMonth(date, 1)}
-                onClickRight={() => {
-                  const start = startOfMonth(date, 1);
+                side="left"
+                startDate={startOfMonth(date)}
+                onClickLeft={() => {
+                  const start = startOfMonth(date, -1);
                   setDate(start);
                 }}
                 onSelectDate={setSelectedDate}
               />
-            </SlidingPanel>
-          )}
-          {mode === "hours" &&
-            (
+              {showHours && (
+                <div className="flex justify-end mt-10">
+                  <Button
+                    style="secondary"
+                    onClick={() => {
+                      setSelectedDate(null);
+                      hideAvailableHourList();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
+            {mode === "calendar" && (
               <SlidingPanel
-                state={showHours ? "center" : "left"}
+                state={showCalendar ? "center" : "right"}
               >
-                <AvailableHourList
-                  userName={name}
-                  eventType={eventType}
-                  ranges={selectedDate
-                    ? dateRangeMap[format(selectedDate)]
-                    : []}
+                <CalendarMonth
+                  canMoveMonth={showCalendar}
+                  dateRangeMap={dateRangeMap}
+                  selectedDate={selectedDate}
+                  side="right"
+                  startDate={startOfMonth(date, 1)}
+                  onClickRight={() => {
+                    const start = startOfMonth(date, 1);
+                    setDate(start);
+                  }}
+                  onSelectDate={setSelectedDate}
                 />
               </SlidingPanel>
             )}
-        </div>
-        <div>
-          {selectedDate && inRange(selectedDate, start, end) && showCalendar &&
-            (
-              <Button
-                style="primary"
-                onClick={showAvailableHourList}
-              >
-                Check
-                <icons.CaretRight />
-              </Button>
-            )}
+            {mode === "hours" &&
+              (
+                <SlidingPanel
+                  state={showHours ? "center" : "left"}
+                >
+                  <AvailableHourList
+                    userName={name}
+                    eventType={eventType}
+                    ranges={selectedDate
+                      ? dateRangeMap[format(selectedDate)]
+                      : []}
+                  />
+                </SlidingPanel>
+              )}
+          </div>
+          <div>
+            {selectedDate && inRange(selectedDate, start, end) &&
+              showCalendar &&
+              (
+                <Button
+                  style="primary"
+                  onClick={showAvailableHourList}
+                >
+                  Check
+                  <icons.CaretRight />
+                </Button>
+              )}
+          </div>
         </div>
       </div>
     </div>
@@ -356,7 +365,7 @@ const hourMinuteFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "medium",
+  dateStyle: "long",
 });
 const timeFormatter = new Intl.DateTimeFormat("en-US", {
   hour12: false,
@@ -387,14 +396,15 @@ function AvailableHourList(
           message={
             <div className="mt-6 grid grid-cols-[300px_minmax(400px,_1fr)]">
               <div className="">
-                <p>TODO: add design</p>
-                <p>{userName}</p>
-                <p className="text-2xl font-bold">{eventType.title}</p>
+                <p className="text-neutral-400">{userName}</p>
                 <p>
-                  {eventType.duration / MIN} min
+                  <Badge>{eventType.duration / MIN} min</Badge>
                 </p>
-                <p>{dateFormatter.format(range.start)}</p>
-                <p className="text-4xl font-thin">
+                <p className="text-2xl font-bold">{eventType.title}</p>
+                <p className="mt-4 flex items-center gap-2">
+                  {dateFormatter.format(range.start)}
+                </p>
+                <p className="mt-1 text-4xl font-thin">
                   {timeFormatter.format(range.start)} -{" "}
                   {timeFormatter.format(range.end)}
                 </p>

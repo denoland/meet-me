@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { useData, useRouter } from "aleph/react";
 import { EventType, getUserBySlug } from "utils/db.ts";
-import { ok } from "utils/api.ts";
+import { MIN } from "utils/datetime.ts";
+import Badge from "base/Badge.tsx";
 
 export const data = {
   async get(_req: Request, ctx: Context) {
@@ -13,7 +14,9 @@ export const data = {
       return Response.json({ error: { message: "User not found" } });
     }
     // Passes only necessary info
-    return ok({
+    return Response.json({
+      picture: user?.picture,
+      name: user?.name,
       givenName: user?.givenName,
       slug: user?.slug,
       eventTypes: user?.eventTypes,
@@ -25,7 +28,9 @@ export default function () {
   const { redirect } = useRouter();
   const { data } = useData<
     {
-      givenName: string;
+      picture?: string;
+      name?: string;
+      givenName?: string;
       slug: string;
       eventTypes: EventType[];
       error?: { message: string };
@@ -42,20 +47,29 @@ export default function () {
   }
 
   return (
-    <div className="max-w-screen-xl px-4 m-auto">
-      <h1>{data.givenName}'s booking page</h1>
-      <ul>
+    <div className="max-w-screen-md px-4 m-auto">
+      <p className="flex flex-col items-center gap-2 text-lg">
+        {data.picture && (
+          <img className="h-10 w-10 rounded-full" src={data.picture} />
+        )}
+        {data.name}
+      </p>
+      <p className="mt-2 text-center text-neutral-400 text-sm max-w-100 mx-auto">
+        Welcome to my booking page. Please follow the instructions to add an
+        event to my calendar.
+      </p>
+      <div className="mt-10 grid grid-cols-3">
         {data.eventTypes!.map((et) => (
-          <li>
-            <a
-              className="text-blue-400"
-              href={`/${data.slug}/${et.slug || et.id}`}
-            >
-              {et.title}
-            </a>
-          </li>
+          <a
+            className="inline-block rounded-lg border px-6 py-7 hover:bg-dark-300 border-neutral-700"
+            href={`/${data.slug}/${et.slug || et.id}`}
+          >
+            <Badge>{et.duration / MIN} min</Badge>
+            <p className="font-bold">{et.title}</p>
+            <p className="text-neutral-600 text-sm">{et.description}</p>
+          </a>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

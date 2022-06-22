@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MIN } from "utils/datetime.ts";
 import { IconButton, IconLink } from "base/Button.tsx";
 import Copyable from "base/Copyable.tsx";
+import Badge from "base/Badge.tsx";
 import { notify } from "base/Notification.tsx";
 import icons from "icons";
 import EditEventTypeDialog from "shared/EditEventTypeDialog.tsx";
@@ -59,9 +60,9 @@ export default function EventTypeCard(
     >
       <div className="flex justify-between">
         <div>
-          <span className="text-xs font-semibold bg-stone-600 rounded-full px-3 py-0.5 text-xs">
+          <Badge>
             {Math.floor(eventType.duration / MIN)} min
-          </span>
+          </Badge>
         </div>
         <div className="flex items-center">
           <IconLink href={eventPath} target="_blank">
