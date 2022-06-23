@@ -21,7 +21,11 @@ Deno.test("/api/user", async (t) => {
           await res.body?.cancel();
           resolve();
           break;
-        } catch (_e) {
+        } catch (e) {
+          if (e instanceof Deno.errors.PermissionDenied) {
+            throw e;
+          }
+          console.log(e);
           // retry
         }
       }
