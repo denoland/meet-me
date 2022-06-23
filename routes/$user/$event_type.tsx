@@ -36,7 +36,6 @@ import cx from "utils/cx.ts";
 import { CALENDAR_EVENTS_API } from "utils/const.ts";
 import { delay } from "std/async/delay.ts";
 import { mapEntries } from "std/collections/map_entries.ts";
-import party from "https://jspm.dev/party-js";
 
 const longMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "long" });
 
@@ -643,11 +642,6 @@ type ConfirmedScreenProps = {
   userName: string;
 };
 function ConfirmedScreen({ eventType, range, userName }: ConfirmedScreenProps) {
-  useEffect(() => {
-    party.confetti(document.querySelector("#confetti"), {
-      count: party.variation.range(20, 40),
-    });
-  }, []);
   return (
     <div className="mt-5 max-w-screen-sm px-4 m-auto">
       <Link className="text-blue-400" to="../">
