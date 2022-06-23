@@ -1,3 +1,4 @@
+import "std/dotenv/load.ts";
 // @deno-types=https://cdn.esm.sh/v83/firebase@9.8.1/app/dist/app/index.d.ts
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-app.js";
 // @deno-types=https://cdn.esm.sh/v83/firebase@9.8.1/auth/dist/auth/index.d.ts
@@ -13,9 +14,6 @@ import {
   getFirestore,
 } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-firestore.js";
 import { createCustomToken } from "https://deno.land/x/deno_gcp_admin@0.0.5/auth.ts";
-
-import { envReady } from "../utils/dotenv.ts";
-await envReady;
 
 const app = initializeApp({
   apiKey: Deno.env.get("FIREBASE_API_KEY"),
