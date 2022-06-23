@@ -30,8 +30,8 @@ jobs:
       - name: lint
         run: deno lint
 
-      #- name: Test
-      #  run: deno test
+      - name: Test
+        run: deno test -A --unstable
 
       - name: Build
         run: deno task build

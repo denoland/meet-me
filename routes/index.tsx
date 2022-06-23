@@ -1,26 +1,34 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+
 import { useEffect } from "react";
 import { useForwardProps, useRouter } from "aleph/react";
 import icons from "icons";
-import { User } from "utils/db.ts";
+import { isUserReady, User } from "utils/db.ts";
 
 export default function LandingPage() {
   const { signin, user } = useForwardProps<
     { signin: () => void; user: User }
   >();
   const { redirect } = useRouter();
+
   useEffect(() => {
     if (user) {
-      redirect("/mypage/onboarding");
+      if (isUserReady(user)) {
+        redirect("/mypage");
+      } else {
+        redirect("/mypage/onboarding");
+      }
     }
   }, []);
+
   if (user) {
     return null;
   }
+
   return (
-    <div className="max-w-screen-xl mx-auto flex items-center gap-16 px-4 pt-20 sm:!pt-36">
+    <div className="max-w-screen-xl mx-auto flex items-center gap-32 px-4 pt-20 sm:!pt-36">
       <div className="max-w-130 sm:flex-shrink-0">
-        <p className="flex gap-1.5">
+        <p className="flex gap-1 text-sm">
           <span className="text-yellow-500">●</span>
           <span className="text-red-500">●</span>
           <span className="text-blue-500">●</span>
@@ -46,12 +54,13 @@ export default function LandingPage() {
 
 function RightArea() {
   return (
-    <div className="lt-sm:!hidden opacity-60">
+    <div className="lt-sm:!hidden opacity-75">
       {[...Array(9)].map((_, i) => (
-        <div className="flex items-center gap-2">
+        <div key={i} className="flex items-center gap-2 text-sm select-none">
           {[...Array(100)].map((_, j) => {
             const r = Math.random();
             const thr = 0.02;
+            const key = `${i}-${j}`;
             const className = r < thr
               ? "text-red-500"
               : r < thr * 2
@@ -60,13 +69,13 @@ function RightArea() {
               ? "text-yellow-500"
               : "";
             if (i < 5) {
-              return <span className={className}>●</span>;
+              return <span key={key} className={className}>●</span>;
             }
             if (i === 5 && j < 10) {
-              return <span className={className}>●</span>;
+              return <span key={key} className={className}>●</span>;
             }
 
-            return <span>○</span>;
+            return <span key={key}>○</span>;
           })}
         </div>
       ))}

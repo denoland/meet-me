@@ -1,80 +1,104 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
+
 import { useEffect, useState } from "react";
 import { useForwardProps, useRouter } from "aleph/react";
-import { UserForClient } from "utils/db.ts";
 import Button from "base/Button.tsx";
 import icons from "icons";
-import cx from "utils/cx.ts";
+import SlidingPanel, { PanelState } from "base/SlidingPanel.tsx";
+import { notify } from "base/Notification.tsx";
+import TimeZoneSelect from "shared/TimeZoneSelect.tsx";
+import AvailabilitySettings from "shared/AvailabilitySettings.tsx";
+import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
+import { UserForClient as User } from "utils/db.ts";
+import { WeekRange } from "utils/datetime.ts";
+import { delay } from "std/async/delay.ts";
 
-type Step = "slug" | "availability";
+const STEPS = ["slug", "availability", "eventType"] as const;
+type Step = (typeof STEPS)[number];
 
 export default function OnboardingPage() {
   const { user, reloadUser } = useForwardProps<
-    { user: UserForClient; reloadUser: () => Promise<void> }
+    { user: User; reloadUser: () => Promise<void> }
   >();
-  console.log("user", user);
   const { redirect } = useRouter();
   const [step, setStep] = useState<Step>("slug");
-  const [goingForward, setGoingForward] = useState(true);
+  const [panelState, setPanelState] = useState<PanelState>("center");
+
   useEffect(() => {
     if (!user) {
       redirect("/");
     }
-  });
+  }, []);
+
+  const goForward = async () => {
+    setPanelState("right");
+    await delay(1000);
+    await reloadUser();
+    setPanelState("left");
+    setStep(STEPS[STEPS.indexOf(step) + 1]);
+    await delay(0);
+    setPanelState("center");
+  };
+
+  const goBack = async () => {
+    setPanelState("left");
+    await delay(1000);
+    await reloadUser();
+    setPanelState("right");
+    setStep(STEPS[STEPS.indexOf(step) - 1]);
+    await delay(0);
+    setPanelState("center");
+  };
 
   if (!user) {
     return null;
   }
 
   return (
-    <div className="px-8 py-4">
+    <div>
       {step === "slug" && (
-        <ChooseURL
-          key={1}
-          slug={user.slug || ""}
-          goingForward={goingForward}
-          onFinish={() => {
-            reloadUser();
-            setStep("availability");
-            setGoingForward(true);
-          }}
-        />
+        <SlidingPanel className="w-screen" state={panelState}>
+          <ChooseURL
+            slug={user.slug || ""}
+            onFinish={goForward}
+          />
+        </SlidingPanel>
       )}
       {step === "availability" && (
-        <ChooseAvailabilities
-          key={2}
-          goingForward={goingForward}
-          onCancel={() => {
-            setStep("slug");
-            setGoingForward(false);
-          }}
-        />
+        <SlidingPanel className="w-screen" state={panelState}>
+          <ChooseAvailabilities
+            user={user}
+            onCancel={goBack}
+            onFinish={goForward}
+          />
+        </SlidingPanel>
+      )}
+      {step === "eventType" && (
+        <SlidingPanel className="w-screen" state={panelState}>
+          <SetUpEventType
+            user={user}
+            onCancel={goBack}
+            onFinish={goForward}
+            reloadUser={reloadUser}
+          />
+        </SlidingPanel>
       )}
     </div>
   );
 }
 
 function ChooseURL(
-  { goingForward, slug: slugDefault, onFinish }: {
-    goingForward: boolean;
+  { slug: slugDefault, onFinish }: {
     slug: string;
     onFinish: () => void;
   },
 ) {
   const [slug, setSlug] = useState(slugDefault);
-  const [fadingOut, setFadingOut] = useState(!goingForward);
   const [updating, setUpdating] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setFadingOut(false);
-    });
-  }, []);
 
   const updateSlug = async () => {
     setUpdating(true);
     try {
-      // TODO(kt3k): Use some API updating utility
       const res = await fetch("/api/user", {
         method: "PATCH",
         body: JSON.stringify({ slug }),
@@ -83,35 +107,34 @@ function ChooseURL(
       if (!res.ok) {
         throw new Error(data.message);
       }
-      setFadingOut(true);
-      await new Promise((resolve) => {
-        setTimeout(resolve, 1000);
-      });
       onFinish();
     } catch (e) {
-      alert(e.message);
+      notify({
+        title: "Request failed",
+        type: "danger",
+        message: e.message,
+      });
     } finally {
       setUpdating(false);
     }
   };
 
   return (
-    <div
-      className={cx("absolute w-screen !transition-500", {
-        "opacity-0": fadingOut,
-        "!-translate-x-5": fadingOut,
-      })}
-    >
-      {goingForward && (
-        <div className="max-w-md mx-auto">
-          <h1 className="text-lg">
-            Welcome to <span className="font-semibold">Meet Me</span>!
-          </h1>
-        </div>
-      )}
-      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-lg mx-auto">
-        <h2 className="font-medium text-lg">Create your Meet Me URL</h2>
-        <p className="text-gray-500">
+    <>
+      <div className="max-w-md mx-auto">
+        <h1 className="text-lg">
+          Welcome to <span className="font-semibold">Meet Me</span>!
+        </h1>
+      </div>
+
+      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-lg mx-auto">
+        <h2 className="font-medium text-lg">
+          Create your Meet Me URL{" "}
+          <span className="ml-2 text-sm font-normal text-neutral-600">
+            (step 1 of 3)
+          </span>
+        </h2>
+        <p className="text-neutral-500">
           Choose a URL that describes you or your business in a concise way.
           Make it short and easy to remember so you can share links with ease.
         </p>
@@ -137,74 +160,150 @@ function ChooseURL(
           </Button>
         </div>
       </div>
+    </>
+  );
+}
+
+const DEFAULT_AVAILABILITIES: WeekRange[] = [
+  { weekDay: "MON" as const, startTime: "09:00", endTime: "17:00" },
+  { weekDay: "TUE" as const, startTime: "09:00", endTime: "17:00" },
+  { weekDay: "WED" as const, startTime: "09:00", endTime: "17:00" },
+  { weekDay: "THU" as const, startTime: "09:00", endTime: "17:00" },
+  { weekDay: "FRI" as const, startTime: "09:00", endTime: "17:00" },
+];
+
+function ChooseAvailabilities(
+  { user, onCancel, onFinish }: {
+    user: User;
+    onCancel: () => void;
+    onFinish: () => void;
+  },
+) {
+  const [updating, setUpdating] = useState(false);
+  const [timeZone, setTimeZone] = useState("");
+
+  const [availabilities, setAvailabilities] = useState(
+    user.availabilities ?? DEFAULT_AVAILABILITIES,
+  );
+
+  useEffect(() => {
+    setTimeZone(
+      // Set the system's default time zone as default
+      user.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+    );
+  }, []);
+
+  const updateAvailabilities = async () => {
+    setUpdating(true);
+    try {
+      const resp = await fetch("/api/user", {
+        method: "PATCH",
+        body: JSON.stringify({
+          timeZone,
+          availabilities,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.message);
+      }
+      onFinish();
+    } catch (e) {
+      notify({
+        title: "Request failed",
+        type: "danger",
+        message: e.message,
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-xl mx-auto">
+      <h2 className="font-medium text-lg">
+        Set your availability{" "}
+        <span className="ml-2 text-sm font-normal text-neutral-600">
+          (step 2 of 3)
+        </span>
+      </h2>
+      <TimeZoneSelect
+        timeZone={timeZone}
+        onTimeZoneSelect={(timeZone) => setTimeZone(timeZone)}
+      />
+      <AvailabilitySettings
+        availabilities={availabilities}
+        onChange={setAvailabilities}
+      />
+      <div className="self-end flex items-center gap-2 mt-4">
+        <Button
+          disabled={updating}
+          style="alternate"
+          onClick={onCancel}
+        >
+          Back
+        </Button>
+        <Button
+          disabled={updating}
+          style="primary"
+          onClick={updateAvailabilities}
+        >
+          Continue
+          <icons.CaretRight />
+        </Button>
+      </div>
     </div>
   );
 }
 
-function ChooseAvailabilities(
-  { onCancel, goingForward }: { goingForward: boolean; onCancel: () => void },
-) {
-  const [updating, setUpdating] = useState(false);
-  const updateAvailabilities = () => {};
-  const [fadingOut, setFadingOut] = useState(!goingForward);
-  const [fadingIn, setFadingIn] = useState(goingForward);
-  const [timeZone, setTimeZone] = useState("");
-  useEffect(() => {
-    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    setTimeout(() => {
-      setFadingIn(false);
-      setFadingOut(false);
-    });
-  }, []);
-  const onBack = async () => {
-    setFadingIn(true);
-    await new Promise((resolve) => {
-      setTimeout(resolve, 1000);
-    });
-    onCancel();
-  };
+function SetUpEventType({ user, onCancel, onFinish, reloadUser }: {
+  user: User;
+  onCancel: () => void;
+  onFinish: () => void;
+  reloadUser: () => Promise<void>;
+}) {
+  const eventTypes = user.eventTypes!;
+  const { redirect } = useRouter();
   return (
-    <div
-      className={cx("absolute w-screen !transition-500", {
-        "opacity-0": fadingOut || fadingIn,
-        "!-translate-x-5": fadingOut,
-        "!translate-x-5": fadingIn,
-      })}
-    >
-      <div className="mt-8 flex flex-col gap-4 border rounded-lg border-gray-600 py-8 px-8 max-w-xl mx-auto">
-        <h2 className="font-medium text-lg">Set your availability</h2>
-        <p className="text-gray-500">
-          Timezone: {timeZone}
-        </p>
-        <ul>
-          <li>SUN: unavailable +</li>
-          <li>MON: 09:00 - 17:00 🗑 +</li>
-          <li>TUE: 09:00 - 17:00 🗑 +</li>
-          <li>WED: 09:00 - 17:00 🗑 +</li>
-          <li>THU: 09:00 - 17:00 🗑 +</li>
-          <li>FRI: 09:00 - 17:00 🗑 +</li>
-          <li>SAT: unavailable +</li>
-        </ul>
-        <p className="text-gray-500">
-          TODO(kt3k): Enable Availability Ranges set up
-        </p>
-        <div className="self-end flex items-center gap-2 mt-4">
-          <Button
-            disabled={updating}
-            style="alternate"
-            onClick={onBack}
-          >
-            Back
-          </Button>
-          <Button
-            disabled={updating || true}
-            style="primary"
-            onClick={updateAvailabilities}
-          >
-            Continue
-            <icons.CaretRight />
-          </Button>
-        </div>
+    <div className="flex flex-col gap-4 border rounded-lg border-neutral-700 py-8 px-8 max-w-4xl mx-auto">
+      <h2 className="font-medium text-lg">
+        Set up event types{" "}
+        <span className="ml-2 text-sm font-normal text-neutral-600">
+          (step 3 of 3)
+        </span>
+      </h2>
+      <div className="grid grid-cols-3 gap-3">
+        {eventTypes.map((eventType) => (
+          <EventTypeCard
+            key={eventType.id}
+            user={user}
+            reloadUser={reloadUser}
+            eventType={eventType}
+          />
+        ))}
+        <NewEventTypeCard user={user} reloadUser={reloadUser} />
+      </div>
+      <div className="self-end flex items-center gap-2 mt-4">
+        <Button
+          style="alternate"
+          onClick={onCancel}
+        >
+          Back
+        </Button>
+        <Button
+          style="primary"
+          onClick={async () => {
+            await onFinish();
+            notify({
+              title: "Settings are completed",
+              type: "success",
+              message: "You successfully completed the initial settings!",
+            });
+            redirect("/mypage", true);
+          }}
+        >
+          Finish
+        </Button>
       </div>
     </div>
   );

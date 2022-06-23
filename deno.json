@@ -1,15 +1,16 @@
 {
   "tasks": {
-    "dev": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts dev",
-    "start": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts start",
-    "build": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.30/cli.ts build",
+    "dev": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.70/cli.ts dev",
+    "start": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.70/cli.ts start",
+    "build": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.70/cli.ts build",
     "store:example": "deno run --allow-env --allow-read=. --allow-net store/mod.ts",
     "test": "deno test -A --unstable"
   },
   "fmt": {
     "files": {
       "exclude": [
-        "dist"
+        "dist",
+        "vendor"
       ]
     }
   },
@@ -35,7 +36,7 @@
       "deno.unstable"
     ],
     "types": [
-      "https://deno.land/x/aleph@1.0.0-alpha.52/types.d.ts",
+      "https://deno.land/x/aleph@1.0.0-alpha.70/types.d.ts",
       "./types.d.ts"
     ],
     "jsx": "react-jsx",

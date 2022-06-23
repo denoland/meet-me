@@ -1,4 +1,5 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
+
 export default function Deno(props: { className?: string }) {
   return (
     <svg

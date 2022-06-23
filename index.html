@@ -6,13 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="google-site-verification" content="Q1nDgHBuvYCKW26JcUGkWpcqRiL2rFSgC9qujNAF52c" />
   <link rel="icon" href="./assets/logo.svg">
-  <link rel="stylesheet" href="./style/tailwind-preflight.css">
-  <link rel="stylesheet" href="./style/style.css">
+  <link rel="stylesheet" href="https://esm.sh/@unocss/reset@0.34.1/tailwind.css">
   <script src="./vendor/gsi-client.js" async defer type="module"></script>
 </head>
 
-<body>
-  <div id="root"><!-- ssr-body --></div>
+<body class="bg-dark-400">
+  <div id="root" data-ssr-root></div>
   <script type="module" src="./main.tsx"></script>
 </body>
 

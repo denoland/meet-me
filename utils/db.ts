@@ -1,12 +1,17 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
+import { validate as uuidValidate } from "std/uuid/v4.ts";
 import {
+  getAvailableRangesBetween,
   hourMinuteToSec,
   isValidHourMinute,
   isValidWeekDay,
   MIN,
-  WeekDay,
+  Range,
+  subtractRangeListFromRangeList,
+  WeekRange,
 } from "./datetime.ts";
+
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
@@ -21,9 +26,9 @@ export type User = {
   slug?: string;
   googleRefreshToken?: string;
   googleAccessToken?: string;
-  googleAccessTokenExpres?: Date;
+  googleAccessTokenExpires?: Date;
   timeZone?: string;
-  availabilities?: Range[];
+  availabilities?: WeekRange[];
   eventTypes?: EventType[];
 };
 
@@ -32,15 +37,14 @@ export type UserForClient = Omit<User, `google${string}`>;
 /** EventType is a template of the events, which the users can set up.
  * The visiters can book actual events based on this EventType settings. */
 export type EventType = {
+  id: string;
   title: string;
   description?: string;
   duration: number;
-};
-
-type Range = {
-  weekDay: WeekDay;
-  startTime: string; // "HH:mm" format
-  endTime: string; // "HH:mm" format
+  /** The slug is used as the last part of the booking page of this event type
+   * like `https://meet-me.deno.dev/[user-slug]/[event-type-slug]`.
+   */
+  slug?: string;
 };
 
 type Token = {
@@ -57,6 +61,7 @@ export const unavailableUserSlugs = [
   "index",
   "terms",
   "privacy",
+  "signout",
 ];
 
 // TODO(kt3k): These are temporary DB tables in memory.
@@ -78,17 +83,21 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 
 function createDefaultCalendarEvent(): EventType {
   return {
+    id: crypto.randomUUID(),
     title: "30 Minute Meeting",
+    description: "30 minute meeting.",
     duration: 30 * MIN,
+    slug: "30min",
   };
 }
 
 export function isValidEventType(event: EventType): event is EventType {
-  return typeof event.title === "string" && typeof event.duration === "number";
+  return uuidValidate(event.id) && typeof event.title === "string" &&
+    typeof event.duration === "number";
 }
 
 // deno-lint-ignore no-explicit-any
-export function isValidRange(range: any = {}): range is Range {
+export function isValidRange(range: any = {}): range is WeekRange {
   const { weekDay, startTime, endTime } = range;
   return isValidWeekDay(weekDay) &&
     isValidHourMinute(startTime) &&
@@ -124,7 +133,14 @@ export async function saveUser(user: User): Promise<void> {
   Users[user.id] = user;
 }
 
-export function isUserReady(user: Omit<User, "googleRefreshToken">) {
+/** Returns true if the user's settings are ready to start using Meet Me.
+ * This check is used for sending user to onboarding flow. */
+export function isUserReady(
+  user: Omit<User, "googleRefreshToken"> | undefined,
+) {
+  if (!user) {
+    return false;
+  }
   return user.slug !== undefined && user.availabilities !== undefined &&
     user.timeZone !== undefined;
 }
@@ -133,8 +149,92 @@ export function isUserAuthorized(user: Pick<User, "googleRefreshToken">) {
   return user.googleRefreshToken !== undefined;
 }
 
+/** Gets the availability of the user in the given period of time. */
+export async function getUserAvailability(
+  user: User,
+  start: Date,
+  end: Date,
+  freeBusyApi: string,
+) {
+  const body = JSON.stringify({
+    timeMin: start.toISOString(),
+    timeMax: end.toISOString(),
+    items: [{ id: user.email }],
+  });
+  const resp = await fetch(freeBusyApi, {
+    method: "POST",
+    body,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${user.googleAccessToken}`,
+    },
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    throw new Error(data.error.message);
+  }
+  const busyRanges = data.calendars[user.email].busy.map((
+    { start, end }: { start: string; end: string },
+  ) => ({ start: new Date(start), end: new Date(end) })) as Range[];
+  const sourceAvailableRanges = getAvailableRangesBetween(
+    start,
+    end,
+    user.availabilities!,
+    // deno-lint-ignore no-explicit-any
+    user.timeZone as any,
+  );
+
+  return subtractRangeListFromRangeList(sourceAvailableRanges, busyRanges);
+}
+
+export async function ensureAccessTokenIsFreshEnough(
+  user: User,
+  tokenEndpoint: string,
+) {
+  if (needsAccessTokenRefresh(user)) {
+    const params = new URLSearchParams();
+    params.append("client_id", Deno.env.get("CLIENT_ID")!);
+    params.append("client_secret", Deno.env.get("CLIENT_SECRET")!);
+    params.append("refresh_token", user.googleRefreshToken!);
+    params.append("grant_type", "refresh_token");
+    const resp = await fetch(tokenEndpoint, {
+      method: "POST",
+      body: params,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+    if (!resp.ok) {
+      const data = await resp.json();
+      throw Error(`Token refresh failed: ${data.error_description}`);
+    }
+    const body = await resp.json() as {
+      access_token: string;
+      expires_in: number;
+    };
+    user.googleAccessToken = body.access_token;
+    user.googleAccessTokenExpires = new Date(
+      Date.now() + body.expires_in * 1000,
+    );
+    await saveUser(user);
+  }
+}
+
+/** Returns true if the access token needs to be refreshed */
+export function needsAccessTokenRefresh(
+  user: Pick<User, "googleAccessTokenExpires">,
+): boolean {
+  const expires = user.googleAccessTokenExpires;
+  if (!expires) {
+    return false;
+  }
+
+  // If the access token expires in 10 sec, then returns true.
+  return +expires < Date.now() - 10000;
+}
+
 // deno-lint-ignore require-await
-export async function getTokenByHash(hash: string) {
+export async function getTokenByHash(hash: string): Promise<Token | undefined> {
   return Object.values(Tokens).find((t) => t.hash === hash);
 }
 
