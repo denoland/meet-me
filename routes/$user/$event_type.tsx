@@ -36,6 +36,7 @@ import cx from "utils/cx.ts";
 import { CALENDAR_EVENTS_API } from "utils/const.ts";
 import { delay } from "std/async/delay.ts";
 import { mapEntries } from "std/collections/map_entries.ts";
+import party from "https://jspm.dev/party-js";
 
 const longMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "long" });
 
