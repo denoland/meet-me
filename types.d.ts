@@ -20,8 +20,8 @@ interface GoogleApi {
 }
 
 interface Party {
-  confetti(...args: unknown[]);
+  confetti(...args: unknown[]): void;
   variation: {
-    range(x: number, y: number);
+    range(x: number, y: number): unknown;
   };
 }
