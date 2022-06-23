@@ -2,3 +2,5 @@
 .env
 .keys
 dist
+# firebase emulator logs
+*-debug.log
