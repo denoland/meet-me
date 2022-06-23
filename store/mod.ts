@@ -1,17 +1,21 @@
-// @deno-types=https://cdn.esm.sh/v83/firebase@9.8.1/app/dist/app/index.d.ts
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-app.js";
-// @deno-types=https://cdn.esm.sh/v83/firebase@9.8.1/auth/dist/auth/index.d.ts
+// @deno-types=https://cdn.esm.sh/v83/firebase@9.8.2/app/dist/app/index.d.ts
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-app.js";
+// @deno-types=https://cdn.esm.sh/v83/firebase@9.8.2/auth/dist/auth/index.d.ts
 import {
   getAuth,
   signInWithCustomToken,
+  signOut,
   // signInWithEmailAndPassword,
-} from "https://www.gstatic.com/firebasejs/9.8.1/firebase-auth.js";
-// @deno-types=https://cdn.esm.sh/v83/firebase@9.8.1/firestore/dist/firestore/index.d.ts
+} from "https://www.gstatic.com/firebasejs/9.8.2/firebase-auth.js";
+// @deno-types=https://cdn.esm.sh/v83/firebase@9.8.2/firestore/dist/firestore/index.d.ts
 import {
+  addDoc,
   collection,
+  doc,
   getDocs,
   getFirestore,
-} from "https://www.gstatic.com/firebasejs/9.8.1/firebase-firestore.js";
+  setDoc,
+} from "https://www.gstatic.com/firebasejs/9.8.2/firebase-firestore.js";
 import { createCustomToken } from "https://deno.land/x/deno_gcp_admin@0.0.5/auth.ts";
 
 import { envReady } from "../utils/dotenv.ts";
@@ -43,12 +47,43 @@ const keys = {
 const token = await createCustomToken(keys);
 
 await signInWithCustomToken(auth, token);
-const store = getFirestore(app);
+const db = getFirestore(app);
 
-const querySnapshot = await getDocs(collection(store, "users"));
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  givenName?: string;
+  familyName?: string;
+  picture?: string;
+  slug?: string;
+  googleRefreshToken?: string;
+  googleAccessToken?: string;
+  googleAccessTokenExpres?: Date;
+  timeZone?: string;
+}
 
-querySnapshot.forEach((doc) => {
-  console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
-});
+const user: User = {
+  id: "kitsonk",
+  email: "kitson@deno.com",
+  name: "Kitson Kelly",
+  givenName: "Kitson",
+  familyName: "Kelly",
+};
 
-console.log("post for each");
+await setDoc(doc(db, "users", user.id), user);
+
+const ref = await addDoc(
+  collection(doc(db, "users", user.id), "availability"),
+  {
+    weekDay: "SUN",
+    startTime: 32_400,
+    endTime: 61_200,
+  },
+);
+
+console.log("ref:", ref.id);
+
+await signOut(auth);
+
+console.log("signed out");

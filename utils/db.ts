@@ -11,7 +11,7 @@ const enc = new TextEncoder();
 const dec = new TextDecoder();
 
 /** User represents the signed-in user. */
-export type User = {
+export interface User {
   id: string;
   email: string;
   name?: string;
@@ -25,30 +25,30 @@ export type User = {
   timeZone?: string;
   availabilities?: Range[];
   eventTypes?: EventType[];
-};
+}
 
 export type UserForClient = Omit<User, `google${string}`>;
 
 /** EventType is a template of the events, which the users can set up.
  * The visiters can book actual events based on this EventType settings. */
-export type EventType = {
+export interface EventType {
   title: string;
   description?: string;
   duration: number;
-};
+}
 
-type Range = {
+interface Range {
   weekDay: WeekDay;
   startTime: string; // "HH:mm" format
   endTime: string; // "HH:mm" format
-};
+}
 
-type Token = {
+interface Token {
   id: string;
   hash: string;
   userId: string;
   expires: Date;
-};
+}
 
 // These words are not usable as url slugs.
 export const unavailableUserSlugs = [
