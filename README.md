@@ -1,5 +1,14 @@
 ![](./doc/screenshot.png)
 
+Note: This app uses Google Calendar API and the app is now being reviewed by
+Google's Trust and Safety team for verification. If you'd like to try this app
+by yourself at this point, please click the below links and approve the app on
+your own risk while signing in to the app.
+
+![](./doc/screenshot_consent_screen0.png)
+
+![](./doc/screenshot_consent_screen1.png)
+
 # showcase_cal
 
 > [calendly](https://calendly.com/) clone in Deno
