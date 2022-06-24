@@ -31,7 +31,7 @@ jobs:
         run: deno lint
 
       - name: Install firebase-tools
-        run: npm i -g firebase-tools@10.9.2
+        run: npx firebase-tools@10.9.2 -V
 
       - name: Test
         run: deno task firestore-emulator & sleep 30 && deno task test && kill %1
