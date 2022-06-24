@@ -76,13 +76,6 @@ export const unavailableUserSlugs = [
   "signout",
 ];
 
-// TODO(kt3k): These are temporary DB tables in memory.
-// Replace these with actual DB calls later.
-/** id -> User */
-//export const Users: Record<string, User> = {};
-/** id -> Token */
-//export const Tokens: Record<string, Token> = {};
-
 /** Gets a user by the given id. */
 export async function getUserById(id: string): Promise<User | undefined> {
   const snapshot = await getDoc(doc(firestore, "users", id));
