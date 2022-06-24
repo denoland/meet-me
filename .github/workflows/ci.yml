@@ -31,7 +31,7 @@ jobs:
         run: deno lint
 
       - name: Test
-        run: deno test -A --unstable
+        run: deno task firestore-emulator & sleep 45 && deno task test && kill %1
 
       - name: Build
         run: deno task build
