@@ -17,6 +17,14 @@ export function Footer() {
       <a href="https://github.com/denoland/showcase_cal/issues">
         Issues
       </a>
+      ・
+      <a href="/terms">
+        Terms
+      </a>
+      ・
+      <a href="/privacy">
+        Privacy
+      </a>
     </footer>
   );
 }

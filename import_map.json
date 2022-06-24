@@ -14,7 +14,8 @@
     "aleph/react": "https://deno.land/x/aleph@1.0.0-alpha.70/framework/react/mod.ts",
     "react": "https://esm.sh/react@18.1.0",
     "react-dom": "https://esm.sh/react-dom@18.1.0",
-    "react-dom/": "https://esm.sh/react-dom@18.1.0/"
+    "react-dom/": "https://esm.sh/react-dom@18.1.0/",
+    "gfm/": "https://deno.land/x/gfm@0.1.20/"
   },
   "scopes": {}
 }

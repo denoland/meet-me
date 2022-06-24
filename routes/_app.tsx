@@ -7,6 +7,7 @@ import { Footer } from "layout/Footer.tsx";
 import { getUserByToken, User } from "utils/db.ts";
 import { NotificationProvider } from "base/Notification.tsx";
 import { ok } from "utils/api.ts";
+import * as gfm from "gfm/mod.ts";
 
 export const data = {
   async get(_: Request, ctx: Context) {
@@ -38,7 +39,12 @@ export default function App({ children }: { children?: ReactNode }) {
   return (
     <>
       <NotificationProvider />
-      <div className="min-h-screen bg-dark-400 text-white overflow-x-hidden">
+      <style>{gfm.CSS}</style>
+      <div
+        data-color-mode="dark"
+        data-dark-theme="dark"
+        className="min-h-screen bg-dark-400 text-white overflow-x-hidden"
+      >
         <Header signin={signin} user={user} />
         {forwardProps(children, {
           clientId,
