@@ -30,8 +30,11 @@ jobs:
       - name: lint
         run: deno lint
 
+      - name: Install firebase-tools
+        run: npx firebase-tools@10.9.2 -V
+
       - name: Test
-        run: deno test -A --unstable
+        run: deno task firestore-emulator & sleep 30 && deno task test && kill %1
 
       - name: Build
         run: deno task build
