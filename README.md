@@ -6,13 +6,30 @@
 
 ## Development
 
-First copy `.env.example` to `.env` and replace `CLIENT_ID` and `CLIENT_SECRET`
-to appropriate values.
+First copy `.env.example` to `.env` and set `CLIENT_ID`, `CLIENT_SECRET`, and
+`FIREBASE_*` appropriate values.
 
 Then run the deployment locally:
 
 ```sh
 deno task dev
+```
+
+This starts Meet Me service in your local machine.
+
+## Testing
+
+Start the firestore emulator by the below command (You need Node.js and Java >
+11 to run the emulator):
+
+```
+deno task firestore-emulator
+```
+
+In another terminal window, run the below command to run the unit tests:
+
+```
+deno task test
 ```
 
 ## Visual Design
