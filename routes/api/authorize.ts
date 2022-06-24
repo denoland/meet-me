@@ -1,7 +1,11 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
 import { parsePayload } from "utils/jwt.ts";
-import { createNewTokenForUser, getOrCreateUserByEmail } from "utils/db.ts";
+import {
+  createNewTokenForUser,
+  getOrCreateUserByEmail,
+  saveUser,
+} from "utils/db.ts";
 
 export const GET = async (req: Request) => {
   const params = new URLSearchParams(new URL(req.url).search);
@@ -33,6 +37,7 @@ export const GET = async (req: Request) => {
   user.name = idTokenPayload.name;
   user.givenName = idTokenPayload.given_name;
   user.familyName = idTokenPayload.family_name;
+  await saveUser(user);
 
   const token = await createNewTokenForUser(user);
 

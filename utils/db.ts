@@ -1,6 +1,7 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
 import { validate as uuidValidate } from "std/uuid/v4.ts";
+import { encode as hexEncode } from "std/encoding/hex.ts";
 import {
   getAvailableRangesBetween,
   hourMinuteToSec,
@@ -11,6 +12,17 @@ import {
   subtractRangeListFromRangeList,
   WeekRange,
 } from "./datetime.ts";
+import {
+  collection,
+  doc,
+  firestore,
+  getDoc,
+  getDocs,
+  getFirstData,
+  query,
+  setDoc,
+  where,
+} from "./firestore.ts";
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -67,18 +79,34 @@ export const unavailableUserSlugs = [
 // TODO(kt3k): These are temporary DB tables in memory.
 // Replace these with actual DB calls later.
 /** id -> User */
-export const Users: Record<string, User> = {};
+//export const Users: Record<string, User> = {};
 /** id -> Token */
-export const Tokens: Record<string, Token> = {};
+//export const Tokens: Record<string, Token> = {};
 
-// deno-lint-ignore require-await
+/** Gets a user by the given id. */
 export async function getUserById(id: string): Promise<User | undefined> {
-  return Users[id];
+  const snapshot = await getDoc(doc(firestore, "users", id));
+  if (snapshot.exists()) {
+    return snapshot.data() as User;
+  } else {
+    return undefined;
+  }
 }
 
-// deno-lint-ignore require-await
+/** Gets a user by the given email. */
 export async function getUserByEmail(email: string): Promise<User | undefined> {
-  return Object.values(Users).find((u) => u.email === email);
+  const snapshot = await getDocs(
+    query(collection(firestore, "users"), where("email", "==", email)),
+  );
+  return getFirstData<User>(snapshot);
+}
+
+/** Gets a user by the given email. */
+export async function getUserBySlug(slug: string): Promise<User | undefined> {
+  const snapshot = await getDocs(
+    query(collection(firestore, "users"), where("slug", "==", slug)),
+  );
+  return getFirstData<User>(snapshot);
 }
 
 function createDefaultCalendarEvent(): EventType {
@@ -105,14 +133,20 @@ export function isValidRange(range: any = {}): range is WeekRange {
     hourMinuteToSec(endTime)! - hourMinuteToSec(startTime)! > 0;
 }
 
+/** Creates a user by the given email. This throws if there's already
+ * a user of the given email. */
 export async function createUserByEmail(email: string): Promise<User> {
-  const user = {
+  const existingUser = await getUserByEmail(email);
+  if (existingUser) {
+    throw new Error(`The email is already userd by another user: ${email}`);
+  }
+  const newUser = {
     id: crypto.randomUUID(),
     email,
     eventTypes: [createDefaultCalendarEvent()],
   };
-  await saveUser(user);
-  return user;
+  await saveUser(newUser);
+  return newUser;
 }
 
 export async function getOrCreateUserByEmail(email: string): Promise<User> {
@@ -123,14 +157,8 @@ export async function getOrCreateUserByEmail(email: string): Promise<User> {
   return createUserByEmail(email);
 }
 
-// deno-lint-ignore require-await
-export async function getUserBySlug(slug: string): Promise<User | undefined> {
-  return Object.values(Users).find((user) => user.slug === slug);
-}
-
-// deno-lint-ignore require-await
 export async function saveUser(user: User): Promise<void> {
-  Users[user.id] = user;
+  await setDoc(doc(firestore, "users", user.id), user);
 }
 
 /** Returns true if the user's settings are ready to start using Meet Me.
@@ -233,9 +261,12 @@ export function needsAccessTokenRefresh(
   return +expires < Date.now() - 10000;
 }
 
-// deno-lint-ignore require-await
+/** Gets the token by the given hash. */
 export async function getTokenByHash(hash: string): Promise<Token | undefined> {
-  return Object.values(Tokens).find((t) => t.hash === hash);
+  const snapshot = await getDocs(
+    query(collection(firestore, "tokens"), where("hash", "==", hash)),
+  );
+  return getFirstData<Token>(snapshot);
 }
 
 export async function getUserByToken(token: string) {
@@ -248,7 +279,9 @@ export async function getUserByToken(token: string) {
 
 async function sha256(str: string) {
   return dec.decode(
-    await crypto.subtle.digest("SHA-256", enc.encode(str)),
+    hexEncode(
+      new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(str))),
+    ),
   );
 }
 
@@ -260,7 +293,7 @@ export async function createNewTokenForUser(user: User): Promise<string> {
     userId: user.id,
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   };
-  Tokens[token.id] = token;
+  await setDoc(doc(firestore, "tokens", token.id), token);
 
   return tokenStr;
 }

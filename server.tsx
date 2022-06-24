@@ -5,6 +5,9 @@ import { renderToReadableStream } from "react-dom/server";
 import { Router } from "aleph/react";
 import { serve } from "aleph/server";
 import "std/dotenv/load.ts";
+import { initFirestore } from "utils/firestore.ts";
+
+initFirestore();
 
 const Signout: Middleware = {
   fetch(req: Request, ctx: Context): Response | void {
