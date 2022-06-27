@@ -9,7 +9,7 @@ your own risk while signing in to the app.
 
 ![](./doc/screenshot_consent_screen1.png)
 
-# showcase_cal
+# Meet Me
 
 > [calendly](https://calendly.com/) clone in Deno
 
