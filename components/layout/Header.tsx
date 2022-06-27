@@ -82,12 +82,16 @@ function UserDropdown({ user }: { user: User }) {
         >
           Go to Google Calendar
         </UserDropdownMenuItem>
-        <UserDropdownMenuItem
-          href="https://github.com/denoland/showcase_cal"
-          external
-        >
-          Source code
-        </UserDropdownMenuItem>
+        {
+          /* TODO(kt3k): temporarily disable this link until showcase_cal made public
+          <UserDropdownMenuItem
+            href="https://github.com/denoland/showcase_cal"
+            external
+          >
+            Source code
+          </UserDropdownMenuItem>
+          */
+        }
         <UserDropdownMenuItem href="/signout">
           Sign out
         </UserDropdownMenuItem>
