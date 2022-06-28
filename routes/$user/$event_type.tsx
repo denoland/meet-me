@@ -492,7 +492,7 @@ function AvailableHourList(
   { userName, eventType, ranges, onSuccess }: AvailableHourListProps,
 ) {
   return (
-    <div className="flex flex-col py-6 px-6 gap-6 sm:max-h-100 overflow-scroll bg-dark-300 rounded-lg">
+    <div className="flex flex-col py-6 px-6 gap-6 sm:max-h-100 overflow-y-auto bg-dark-300 rounded-lg">
       {ranges.map((
         range,
         i,
