@@ -53,7 +53,7 @@ MIT
 
 ## Notes
 
-### How to configure GCP Project and get create `CLIENT_ID` and `CLIENT_SECRET` values
+### How to configure GCP Project and get/create `CLIENT_ID` and `CLIENT_SECRET` values
 
 You need [Google Cloud Platform](https://console.cloud.google.com/) Project to
 develop this app.
