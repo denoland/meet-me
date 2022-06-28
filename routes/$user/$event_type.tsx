@@ -347,8 +347,10 @@ export default function BookPage() {
               showCalendar &&
               (
                 <Button
+                  key={+selectedDate}
                   style="primary"
                   onClick={showAvailableHourList}
+                  autoFocus
                 >
                   Check
                   <icons.CaretRight />
@@ -429,8 +431,15 @@ function CalendarMonth(
             <div
               role={available ? "button" : ""}
               key={i}
+              tabIndex={available ? 0 : undefined}
               onClick={() => {
                 if (available) {
+                  onSelectDate(date);
+                }
+              }}
+              onKeyDown={(e) => {
+                if ((e.code === "Space" || e.code === "Enter") && available) {
+                  e.preventDefault();
                   onSelectDate(date);
                 }
               }}
@@ -486,6 +495,7 @@ function AvailableHourList(
     <div className="flex flex-col py-6 px-6 gap-6 sm:max-h-100 overflow-scroll bg-dark-300 rounded-lg">
       {ranges.map((
         range,
+        i,
       ) => (
         <BookDialog
           key={+range.start}
@@ -494,12 +504,12 @@ function AvailableHourList(
           range={range}
           onSuccess={onSuccess}
         >
-          <div
-            role="button"
-            className="w-full border border-neutral-500 rounded-lg py-5 flex justify-center bg-dark-400 hover:bg-dark-100"
+          <button
+            autoFocus={i === 0}
+            className="a1 w-full border border-neutral-500 rounded-lg py-5 flex justify-center bg-dark-400 hover:bg-dark-100"
           >
             {hourMinuteFormatter.format(range.start)}
-          </div>
+          </button>
         </BookDialog>
       ))}
     </div>
@@ -589,6 +599,7 @@ function BookDialog(
               placeholder="Your name"
               value={name}
               onChange={(value) => setName(value)}
+              autoFocus
             />
             <span className="text-right pt-1">Email *</span>
             <Input
