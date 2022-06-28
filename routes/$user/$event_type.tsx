@@ -416,6 +416,13 @@ function CalendarMonth(
         )}
       </p>
       <div className="mt-10 grid grid-cols-7 gap-3.5">
+        <div className="font-light">SUN</div>
+        <div className="font-light">MON</div>
+        <div className="font-light">TUE</div>
+        <div className="font-light">WED</div>
+        <div className="font-light">THU</div>
+        <div className="font-light">FRI</div>
+        <div className="font-light">SAT</div>
         {[...Array(startDate.getDay())].map((_, i) => (
           <div key={"empty-" + i}></div>
         ))}
