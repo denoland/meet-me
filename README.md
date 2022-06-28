@@ -66,7 +66,7 @@ develop this app.
 - In `OAuth consent screen` tab, set up the project's consent screen.
 - In `Credentials` tab, create `OAuth client ID` with `Web application` type.
 - TODO(kt3k): document the parameters to set.
-- Then you'll find client id and client secrent of the oauth client.
+- Then you'll find client id and client secret of the oauth client.
 - Copy those values and set them as `CLIENT_ID` and `CLIENT_SECRET`.
 
 For Deno Land employees:
