@@ -82,6 +82,7 @@ export default function EditEventTypeDialog(
             <div>
               <h3 className="font-semibold text-sm">TITLE</h3>
               <Input
+                autoFocus
                 className="mt-2"
                 placeholder="event title"
                 onChange={setTitle}
@@ -90,27 +91,22 @@ export default function EditEventTypeDialog(
             </div>
             <div>
               <h3 className="font-semibold text-sm">DURATION</h3>
-              <Dropdown
-                trigger="click"
-                render={() => (
-                  <ul className="rounded-md py-2 bg-neutral-100">
-                    {[...Array(12)].map((_, i) => (
-                      <li
-                        key={i}
-                        className="px-2 py-1 hover:bg-neutral-3 cursor-pointer"
-                        onClick={() => setDuration((i + 1) * 15)}
-                      >
-                        {(i + 1) * 15} mins
-                      </li>
-                    ))}
-                  </ul>
-                )}
+              <select
+                className="mt-2 rounded-md py-2 px-3 w-30 text-black bg-neutral-100"
+                value={duration}
+                onChange={(e) => {
+                  setDuration(e.target.value);
+                }}
               >
-                <div className="mt-2 flex items-center justify-between bg-neutral-100 rounded-md h-9 px-3 w-30 text-black">
-                  {duration} mins
-                  <icons.CaretDown />
-                </div>
-              </Dropdown>
+                {[...Array(12)].map((_, i) => (
+                  <option
+                    key={i}
+                    value={(i + 1) * 15}
+                  >
+                    {(i + 1) * 15} min
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div>
