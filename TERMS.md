@@ -6,7 +6,8 @@ Deno Land Inc ("Deno", "company", "we", "our", "us") is a corporation registered
 in Delaware, USA doing business as "Deno".
 
 These Terms of Service ("Terms") govern your use of our service Meet Me
-("Service") located at https://meet-me.deno.dev operated by Deno.
+("Service") located at https://meet-me.deno.dev operated by Deno Land Inc doing
+business as Deno.
 
 Our Privacy Policy also governs your use of our Service and explains how we
 collect, safeguard and disclose information that results from your use of our
