@@ -5,12 +5,13 @@ import {
   hourMinuteToSec,
   MIN,
   secToHourMinute,
+  SELECTABLE_MINUTES,
   WeekDay,
 } from "utils/datetime.ts";
 import { WeekRange, weekRangeListToMap } from "utils/datetime.ts";
 import cx from "utils/cx.ts";
 import Button from "base/Button.tsx";
-import Input from "base/Input.tsx";
+import Select from "base/Select.tsx";
 import icons from "icons";
 
 type Props = {
@@ -106,20 +107,33 @@ function WeekRow(
             <div className="flex items-center justify-between" key={i}>
               <div className="flex items-center gap-2">
                 <span className="w-10">{i === 0 && weekDay}</span>
-                <Input
-                  className="w-24 text-center"
+                <Select
                   value={startTime}
-                  onChange={(v) =>
-                    onChange(v, "startTime", i)}
-                />
+                  onChange={(v) => {
+                    onChange(v, "startTime", i);
+                  }}
+                >
+                  {SELECTABLE_MINUTES.map((hourMinutes) => (
+                    <option>{hourMinutes}</option>
+                  ))}
+                </Select>
                 ~
-                <Input
-                  className="w-24"
+                <Select
                   value={endTime}
-                  onChange={(v) =>
-                    onChange(v, "endTime", i)}
-                />
-                <Button size="xs" style="none" onClick={() => onRemove(i)}>
+                  onChange={(v) => {
+                    onChange(v, "endTime", i);
+                  }}
+                >
+                  {SELECTABLE_MINUTES.map((hourMinutes) => (
+                    <option>{hourMinutes}</option>
+                  ))}
+                </Select>
+                <Button
+                  size="xs"
+                  style="none"
+                  onClick={() =>
+                    onRemove(i)}
+                >
                   <icons.TrashBin />
                 </Button>
               </div>

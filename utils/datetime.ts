@@ -362,6 +362,16 @@ export function subtractRangeFromRange(
   throw new Error("unreachable");
 }
 
+/** This array includes the all strings in the form of
+ * 00:00, 00:30, 01:00, ..., 23:30 */
+export const SELECTABLE_MINUTES = [...Array(24)].map((_, hour) => {
+  let h = "" + hour;
+  if (h.length === 1) {
+    h = "0" + h;
+  }
+  return [h + ":00", h + ":30"];
+}).flat();
+
 export const timeZones = [
   "Africa/Abidjan",
   "Africa/Accra",

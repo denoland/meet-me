@@ -3,9 +3,8 @@
 import { PropsWithChildren, useState } from "react";
 import { MIN } from "utils/datetime.ts";
 import Input from "base/Input.tsx";
-import icons from "icons";
-import Dropdown from "base/Dropdown.tsx";
 import Dialog from "base/Dialog.tsx";
+import Select from "base/Select.tsx";
 import { notify } from "base/Notification.tsx";
 import { EventType, UserForClient as User } from "utils/db.ts";
 
@@ -91,11 +90,11 @@ export default function EditEventTypeDialog(
             </div>
             <div>
               <h3 className="font-semibold text-sm">DURATION</h3>
-              <select
-                className="mt-2 rounded-md py-2 px-3 w-30 text-black bg-neutral-100"
+              <Select
+                className="mt-2 w-30"
                 value={duration}
-                onChange={(e) => {
-                  setDuration(e.target.value);
+                onChange={(v) => {
+                  setDuration(+v);
                 }}
               >
                 {[...Array(12)].map((_, i) => (
@@ -106,7 +105,7 @@ export default function EditEventTypeDialog(
                     {(i + 1) * 15} min
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
           <div>
