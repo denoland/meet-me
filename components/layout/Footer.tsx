@@ -12,7 +12,7 @@ export function Footer() {
         Source
       </a>
       ・
-      <a href="https://www.figma.com/file/P0XsTDIeiwNhm8jFS03gwz/Deno-Cal">
+      <a href="https://www.figma.com/file/P0XsTDIeiwNhm8jFS03gwz/Deno-Showcases-Mockup?node-id=0%3A1">
         Figma
       </a>
       ・
