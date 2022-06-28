@@ -34,14 +34,44 @@ export default function LandingPage() {
           <span className="text-blue-500">●</span>
         </p>
         <h1 className="mt-3 font-bold text-5xl">The Calendar by Deno</h1>
-        <p className="mt-4 text-zinc-300 text-lg font-light leading-6">
-          We re-engineered the service we built for secure, high-quality
-          business meetings, Google Meet, to make it available for all, on any
-          device.
+        <p className="mt-4 text-neutral-300 text-lg font-light leading-7">
+          This app showcases the use of{" "}
+          <a
+            className="text-blue-400 cursor-pointer font-medium"
+            href="https://deno.com/deploy"
+            target="_blank"
+          >
+            Deno Deploy
+          </a>{" "}
+          with{" "}
+          <a
+            className="text-blue-400 cursor-pointer font-medium"
+            href="https://developers.google.com/identity/protocols/oauth2"
+            target="_blank"
+          >
+            Google OAuth API
+          </a>{" "}
+          integration. It uses{" "}
+          <a
+            className="text-blue-400 cursor-pointer font-medium"
+            href="https://alephjs.org/"
+            target="_blank"
+          >
+            Aleph.js
+          </a>{" "}
+          as frontend &amp; backend framework and{" "}
+          <a
+            className="text-blue-400 cursor-pointer font-medium"
+            href="https://firebase.google.com/docs/firestore"
+            target="_blank"
+          >
+            Cloud Firestore
+          </a>{" "}
+          for the persistence.
         </p>
         <button
           onClick={signin}
-          className="rounded-full mt-10 px-4 py-2 bg-zinc-200 flex items-center gap-2 text-black"
+          className="rounded-full mt-10 px-4 py-2 bg-neutral-200 flex items-center gap-2 text-black"
         >
           <icons.Google />
           <span className="font-medium">Continue with Google</span>
