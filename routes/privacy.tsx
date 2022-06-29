@@ -6,17 +6,17 @@ import * as gfm from "gfm/mod.ts";
 export const data = {
   async get(_: Request, _ctx: Context) {
     const text = await Deno.readTextFile("./PRIVACY.md");
-    return Response.json({ text });
+    const html = gfm.render(text);
+    return Response.json({ html });
   },
 };
 
 export default function Privacy() {
-  const { data } = useData<{ text: string }>();
-  const html = gfm.render(data.text);
+  const { data } = useData<{ html: string }>();
   return (
     <div
       className="max-w-screen-md mx-auto markdown-body"
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: data.html }}
     />
   );
 }

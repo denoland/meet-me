@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useData, useRouter } from "aleph/react";
-import { EventType, getUserBySlug } from "utils/db.ts";
+import { type EventType, getUserBySlug } from "utils/db.ts";
 import { MIN } from "utils/datetime.ts";
 import Badge from "base/Badge.tsx";
 

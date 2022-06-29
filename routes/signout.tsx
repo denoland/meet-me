@@ -2,10 +2,11 @@
 
 import { useEffect } from "react";
 
-export default function Settings() {
+export default function Signout() {
   useEffect(() => {
     // This triggers Signout middleware
     location.reload();
   });
-  return <div></div>;
+
+  return null;
 }

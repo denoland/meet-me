@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useForwardProps, useRouter } from "aleph/react";
-import { UserForClient as User } from "utils/db.ts";
+import { type UserForClient as User } from "utils/db.ts";
 import EventTypeCard, { NewEventTypeCard } from "shared/EventTypeCard.tsx";
 
 export default function MyPage() {

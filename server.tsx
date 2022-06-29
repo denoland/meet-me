@@ -1,5 +1,7 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
+/** @jsxImportSource https://esm.sh/react@18.1.0 */
+
 import presetUno from "@unocss/preset-uno.ts";
 import { renderToReadableStream } from "react-dom/server";
 import { Router } from "aleph/react";
@@ -7,10 +9,13 @@ import { serve } from "aleph/server";
 import "std/dotenv/load.ts";
 import { initFirestore } from "utils/firestore.ts";
 
+// pre-import route modules for serverless env that doesn't support the dynamic imports.
+import routeModules from "./routes/_export.ts";
+
 initFirestore();
 
 const Signout: Middleware = {
-  fetch(req: Request, ctx: Context): Response | void {
+  fetch(req) {
     const { pathname } = new URL(req.url);
     if (pathname === "/signout") {
       return new Response("", {
@@ -27,6 +32,7 @@ const Signout: Middleware = {
 serve({
   port: 3000,
   routes: "./routes/**/*.{ts,tsx}",
+  routeModules,
   unocss: {
     presets: [presetUno()],
     theme: {
@@ -36,14 +42,10 @@ serve({
         "fresh": "#00AC47",
         "danger": "#E90807",
       },
-      fontSize: {
-        "xs": ".75rem",
-      },
     },
   },
   middlewares: [
-    // deno-lint-ignore no-explicit-any
-    Signout as any,
+    Signout,
   ],
   ssr: {
     dataDefer: false,

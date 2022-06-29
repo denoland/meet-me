@@ -12,7 +12,7 @@ import { notify } from "base/Notification.tsx";
 import { CALENDAR_FREE_BUSY_API, TOKEN_ENDPOINT } from "utils/const.ts";
 import {
   ensureAccessTokenIsFreshEnough,
-  EventType,
+  type EventType,
   getUserAvailability,
   getUserBySlug,
 } from "utils/db.ts";

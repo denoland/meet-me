@@ -1,8 +1,7 @@
 {
   "tasks": {
-    "dev": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.70/cli.ts dev",
-    "start": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.70/cli.ts start",
-    "build": "deno run -A https://deno.land/x/aleph@1.0.0-alpha.70/cli.ts build",
+    "dev": "ALEPH_ENV=development deno run -A server.tsx",
+    "start": "deno run -A server.tsx",
     "firestore-emulator": "npx firebase-tools@10.9.2 emulators:start",
     "test": "deno test -A --unstable"
   },
@@ -36,7 +35,7 @@
       "deno.unstable"
     ],
     "types": [
-      "https://deno.land/x/aleph@1.0.0-alpha.70/types.d.ts",
+      "https://deno.land/x/aleph@1.0.0-alpha.78/types.d.ts",
       "./types.d.ts"
     ],
     "jsx": "react-jsx",
