@@ -1,6 +1,9 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
+/** @jsx React.createElement */
+
 import presetUno from "@unocss/preset-uno.ts";
+import React from "react";
 import { renderToReadableStream } from "react-dom/server";
 import { Router } from "aleph/react";
 import { serve } from "aleph/server";
