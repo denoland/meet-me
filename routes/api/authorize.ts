@@ -35,8 +35,8 @@ export const GET = async (req: Request) => {
   );
   user.picture = idTokenPayload.picture;
   user.name = idTokenPayload.name;
-  user.givenName = idTokenPayload.given_name;
-  user.familyName = idTokenPayload.family_name;
+  user.givenName = idTokenPayload.given_name || "";
+  user.familyName = idTokenPayload.family_name || "";
   await saveUser(user);
 
   const token = await createNewTokenForUser(user);
