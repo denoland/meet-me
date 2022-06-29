@@ -4,10 +4,9 @@ import type { ReactNode } from "react";
 import { forwardProps, useData } from "aleph/react";
 import { Header } from "layout/Header.tsx";
 import { Footer } from "layout/Footer.tsx";
-import { getUserByToken, User } from "utils/db.ts";
+import { getUserByToken, type User } from "utils/db.ts";
 import { NotificationProvider } from "base/Notification.tsx";
 import { ok } from "utils/api.ts";
-import * as gfm from "gfm/mod.ts";
 
 export const data = {
   async get(_: Request, ctx: Context) {
@@ -39,7 +38,6 @@ export default function App({ children }: { children?: ReactNode }) {
   return (
     <>
       <NotificationProvider />
-      <style>{gfm.CSS}</style>
       <div
         data-color-mode="dark"
         data-dark-theme="dark"
