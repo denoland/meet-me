@@ -36,9 +36,6 @@ serve({
         "fresh": "#00AC47",
         "danger": "#E90807",
       },
-      fontSize: {
-        "xs": ".75rem",
-      },
     },
   },
   middlewares: [

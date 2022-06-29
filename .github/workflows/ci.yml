@@ -11,9 +11,6 @@ jobs:
   ci:
     name: CI
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # Needed for auth with Deno Deploy
-      contents: read # Needed to clone the repository
 
     steps:
       - name: Clone repository
@@ -35,12 +32,3 @@ jobs:
 
       - name: Test
         run: deno task firestore-emulator & sleep 30 && deno task test && kill %1
-
-      - name: Build
-        run: deno task build
-
-      - name: Upload to Deno Deploy
-        uses: denoland/deployctl@v1
-        with:
-          project: "meet-me"
-          entrypoint: "./dist/server.js"
