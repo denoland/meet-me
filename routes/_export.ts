@@ -27,4 +27,4 @@ export default {
   "/api/user": $9,
   "/:user/index": $10,
   "/:user/:event_type": $11,
-}
+};
