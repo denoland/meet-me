@@ -418,16 +418,6 @@ export default function BookPage() {
   );
 }
 
-type MobileViewProps = {};
-
-function MobileView({}: MobileViewProps) {
-  return (
-    <div className="lt-sm:block hidden">
-      Mobile
-    </div>
-  );
-}
-
 const isClientSide = typeof Deno === "undefined";
 
 type CalendarMonthProp = {
