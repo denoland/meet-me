@@ -263,11 +263,66 @@ export default function BookPage() {
     );
   }
   return (
-    <div className="mt-5 max-w-screen-xl px-4 m-auto">
+    <div className="lt-sm:mt-0 mt-5 max-w-screen-xl px-4 m-auto">
       <Link className="text-blue-400" to="../">
         Back
       </Link>
-      <div className=" mt-4 w-full grid grid-cols-3 gap-20">
+      <div className="mt-5 lt-sm:block hidden">
+        {selectedDate
+          ? (
+            <>
+              <div className="mb-5 flex items-center justify-center gap-4">
+                <Button
+                  style="outline"
+                  onClick={() => {
+                    setSelectedDate(null);
+                    hideAvailableHourList();
+                  }}
+                >
+                  {dateFormatter.format(selectedDate).toUpperCase()}
+                </Button>
+              </div>
+              <AvailableHourList
+                userName={name}
+                eventType={eventType}
+                ranges={selectedDate ? dateRangeMap[format(selectedDate)] : []}
+                onSuccess={onSuccess}
+              />
+              <div className="mt-5 flex items-center justify-center gap-4">
+                <Button
+                  style="outline"
+                  onClick={() => {
+                    setSelectedDate(null);
+                    hideAvailableHourList();
+                  }}
+                >
+                  {dateFormatter.format(selectedDate).toUpperCase()}
+                </Button>
+              </div>
+            </>
+          )
+          : (
+            <CalendarMonth
+              canMoveMonth={showCalendar}
+              dateRangeMap={dateRangeMap}
+              selectedDate={selectedDate}
+              mode="mobile"
+              startDate={startOfMonth(date)}
+              onClickLeft={() => {
+                const start = startOfMonth(date, -1);
+                setDate(start);
+              }}
+              onClickRight={() => {
+                const start = startOfMonth(date, 1);
+                setDate(start);
+              }}
+              onSelectDate={(d) => {
+                setSelectedDate(d);
+              }}
+            />
+          )}
+      </div>
+      <div className="lt-sm:hidden mt-4 w-full grid grid-cols-3 gap-20">
         <div className="border-t border-neutral-600 pt-4">
           <p className="text-neutral-400">{name}</p>
           <p className="mt-4">
@@ -286,7 +341,7 @@ export default function BookPage() {
                 canMoveMonth={showCalendar}
                 dateRangeMap={dateRangeMap}
                 selectedDate={selectedDate}
-                side="left"
+                mode="pc-left"
                 startDate={startOfMonth(date)}
                 onClickLeft={() => {
                   const start = startOfMonth(date, -1);
@@ -316,7 +371,7 @@ export default function BookPage() {
                   canMoveMonth={showCalendar}
                   dateRangeMap={dateRangeMap}
                   selectedDate={selectedDate}
-                  side="right"
+                  mode="pc-right"
                   startDate={startOfMonth(date, 1)}
                   onClickRight={() => {
                     const start = startOfMonth(date, 1);
@@ -363,12 +418,22 @@ export default function BookPage() {
   );
 }
 
+type MobileViewProps = {};
+
+function MobileView({}: MobileViewProps) {
+  return (
+    <div className="lt-sm:block hidden">
+      Mobile
+    </div>
+  );
+}
+
 const isClientSide = typeof Deno === "undefined";
 
 type CalendarMonthProp = {
   startDate: Date;
   selectedDate: Date | null;
-  side: "left" | "right";
+  mode: "pc-left" | "pc-right" | "mobile";
   dateRangeMap: DateRangeMap;
   onClickLeft?: () => void;
   onClickRight?: () => void;
@@ -380,16 +445,17 @@ function CalendarMonth(
     canMoveMonth,
     dateRangeMap,
     selectedDate,
-    side,
+    mode,
     startDate,
     onClickLeft,
     onClickRight,
     onSelectDate,
   }: CalendarMonthProp,
 ) {
-  const canGoBack = canMoveMonth && side === "left" &&
+  const canGoBack = canMoveMonth && (mode === "pc-left" || mode === "mobile") &&
     startOfMonth(new Date()).valueOf() !== startDate.valueOf();
-  const canGoFowrad = canMoveMonth && side === "right";
+  const canGoFowrad = canMoveMonth &&
+    (mode === "pc-right" || mode === "mobile");
 
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -399,21 +465,27 @@ function CalendarMonth(
         className={cx(
           "flex items-center gap-2 text-neutral-500 font-bold text-xl",
           {
-            "justify-end": side === "right",
+            "justify-end": mode === "pc-right",
+            "justify-start": mode === "pc-left",
+            "justify-between": mode === "mobile",
           },
         )}
       >
-        {canGoBack && (
-          <IconButton onClick={onClickLeft}>
-            <icons.CaretLeft size={24} />
-          </IconButton>
-        )}
+        {canGoBack
+          ? (
+            <IconButton onClick={onClickLeft}>
+              <icons.CaretLeft size={24} />
+            </IconButton>
+          )
+          : <span />}
         {longMonthFormatter.format(startDate).toUpperCase()}
-        {canGoFowrad && (
-          <IconButton onClick={onClickRight}>
-            <icons.CaretRight size={24} />
-          </IconButton>
-        )}
+        {canGoFowrad
+          ? (
+            <IconButton onClick={onClickRight}>
+              <icons.CaretRight size={24} />
+            </IconButton>
+          )
+          : <span />}
       </p>
       <div className="mt-10 grid grid-cols-7 gap-3.5">
         <div className="font-light">SUN</div>
@@ -586,7 +658,7 @@ function BookDialog(
         setDescription("");
       }}
       message={
-        <div className="mt-6 grid grid-cols-[300px_minmax(400px,_1fr)]">
+        <div className="mt-6 grid lt-sm:grid-cols-1 grid-cols-[300px_minmax(400px,_1fr)] gap-4">
           <div className="">
             <p className="text-neutral-400">{userName}</p>
             <p>
@@ -600,15 +672,15 @@ function BookDialog(
               {formatTimeRange(range)}
             </p>
           </div>
-          <div className="border-l border-neutral-600 pl-4 grid grid-cols-[100px_minmax(300px,_1fr)] gap-4">
-            <span className="text-right pt-1">Name *</span>
+          <div className="sm:border-l border-neutral-600 sm:pl-4 grid lt-sm:grid-cols-1 grid-cols-[100px_minmax(300px,_1fr)] gap-4">
+            <span className="sm:text-right pt-1">Name *</span>
             <Input
               placeholder="Your name"
               value={name}
               onChange={(value) => setName(value)}
               autoFocus
             />
-            <span className="text-right pt-1">Email *</span>
+            <span className="sm:text-right pt-1">Email *</span>
             <Input
               placeholder="Your email address"
               value={email}
@@ -628,7 +700,7 @@ function BookDialog(
             )}
             {openGuestEmails && (
               <>
-                <span className="text-right pt-1">Guest Emails</span>
+                <span className="sm:text-right pt-1">Guest Emails</span>
 
                 <textarea
                   className="rounded-md p-2 min-h-20 text-black"
@@ -638,7 +710,7 @@ function BookDialog(
                 />
               </>
             )}
-            <span className="text-right pt-1">Description</span>
+            <span className="sm:text-right pt-1">Description</span>
             <textarea
               className="rounded-md p-2 min-h-20 text-black"
               placeholder="The description"
