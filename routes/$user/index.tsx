@@ -58,7 +58,7 @@ export default function () {
         Welcome to my booking page. Please follow the instructions to add an
         event to my calendar.
       </p>
-      <div className="mt-10 grid grid-cols-3 gap-3">
+      <div className="mt-10 grid lt-sm:grid-cols-1 grid-cols-3 gap-3">
         {data.eventTypes!.map((et) => (
           <a
             className="inline-block rounded-lg border px-6 py-7 hover:bg-dark-300 border-neutral-700"
