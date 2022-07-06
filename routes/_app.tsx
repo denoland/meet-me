@@ -1,4 +1,5 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
+/** @jsxImportSource https://esm.sh/react@18.1.0 */
 
 import type { ReactNode } from "react";
 import { forwardProps, useData } from "aleph/react";

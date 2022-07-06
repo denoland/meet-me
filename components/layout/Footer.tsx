@@ -1,4 +1,5 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
+/** @jsxImportSource https://esm.sh/react@18.1.0 */
 
 import icons from "icons";
 
@@ -21,16 +22,16 @@ const links = [
 
 export function Footer() {
   return (
-    <footer className="sticky top-full max-w-screen-xl mx-auto mt-8 h-25 flex lt-sm:flex-col flex-row lt-sm:items-start items-center lt-sm:gap-5 gap-8 px-4">
-      <span className="flex items-center gap-2  text-gray-300">
+    <footer className="sticky top-full max-w-screen-xl mx-auto mt-8 h-25 flex lt-sm:flex-col flex-row lt-sm:items-start items-center lt-sm:gap-5 gap-6 px-4">
+      <span className="flex items-center gap-2 text-gray-300">
         <icons.Deno className="h-5 w-5" /> Powered by Deno
       </span>
-      <div className="flex items-center lt-sm:gap-4 gap-8">
+      <div className="flex items-center lt-sm:gap-4 gap-6">
         {links.map(([href, text]) => (
           <a
             href={href}
             key={href}
-            className="text-gray-500 border-b-1 border-transparent hover:text-gray-200 hover:border-gray-200"
+            className="text-gray-500 border-b-1 border-transparent hover:text-gray-300 hover:border-gray-200"
           >
             {text}
           </a>
