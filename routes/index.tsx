@@ -34,7 +34,7 @@ export default function LandingPage() {
   return (
     <div className="max-w-screen-xl mx-auto flex items-center gap-32 px-4 pt-20 sm:!pt-36">
       <div className="max-w-130 sm:flex-shrink-0">
-        <p className="flex gap-1.5 text-sm">
+        <p className="flex gap-1 text-sm">
           <span className="block w-3 h-3 rounded-full bg-yellow-500" />
           <span className="block w-3 h-3 rounded-full bg-red-500" />
           <span className="block w-3 h-3 rounded-full bg-blue-500" />
@@ -92,22 +92,33 @@ export default function LandingPage() {
 
 function Dots() {
   const [isClient, setIsClient] = useState(false);
+  const [opacity, setOpacity] = useState(0);
   const thr = 0.03;
   const rows = 9;
 
   useEffect(() => {
     setIsClient(true);
+    setTimeout(() => {
+      setOpacity(1);
+    }, 1000 / 60);
   }, []);
 
+  if (!isClient) {
+    return null;
+  }
+
   return (
-    <div className="lt-sm:!hidden">
+    <div
+      className="lt-sm:!hidden transition-opacity duration-600"
+      style={{ opacity }}
+    >
       {[...Array(rows)].map((_, i) => (
         <div
           key={i}
           className="mt-2 flex items-center gap-2 text-sm select-none"
         >
           {[...Array(100)].map((_, j) => {
-            const r = isClient ? Math.random() : 0.5;
+            const r = Math.random();
             const key = `${i}-${j}`;
             const className = r < thr
               ? "bg-red-600"

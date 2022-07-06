@@ -1,11 +1,7 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
-/** @jsxImportSource https://esm.sh/react@18.2.0 */
-
-/** @jsxImportSource https://esm.sh/react@18.2.0 */
 
 import presetUno from "@unocss/preset-uno.ts";
-import { renderToReadableStream } from "react-dom/server";
-import { Router } from "aleph/react";
+import ssr from "aleph/react-ssr";
 import { serve } from "aleph/server";
 import { initFirestore } from "utils/firestore.ts";
 import "std/dotenv/load.ts";
@@ -48,8 +44,5 @@ serve({
   middlewares: [
     Signout,
   ],
-  ssr: {
-    dataDefer: false,
-    render: (ctx) => renderToReadableStream(<Router ssrContext={ctx} />, ctx),
-  },
+  ssr,
 });
