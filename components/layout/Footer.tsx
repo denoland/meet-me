@@ -4,18 +4,12 @@
 import icons from "icons";
 
 const links = [
-  [
-    "https://github.com/denoland/meet-me",
-    "Source",
-  ],
+  ["https://github.com/denoland/meet-me", "Source"],
   [
     "https://www.figma.com/file/P0XsTDIeiwNhm8jFS03gwz/Deno-Showcases-Mockup?node-id=0%3A1",
     "Figma",
   ],
-  [
-    "https://github.com/denoland/meet-me/issues",
-    "Issues",
-  ],
+  ["https://github.com/denoland/meet-me/issues", "Issues"],
   ["/terms", "Terms"],
   ["/privacy", "Privacy"],
 ];
@@ -31,7 +25,7 @@ export function Footer() {
           <a
             href={href}
             key={href}
-            className="text-gray-500 border-b-1 border-transparent hover:text-gray-300 hover:border-gray-200"
+            className="text-gray-400 border-b-1 border-transparent hover:text-gray-300 hover:border-gray-200"
           >
             {text}
           </a>
