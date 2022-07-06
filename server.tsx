@@ -6,11 +6,11 @@ import presetUno from "@unocss/preset-uno.ts";
 import { renderToReadableStream } from "react-dom/server";
 import { Router } from "aleph/react";
 import { serve } from "aleph/server";
-import "std/dotenv/load.ts";
 import { initFirestore } from "utils/firestore.ts";
+import "std/dotenv/load.ts";
 
 // pre-import route modules for serverless env that doesn't support the dynamic imports.
-import routeModules from "./routes/_export.ts";
+import routes from "./routes/_export.ts";
 
 initFirestore();
 
@@ -31,8 +31,8 @@ const Signout: Middleware = {
 
 serve({
   port: 3000,
-  routes: "./routes/**/*.{ts,tsx}",
-  routeModules,
+  routeGlob: "./routes/**/*.{ts,tsx}",
+  routes,
   unocss: {
     presets: [presetUno()],
     theme: {
