@@ -1,7 +1,7 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
-/** @jsxImportSource https://esm.sh/react@18.1.0 */
+/** @jsxImportSource https://esm.sh/react@18.2.0 */
 
-/** @jsxImportSource https://esm.sh/react@18.1.0 */
+/** @jsxImportSource https://esm.sh/react@18.2.0 */
 
 import presetUno from "@unocss/preset-uno.ts";
 import { renderToReadableStream } from "react-dom/server";
