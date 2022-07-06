@@ -7,28 +7,24 @@ import Dropdown from "base/Dropdown.tsx";
 import Copyable from "base/Copyable.tsx";
 import { ShadowBox } from "base/Container.tsx";
 import icons from "icons";
-import { User } from "utils/db.ts";
+import type { User } from "utils/db.ts";
 
 export function Header(
   { signin, user }: { signin: () => void; user: User | undefined },
 ) {
   const { url } = useRouter();
   const { pathname } = url;
-  let title = "Meet Me";
-  if (pathname === "/mypage") {
-    title = "My Meetings";
-  }
-
+  const isMyPage = pathname === "/mypage";
   const isInMyPage = pathname === "/mypage" || pathname === "/mypage/settings";
   const isInLandingPage = pathname === "/";
 
   return (
     <header className="h-25 max-w-screen-xl mx-auto flex items-center justify-between px-4">
-      <div className="flex items-center font-bold text-2xl gap-7">
+      <div className="flex items-center gap-4 font-semibold text-xl text-neutral-300">
         <Link to="/">
           <icons.Logo />
         </Link>{" "}
-        {title}
+        {isMyPage ? "My Meetings" : "Meet Me"}
       </div>
       <div>
         {user && isInMyPage && <UserAccountButton user={user} />}
@@ -78,17 +74,13 @@ function UserDropdown({ user }: { user: User }) {
         </UserDropdownMenuItem>
         <UserDropdownMenuItem
           href={`https://calendar.google.com/calendar?authuser=${user.email}`}
-          external
         >
           Go to Google Calendar
         </UserDropdownMenuItem>
-        <UserDropdownMenuItem
-          href="https://github.com/denoland/meet-me"
-          external
-        >
+        <UserDropdownMenuItem href="https://github.com/denoland/meet-me">
           Source code
         </UserDropdownMenuItem>
-        <UserDropdownMenuItem href="/signout">
+        <UserDropdownMenuItem href="/signout" native>
           Sign out
         </UserDropdownMenuItem>
       </ul>
@@ -96,24 +88,25 @@ function UserDropdown({ user }: { user: User }) {
   );
 }
 
-function UserDropdownMenuItem(
-  { href, external, children }: PropsWithChildren<
-    { href: string; external?: boolean }
-  >,
-) {
-  const { redirect } = useRouter();
+function UserDropdownMenuItem({
+  href,
+  native,
+  children,
+}: PropsWithChildren<{
+  href: string;
+  native?: boolean;
+}>) {
+  const external = href.startsWith("https://");
   return (
-    <li
-      className="cursor-pointer border-t border-neutral-700 px-6 py-2"
-      onClick={() => {
-        if (external) {
-          open(href);
-        } else {
-          redirect(href);
-        }
-      }}
-    >
-      {children}
+    <li className="cursor-pointer border-t border-neutral-700 px-6 py-2">
+      {external || native
+        ? <a className="text-black" href={href}>{children}</a>
+        : (
+          <Link to={href}>
+            {children}
+          </Link>
+        )}
+      {external && <icons.ExternalLink className="h-4 w-4" />}
     </li>
   );
 }
@@ -121,7 +114,7 @@ function UserDropdownMenuItem(
 function GoogleSignInButton({ signin }: { signin: () => void }) {
   return (
     <button
-      className="flex items-center gap-2 bg-zinc-200 px-4 py-2 rounded-full text-black"
+      className="flex items-center gap-2 bg-zinc-200 hover:bg-zinc-300 px-6 py-2 rounded-full text-black"
       onClick={signin}
     >
       <icons.Google />

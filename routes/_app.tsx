@@ -13,9 +13,9 @@ export const data = {
     const token = ctx.cookies.get("token");
     const user = token ? await getUserByToken(token) : undefined;
     return ok({
-      user,
       clientId: Deno.env.get("CLIENT_ID"),
       redirectUri: Deno.env.get("REDIRECT_URI"),
+      user,
     });
   },
 };

@@ -3,7 +3,7 @@
 /** @jsxImportSource https://esm.sh/react@18.1.0 */
 
 import presetUno from "@unocss/preset-uno.ts";
-import { renderToString } from "react-dom/server";
+import { renderToReadableStream } from "react-dom/server";
 import { Router } from "aleph/react";
 import { serve } from "aleph/server";
 import { initFirestore } from "utils/firestore.ts";
@@ -47,5 +47,8 @@ serve({
   middlewares: [
     Signout,
   ],
-  ssr: (ctx) => renderToString(<Router ssrContext={ctx} />),
+  ssr: {
+    dataDefer: false,
+    render: (ctx) => renderToReadableStream(<Router ssrContext={ctx} />, ctx),
+  },
 });
