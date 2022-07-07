@@ -2,8 +2,9 @@
 /** @jsxImportSource https://esm.sh/react@18.2.0 */
 
 import { useCallback, useEffect, useState } from "react";
+import { usePortal } from "aleph/react";
 import cx from "utils/cx.ts";
-import { onKeyDown, usePortal } from "utils/hooks.ts";
+import { onKeyDown } from "utils/hooks.ts";
 import icons from "../icons/mod.ts";
 
 type ModalProps = React.PropsWithChildren<{
@@ -17,6 +18,7 @@ export default function Modal(props: ModalProps) {
   const portal = usePortal({
     className: "modal-overlay",
     lockScroll: true,
+    isDialog: true,
   });
   const [tansitionTiggered, setTansitionTiggered] = useState(false);
 

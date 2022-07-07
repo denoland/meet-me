@@ -2,10 +2,10 @@
 /** @jsxImportSource https://esm.sh/react@18.2.0 */
 
 import { useEffect, useState } from "react";
-import events from "utils/events.ts";
-import { usePortal } from "utils/hooks.ts";
-import { Danger, Info } from "./Status.tsx";
+import { usePortal } from "aleph/react";
 import cx from "utils/cx.ts";
+import events from "utils/events.ts";
+import { Danger, Info } from "./Status.tsx";
 
 type Message = {
   type: "danger" | "success";
