@@ -126,7 +126,7 @@ function Dots() {
               ? "bg-blue-600"
               : r < thr * 3
               ? "bg-yellow-600"
-              : "bg-gray-100/70";
+              : "bg-gray-100/80";
             if (i < 5) {
               return (
                 <div

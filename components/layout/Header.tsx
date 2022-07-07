@@ -21,7 +21,7 @@ export function Header(
 
   return (
     <header className="h-25 max-w-screen-xl mx-auto flex items-center justify-between px-4">
-      <div className="flex items-center gap-4 font-semibold text-xl text-neutral-300">
+      <div className="flex items-center gap-3 font-semibold text-xl text-neutral-100">
         <Link to="/">
           <icons.Logo />
         </Link>{" "}
@@ -115,7 +115,7 @@ function UserDropdownMenuItem({
 function GoogleSignInButton({ signin }: { signin: () => void }) {
   return (
     <button
-      className="flex items-center gap-2 bg-zinc-200 hover:bg-zinc-300 px-6 py-2 rounded-full text-black"
+      className="flex items-center gap-2 bg-zinc-200 hover:bg-zinc-300 px-4 py-2 rounded-full text-black"
       onClick={signin}
     >
       <icons.Google />
