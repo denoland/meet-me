@@ -99,14 +99,12 @@ function UserDropdownMenuItem({
 }>) {
   const external = href.startsWith("https://");
   return (
-    <li className="cursor-pointer border-t border-neutral-700 px-6 py-2">
-      {external || native
-        ? <a className="text-black" href={href}>{children}</a>
-        : (
-          <Link to={href}>
-            {children}
-          </Link>
-        )}
+    <li className="flex items-center justify-between cursor-pointer border-t border-neutral-700 px-6 py-2">
+      {external || native ? <a href={href}>{children}</a> : (
+        <Link to={href}>
+          {children}
+        </Link>
+      )}
       {external && <icons.ExternalLink className="h-4 w-4" />}
     </li>
   );
