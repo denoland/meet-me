@@ -15,7 +15,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { usePortal } from "utils/hooks.ts";
+import { usePortal } from "aleph/react";
 
 type DropdownProps = PropsWithChildren<{
   trigger: "hover" | "click";
