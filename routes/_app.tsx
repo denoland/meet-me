@@ -1,4 +1,5 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
+/** @jsxImportSource https://esm.sh/react@18.2.0 */
 
 import type { ReactNode } from "react";
 import { forwardProps, useData } from "aleph/react";
@@ -13,9 +14,9 @@ export const data = {
     const token = ctx.cookies.get("token");
     const user = token ? await getUserByToken(token) : undefined;
     return ok({
-      user,
       clientId: Deno.env.get("CLIENT_ID"),
       redirectUri: Deno.env.get("REDIRECT_URI"),
+      user,
     });
   },
 };

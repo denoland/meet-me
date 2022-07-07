@@ -20,7 +20,7 @@ Deno.test(
     useEmulator(initFirestore());
     await resetEmulatorDocuments();
     const api = new MockServer({
-      routes: "./routes/**/*.{ts,tsx}",
+      routeGlob: "./routes/**/*.{ts,tsx}",
     });
 
     await new Promise<void>((resolve) => {

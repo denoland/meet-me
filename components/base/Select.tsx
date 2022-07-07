@@ -1,4 +1,5 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
+/** @jsxImportSource https://esm.sh/react@18.2.0 */
 
 import { SelectHTMLAttributes } from "react";
 import cx from "utils/cx.ts";
