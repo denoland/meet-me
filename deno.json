@@ -35,7 +35,7 @@
       "deno.unstable"
     ],
     "types": [
-      "https://deno.land/x/aleph@1.0.0-alpha.85/types.d.ts",
+      "https://deno.land/x/aleph@1.0.0-alpha.86/types.d.ts",
       "./types.d.ts"
     ],
     "jsx": "react-jsx",
