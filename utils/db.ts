@@ -15,10 +15,10 @@ import {
 import {
   collection,
   doc,
-  firestore,
   getDoc,
   getDocs,
   getFirstData,
+  initFirestore as firestore,
   query,
   setDoc,
   where,
@@ -78,7 +78,7 @@ export const unavailableUserSlugs = [
 
 /** Gets a user by the given id. */
 export async function getUserById(id: string): Promise<User | undefined> {
-  const snapshot = await getDoc(doc(firestore, "users", id));
+  const snapshot = await getDoc(doc(firestore(), "users", id));
   if (snapshot.exists()) {
     return snapshot.data() as User;
   } else {
@@ -89,7 +89,7 @@ export async function getUserById(id: string): Promise<User | undefined> {
 /** Gets a user by the given email. */
 export async function getUserByEmail(email: string): Promise<User | undefined> {
   const snapshot = await getDocs(
-    query(collection(firestore, "users"), where("email", "==", email)),
+    query(collection(firestore(), "users"), where("email", "==", email)),
   );
   return getFirstData<User>(snapshot);
 }
@@ -97,7 +97,7 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 /** Gets a user by the given email. */
 export async function getUserBySlug(slug: string): Promise<User | undefined> {
   const snapshot = await getDocs(
-    query(collection(firestore, "users"), where("slug", "==", slug)),
+    query(collection(firestore(), "users"), where("slug", "==", slug)),
   );
   return getFirstData<User>(snapshot);
 }
@@ -151,7 +151,7 @@ export async function getOrCreateUserByEmail(email: string): Promise<User> {
 }
 
 export async function saveUser(user: User): Promise<void> {
-  await setDoc(doc(firestore, "users", user.id), user);
+  await setDoc(doc(firestore(), "users", user.id), user);
 }
 
 /** Returns true if the user's settings are ready to start using Meet Me.
@@ -257,7 +257,7 @@ export function needsAccessTokenRefresh(
 /** Gets the token by the given hash. */
 export async function getTokenByHash(hash: string): Promise<Token | undefined> {
   const snapshot = await getDocs(
-    query(collection(firestore, "tokens"), where("hash", "==", hash)),
+    query(collection(firestore(), "tokens"), where("hash", "==", hash)),
   );
   return getFirstData<Token>(snapshot);
 }
@@ -286,7 +286,7 @@ export async function createNewTokenForUser(user: User): Promise<string> {
     userId: user.id,
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   };
-  await setDoc(doc(firestore, "tokens", token.id), token);
+  await setDoc(doc(firestore(), "tokens", token.id), token);
 
   return tokenStr;
 }
