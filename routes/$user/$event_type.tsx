@@ -94,12 +94,23 @@ export const data = {
       guestEmails?: string;
       description?: string;
     };
+    // Request body to Calendar Event insert API.
+    // See the below page for details:
+    // https://developers.google.com/calendar/api/v3/reference/events/insert
     const body = {
       start: { dateTime: data.start },
       end: { dateTime: data.end },
       summary: data.name + " and " + user.name,
       description: `Event type: ${eventType?.title}\n\n` + data.description,
-      attendees: [{ email: data.email }],
+      attendees: [{ email: user.email }, { email: data.email }],
+      conferenceData: {
+        createRequest: {
+          requestId: Math.random().toString(36).slice(2),
+          conferenceSolutionKey: {
+            type: "hangoutsMeet",
+          },
+        },
+      },
     };
     const guestEmails = data.guestEmails;
     if (guestEmails) {
@@ -124,9 +135,12 @@ export const data = {
           }, ${dateFormatter.format(start)}`,
         }, { status: 400 });
       }
+      // Note:
+      // sendUpdates=all enables sending emails to attendees from Google
+      // conferenceDataVersion=1 enables the attachment of Meet link
       const resp = await fetch(
         CALENDAR_EVENTS_API.replace(":calendarId", "primary") +
-          "?sendUpdates=all",
+          "?sendUpdates=all&conferenceDataVersion=1",
         {
           method: "POST",
           headers: {
