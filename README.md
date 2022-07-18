@@ -76,14 +76,14 @@ Now setup Firebase:
 - Select the project you created above.
 - Select your preferred billing and analytics options.
 - Wait while your Firebase app is created.
-- From the overview screen add a Web app (currently represented with a `</>` icon).
-- Don't add Firebase hosting, as you'll be using Deno Deploy
+- From the Overview screen add a Web app (currently represented with a `</>` icon).
+- Don't add Firebase hosting, as you'll be using Deno Deploy.
 - You'll be presented with some JavaScript code including `firebaseConfig`. Copy those values to the appropriate place in `.env`. (If you didn't enable analytics there will not be a value for `FIREBASE_MEASUREMENT_ID`).
-- Click through back to the overview screen, click Cloud Firestore, and then Create database.
+- Click back to the Overview screen, click Cloud Firestore, and then Create database.
 - Start in production mode.
 - Select a Firestore location, the default is probably good, and then Enable.
 - Click to the Rules tab, copy the content of `firestore.rules`, and click Publish.
-- Now head to Project Overview, then Storage. You might need to click See all Build features to see it
+- Now head to Overview, then Storage. You might need to click See all Build features.
 - Under the Rules tab, copy the content of `storage.rules`, and click Publish.
 
 You should now be able to start the app locally with the instructions in [Development](#development). If you see a an error similar to `Could not reach Cloud Firestore backend` then you may need to wait awhile for Firestore to be available.
