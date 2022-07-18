@@ -53,7 +53,7 @@ MIT License
 
 ## Notes
 
-### How to configure GCP Project and get/create `CLIENT_ID` and `CLIENT_SECRET` values
+### How to configure GCP Resources
 
 You need [Google Cloud Platform](https://console.cloud.google.com/) Project to
 develop this app.
@@ -65,9 +65,28 @@ develop this app.
   ![](doc/enable-api.png)
 - In `OAuth consent screen` tab, set up the project's consent screen.
 - In `Credentials` tab, create `OAuth client ID` with `Web application` type.
-- TODO(kt3k): document the parameters to set.
+  - Under Authorized JavaScript origins add `http://localhost:3000`
+  - Under Authorized redirect URIs add `http://localhost:3000/api/authorize`
 - Then you'll find client id and client secret of the oauth client.
-- Copy those values and set them as `CLIENT_ID` and `CLIENT_SECRET`.
+- Copy those values and set them as `CLIENT_ID` and `CLIENT_SECRET` in `.env`
+
+Now setup Firebase:
+
+- Go to https://console.firebase.google.com/ and click Create a project.
+- Select the project you created above.
+- Select your preferred billing and analytics options.
+- Wait while your Firebase app is created.
+- From the overview screen add a Web app (currently represented with a `</>` icon).
+- Don't add Firebase hosting, as you'll be using Deno Deploy
+- You'll be presented with some JavaScript code including `firebaseConfig`. Copy those values to the appropriate place in `.env`. (If you didn't enable analytics there will not be a value for `FIREBASE_MEASUREMENT_ID`).
+- Click through back to the overview screen, click Cloud Firestore, and then Create database.
+- Start in production mode.
+- Select a Firestore location, the default is probably good, and then Enable.
+- Click to the Rules tab, copy the content of `firestore.rules`, and click Publish.
+- Now head to Project Overview, then Storage. You might need to click See all Build features to see it
+- Under the Rules tab, copy the content of `storage.rules`, and click Publish.
+
+You should now be able to start the app locally with the instructions in [Development](#development). If you see a an error similar to `Could not reach Cloud Firestore backend` then you may need to wait awhile for Firestore to be available.
 
 For Deno Land employees:
 
