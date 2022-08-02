@@ -3,10 +3,13 @@
 import { useData } from "aleph/react";
 import * as gfm from "gfm/mod.ts";
 
+let html: string;
 export const data = {
   async get(_: Request, _ctx: Context) {
-    const text = await Deno.readTextFile("./PRIVACY.md");
-    const html = gfm.render(text);
+    if (typeof html === "undefined") {
+      const text = await Deno.readTextFile("./PRIVACY.md");
+      html = gfm.render(text);
+    }
     return Response.json({ html });
   },
 };
