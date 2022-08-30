@@ -210,11 +210,11 @@ export function startOfMonth(d: Date, n = 0) {
 }
 
 export function endOfMonth(d: Date, n = 0) {
-  return new Date(+new Date(d.getFullYear(), d.getMonth() + 1 + n) - DAY);
+  return new Date(d.getFullYear(), d.getMonth() + 1 + n, 0);
 }
 
 export function daysOfMonth(d: Date) {
-  return (+endOfMonth(d) - +startOfMonth(d)) / DAY + 1;
+  return endOfMonth(d).getDate();
 }
 
 export function getAvailableRangesBetween(

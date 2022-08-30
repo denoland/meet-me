@@ -2,6 +2,7 @@
 
 import {
   createRangesInRange,
+  daysOfMonth,
   getAvailableRangesBetween,
   HOUR,
   hourMinuteToSec,
@@ -496,3 +497,19 @@ Deno.test("createRangesInRange", () => {
     ],
   );
 });
+
+Deno.test("daysOfMonth", () => {
+  assertEquals(31, daysOfMonth(new Date("2022-01-05T00:00Z")));
+  assertEquals(28, daysOfMonth(new Date("2022-02-05T00:00Z")));
+  assertEquals(31, daysOfMonth(new Date("2022-03-05T00:00Z")));
+  assertEquals(30, daysOfMonth(new Date("2022-04-05T00:00Z")));
+  assertEquals(31, daysOfMonth(new Date("2022-05-05T00:00Z")));
+  assertEquals(30, daysOfMonth(new Date("2022-06-05T00:00Z")));
+  assertEquals(31, daysOfMonth(new Date("2022-07-05T00:00Z")));
+  assertEquals(31, daysOfMonth(new Date("2022-08-05T00:00Z")));
+  assertEquals(30, daysOfMonth(new Date("2022-09-05T00:00Z")));
+  assertEquals(31, daysOfMonth(new Date("2022-10-05T00:00Z")));
+  assertEquals(30, daysOfMonth(new Date("2022-11-05T00:00Z")));
+  assertEquals(31, daysOfMonth(new Date("2022-12-05T00:00Z")));
+})
+
