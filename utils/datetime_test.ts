@@ -511,5 +511,4 @@ Deno.test("daysOfMonth", () => {
   assertEquals(31, daysOfMonth(new Date("2022-10-05T00:00Z")));
   assertEquals(30, daysOfMonth(new Date("2022-11-05T00:00Z")));
   assertEquals(31, daysOfMonth(new Date("2022-12-05T00:00Z")));
-})
-
+});
