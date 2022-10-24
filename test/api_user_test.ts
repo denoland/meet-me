@@ -22,7 +22,7 @@ Deno.test(
     const api = new MockServer({
       router: {
         glob: "./routes/**/*.{ts,tsx}",
-      }
+      },
     });
 
     await new Promise<void>((resolve) => {
