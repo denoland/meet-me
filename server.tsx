@@ -1,8 +1,7 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-import presetUno from "@unocss/preset-uno.ts";
-import ssr from "aleph/react-ssr";
-import { serve } from "aleph/server";
+import presetUno from "@unocss/preset-uno";
+import { serve } from "aleph/react-server";
 import { initFirestore } from "utils/firestore.ts";
 import "std/dotenv/load.ts";
 
@@ -12,7 +11,7 @@ import routes from "./routes/_export.ts";
 initFirestore();
 
 const Signout: Middleware = {
-  fetch(req) {
+  fetch(req, ctx) {
     const { pathname } = new URL(req.url);
     if (pathname === "/signout") {
       return new Response("", {
@@ -23,13 +22,16 @@ const Signout: Middleware = {
         },
       });
     }
+    return ctx.next();
   },
 };
 
 serve({
   port: 3000,
-  routeGlob: "./routes/**/*.{ts,tsx}",
-  routes,
+  router: {
+    routes,
+    glob: "./routes/**/*.{ts,tsx}",
+  },
   unocss: {
     presets: [presetUno()],
     theme: {
@@ -41,8 +43,6 @@ serve({
       },
     },
   },
-  middlewares: [
-    Signout,
-  ],
-  ssr,
+  middlewares: [Signout],
+  ssr: true,
 });
