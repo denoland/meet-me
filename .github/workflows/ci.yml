@@ -31,4 +31,4 @@ jobs:
         run: npx firebase-tools@10.9.2 -V
 
       - name: Test
-        run: deno task firestore-emulator & sleep 30 && deno task test && kill %1
+        run: npx start-server-and-test 'deno task firestore-emulator' 4000 'deno task test'
