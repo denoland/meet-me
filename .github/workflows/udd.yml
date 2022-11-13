@@ -1,0 +1,22 @@
+name: Update Deno Dependencies
+
+on:
+  schedule:
+    - cron: "0 18 * * 0" # Every Sunday 18:00 UTC
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: denoland/setup-deno@v1
+      - name: Update Dependencies
+        run: |
+          deno run -A https://deno.land/x/udd/main.ts ./import_map.json
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "chore(deps): Update dependencies"
+          commit-message: "chore(deps): Update dependencies"
+          delete-branch: true
