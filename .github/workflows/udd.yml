@@ -1,10 +1,8 @@
-name: Update Deno Dependencies
-
+name: udd
 on:
   schedule:
-    - cron: "0 18 * * 0" # Every Sunday 18:00 UTC
+    - cron: "0 0 1 * *" # Monthly
   workflow_dispatch:
-
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -13,7 +11,7 @@ jobs:
       - uses: denoland/setup-deno@v1
       - name: Update Dependencies
         run: |
-          deno run -A https://deno.land/x/udd/main.ts ./import_map.json
+          deno run -A https://deno.land/x/udd@0.8.1/main.ts ./import_map.json
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
