@@ -1,0 +1,20 @@
+name: udd
+on:
+  schedule:
+    - cron: "0 0 1 * *" # Monthly
+  workflow_dispatch:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: denoland/setup-deno@v1
+      - name: Update Dependencies
+        run: |
+          deno run -A https://deno.land/x/udd@0.8.1/main.ts ./import_map.json
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "chore(deps): Update dependencies"
+          commit-message: "chore(deps): Update dependencies"
+          delete-branch: true
