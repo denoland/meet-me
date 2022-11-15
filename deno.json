@@ -2,7 +2,7 @@
   "tasks": {
     "dev": "deno run -A -q dev.ts",
     "start": "deno run -A server.tsx",
-    "firestore-emulator": "npx firebase-tools@10.9.2 emulators:start",
+    "firestore-emulator": "npx firebase-tools@11.16.0 emulators:start",
     "test": "deno test -A --unstable"
   },
   "fmt": {

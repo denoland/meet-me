@@ -4,3 +4,4 @@
 dist
 # firebase emulator logs
 *-debug.log
+deno.lock
