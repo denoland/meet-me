@@ -16,9 +16,9 @@
     "aleph/react": "https://deno.land/x/aleph@1.0.0-beta.21/runtime/react/mod.ts",
     "aleph/react-client": "https://deno.land/x/aleph@1.0.0-beta.21/runtime/react/client.ts",
     "aleph/react-server": "https://deno.land/x/aleph@1.0.0-beta.21/runtime/react/server.ts",
-    "react": "https://esm.sh/react@18.3.0-next-fecc288b7-20221025/",
-    "react-dom": "https://esm.sh/react-dom@18.3.0-next-fecc288b7-20221025/",
-    "react-dom/": "https://esm.sh/react-dom@18.3.0-next-fecc288b7-20221025//",
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/": "https://esm.sh/react-dom@18.18.2.0/",
     "gfm/": "https://deno.land/x/gfm@0.1.28/"
   },
   "scopes": {}
