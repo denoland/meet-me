@@ -19,7 +19,7 @@
     "react": "https://esm.sh/react@18.3.0-next-fecc288b7-20221025/",
     "react-dom": "https://esm.sh/react-dom@18.3.0-next-fecc288b7-20221025/",
     "react-dom/": "https://esm.sh/react-dom@18.3.0-next-fecc288b7-20221025//",
-    "gfm/": "https://deno.land/x/gfm@0.1.26/"
+    "gfm/": "https://deno.land/x/gfm@0.1.28/"
   },
   "scopes": {}
 }
