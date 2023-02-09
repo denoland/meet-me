@@ -1,8 +1,8 @@
 // Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
-// @deno-types=https://cdn.esm.sh/v83/firebase@9.8.1/app/dist/app/index.d.ts
+// @deno-types="https://cdn.esm.sh/v83/firebase@9.8.1/app/dist/app/index.d.ts"
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-app.js";
-// @deno-types=https://cdn.esm.sh/v83/firebase@9.8.1/firestore/dist/firestore/index.d.ts
+// @deno-types="https://cdn.esm.sh/v83/firebase@9.8.1/firestore/dist/firestore/index.d.ts"
 import {
   addDoc,
   collection,
