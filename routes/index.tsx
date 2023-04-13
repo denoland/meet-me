@@ -1,15 +1,26 @@
-// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-/** @jsxImportSource https://esm.sh/react@18.2.0 */
+import { Head, Link } from "aleph/react";
 
-import { useEffect, useState } from "react";
-import { useForwardProps, useRouter } from "aleph/react";
-import icons from "icons";
-import cx from "utils/cx.ts";
-import { type User } from "utils/db.ts";
-
-export default function LandingPage() {
-  
-           
+export default function Index() {
+  return (
+    <div className="screen index">
+      <Head>
+        <title>Wallet</title>
+        <meta name="description" content="gled-labs." />
+      </Head>
+      <p className="logo">
+        <img src="./assets/logo.svg" width="75" height="75" title="Aleph.js" />
+      </p>
+      <h1>
+        The Wallet.
+      </h1>
+      
+      <nav>
+        <Link
+          role="button"
+          to="/app">
+          Wallet
+        </Link>
+      </nav>
+    </div>
+  );
 }
-
-
