@@ -1,45 +1,24 @@
 {
-  "tasks": {
-    "dev": "deno run -A -q dev.ts",
-    "start": "deno run -A server.tsx",
-    "firestore-emulator": "npx firebase-tools@11.16.0 emulators:start",
-    "test": "deno test -A --unstable"
-  },
-  "fmt": {
-    "files": {
-      "exclude": [
-        "dist",
-        "vendor"
-      ]
-    }
-  },
-  "lint": {
-    "rules": {
-      "exclude": [
-        "import-prefix-missing"
-      ]
-    },
-    "files": {
-      "exclude": [
-        "dist",
-        "vendor"
-      ]
-    }
-  },
   "compilerOptions": {
     "lib": [
       "dom",
       "dom.iterable",
-      "dom.asynciterable",
-      "deno.ns",
-      "deno.unstable"
+      "dom.extras",
+      "deno.ns"
     ],
     "types": [
-      "https://deno.land/x/aleph@1.0.0-beta.21/types.d.ts",
-      "./types.d.ts"
+      "https://deno.land/x/aleph@1.0.0-beta.43/types.d.ts"
     ],
     "jsx": "react-jsx",
-    "jsxImportSource": "https://esm.sh/react@18.2.0"
+    "jsxImportSource": "https://esm.sh/v114/react@18.2.0"
   },
-  "importMap": "./import_map.json"
+  "importMap": "import_map.json",
+  "tasks": {
+    "dev": "deno run -A https://deno.land/x/aleph@1.0.0-beta.43/dev.ts",
+    "start": "deno run -A server.ts",
+    "build": "deno run -A server.ts --build",
+    "esm:add": "deno run -A https://esm.sh/v114 add",
+    "esm:update": "deno run -A https://esm.sh/v114 update",
+    "esm:remove": "deno run -A https://esm.sh/v114 remove"
+  }
 }
