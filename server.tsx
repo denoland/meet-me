@@ -2,7 +2,7 @@
 
 import presetUno from "@unocss/preset-uno";
 import { serve } from "aleph/react-server";
-import "std/dotenv/load.ts";
+
 
 
 import routes from "./routes/_export.ts";
@@ -25,6 +25,5 @@ serve({
       },
     },
   },
-  middlewares: [Signout],
   ssr: true,
 });
