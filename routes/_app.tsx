@@ -37,23 +37,6 @@ export default function App({ children }: { children?: ReactNode }) {
   };
 
   return (
-    <>
-      <NotificationProvider />
-      <div
-        data-color-mode="dark"
-        data-dark-theme="dark"
-        className="min-h-screen bg-dark-400 text-white overflow-x-hidden"
-      >
-        <Header signin={signin} user={user} />
-        {forwardProps(children, {
-          clientId,
-          redirectUri,
-          signin,
-          user,
-          reloadUser,
-        })}
-        <Footer />
-      </div>
-    </>
+    
   );
 }
