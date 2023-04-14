@@ -1,22 +1,26 @@
-import { serve } from "aleph/server";
-import react from "aleph/plugins/react";
-import unocss from "aleph/plugins/unocss";
-import config from "./unocss.config.ts";
+// Copyright 2022 the Deno authors. All rights reserved. MIT license.
 
+import presetUno from "@unocss/preset-uno";
+import { serve } from "aleph/react-server";
 
 import routes from "./routes/_export.ts";
 
-
-
 serve({
-  plugins: [
-    react({ ssr: false }),
-    unocss(config),
-  ],
-  router:{
+  port: 3000,
+  router: {
     routes,
     glob: "./routes/**/*.{ts,tsx}",
-	  
-  }
-
+  },
+  unocss: {
+    presets: [presetUno()],
+    theme: {
+      colors: {
+        "default": "#222222",
+        "primary": "#00AC47",
+        "fresh": "#00AC47",
+        "danger": "#E90807",
+      },
+    },
+  },
+  ssr: true,
 });
