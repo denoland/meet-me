@@ -22,5 +22,5 @@ serve({
       },
     },
   },
-  ssr: false,
+  ssr: true,
 });
